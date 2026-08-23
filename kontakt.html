@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontakt — iDispečink.cz</title>
+<meta name="description" content="Napište nám poptávku na přepravu nebo dispečink. iDispečink.cz s.r.o., doprava@idispecink.cz, IČO 23359765.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://idispecink.cz/kontakt.html">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="iDispečink.cz">
+<meta property="og:locale" content="cs_CZ">
+<meta property="og:title" content="Kontakt — iDispečink.cz">
+<meta property="og:description" content="Napište nám poptávku na přepravu nebo dispečink. iDispečink.cz s.r.o., doprava@idispecink.cz, IČO 23359765.">
+<meta property="og:url" content="https://idispecink.cz/kontakt.html">
+<meta name="theme-color" content="#343F41">
+<link rel="stylesheet" href="assets/css/firemni-styl.css">
+</head>
+<body>
+<a class="preskocit" href="#obsah">Přeskočit na obsah</a>
+
+<header class="hlavicka">
+  <div class="obal">
+    <a class="logo" href="index.html">
+      <img src="assets/img/logo-idispecink.svg" alt="iDispečink.cz" width="170" height="34">
+    </a>
+    <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="hlavni-menu">
+      Menu
+    </button>
+    <nav class="menu" id="hlavni-menu" aria-label="Hlavní navigace">
+      <a href="index.html">Úvod</a>
+      <a href="sluzby.html">Služby</a>
+      <a href="pro-dopravce.html">Pro dopravce</a>
+      <a href="reference.html">Reference</a>
+      <a href="o-nas.html">O nás</a>
+      <a href="kontakt.html" aria-current="page">Kontakt</a>
+    </nav>
+  </div>
+</header>
+
+<main id="obsah">
+<section class="hero jednoduchy">
+  <div class="obal">
+    <span class="nadpis-stitek">Kontakt</span>
+    <h1>Napište nám</h1>
+    <p class="uvod">
+      Poptávku vyřídíme rychle. Stačí základní informace — odkud, kam, co a kdy.
+      Zbytek doladíme spolu.
+    </p>
+  </div>
+</section>
+
+<section class="sekce" id="poptavka">
+  <div class="obal">
+    <div class="mrizka dva" style="gap:40px;align-items:start">
+
+      <div>
+        <h2>Kontaktní údaje</h2>
+        <ul class="udaje" style="margin-top:16px">
+          <li><span class="klic">E-mail</span><span class="hodnota"><a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a></span></li>
+          <li><span class="klic">Telefon</span><span class="hodnota" style="color:var(--pozor-text)">doplnit</span></li>
+          <li><span class="klic">Provozní doba</span><span class="hodnota" style="color:var(--pozor-text)">doplnit</span></li>
+          <li><span class="klic">Společnost</span><span class="hodnota">iDispečink.cz s.r.o.</span></li>
+          <li><span class="klic">IČO</span><span class="hodnota cislo">23359765</span></li>
+          <li><span class="klic">DIČ</span><span class="hodnota" style="color:var(--pozor-text)">doplnit</span></li>
+          <li><span class="klic">Sídlo</span><span class="hodnota" style="color:var(--pozor-text)">doplnit</span></li>
+        </ul>
+
+        <div class="karta akcent" style="margin-top:28px">
+          <h3>Jsem dopravce</h3>
+          <p>
+            Nabízíte volné vozy? Použijte raději registrační formulář
+            na stránce <a href="pro-dopravce.html#registrace">Pro dopravce</a> —
+            rovnou se nás zeptá na to, co potřebujeme vědět.
+          </p>
+        </div>
+
+        <!-- PLACEHOLDER — doplnit a smazat -->
+        <div class="doplnit" style="margin-top:20px">
+          <b>Doplnit:</b> telefon, provozní dobu, DIČ, adresu sídla a případně
+          mapu nebo bankovní spojení. Pokud budete zpracovávat osobní údaje
+          z formuláře, přidejte odkaz na zásady zpracování osobních údajů.
+        </div>
+      </div>
+
+      <form class="formular" data-mailto data-prijemce="doprava@idispecink.cz"
+            data-predmet="Poptávka přepravy z webu">
+        <h2 style="margin-bottom:.6em">Poptávka</h2>
+
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="k-jmeno">Jméno <span class="napoveda">*</span></label>
+            <input type="text" id="k-jmeno" name="jmeno" data-popisek="Jméno" required autocomplete="name">
+          </div>
+          <div class="pole">
+            <label for="k-firma">Firma</label>
+            <input type="text" id="k-firma" name="firma" data-popisek="Firma" autocomplete="organization">
+          </div>
+        </div>
+
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="k-email">E-mail <span class="napoveda">*</span></label>
+            <input type="email" id="k-email" name="email" data-popisek="E-mail" required autocomplete="email">
+          </div>
+          <div class="pole">
+            <label for="k-telefon">Telefon</label>
+            <input type="tel" id="k-telefon" name="telefon" data-popisek="Telefon" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="pole">
+          <label for="k-typ">Co potřebujete</label>
+          <select id="k-typ" name="typ" data-popisek="Typ poptávky">
+            <option>Jednorázová přeprava</option>
+            <option>Pravidelné přepravy</option>
+            <option>Externí dispečink pro moji dopravu</option>
+            <option>Něco jiného / nevím</option>
+          </select>
+        </div>
+
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="k-odkud">Odkud</label>
+            <input type="text" id="k-odkud" name="odkud" data-popisek="Odkud" placeholder="město nebo PSČ">
+          </div>
+          <div class="pole">
+            <label for="k-kam">Kam</label>
+            <input type="text" id="k-kam" name="kam" data-popisek="Kam" placeholder="město nebo PSČ">
+          </div>
+        </div>
+
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="k-termin">Termín nakládky</label>
+            <input type="date" id="k-termin" name="termin" data-popisek="Termín nakládky">
+          </div>
+          <div class="pole">
+            <label for="k-naklad">Náklad <span class="napoveda">váha, palety</span></label>
+            <input type="text" id="k-naklad" name="naklad" data-popisek="Náklad" placeholder="např. 12 palet, 8 t">
+          </div>
+        </div>
+
+        <div class="pole">
+          <label for="k-zprava">Zpráva <span class="napoveda">*</span></label>
+          <textarea id="k-zprava" name="zprava" data-popisek="Zpráva" required
+                    placeholder="Popište, co potřebujete. Čím konkrétněji, tím přesnější dostanete cenu."></textarea>
+        </div>
+
+        <button class="tlacitko" type="submit">Odeslat poptávku</button>
+        <p class="formular-poznamka formular-stav" role="status" aria-live="polite">
+          Formulář otevře váš poštovní klient s předvyplněnou zprávou. Odeslání pak potvrdíte v něm.
+          Nefunguje to? Napište přímo na <a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a>.
+        </p>
+      </form>
+
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="paticka">
+  <div class="obal">
+    <div class="mrizka ctyri">
+      <div>
+        <a class="logo" href="index.html">
+          <img src="assets/img/logo-idispecink.svg" alt="iDispečink.cz" width="150" height="30">
+        </a>
+        <p>Spedice a externí dispečink. Přepravy organizujeme s daty, ne s papírem.</p>
+      </div>
+      <div>
+        <h4>Web</h4>
+        <ul>
+          <li><a href="index.html">Úvod</a></li>
+          <li><a href="sluzby.html">Služby</a></li>
+          <li><a href="reference.html">Reference</a></li>
+          <li><a href="o-nas.html">O nás</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Spolupráce</h4>
+        <ul>
+          <li><a href="pro-dopravce.html">Pro dopravce</a></li>
+          <li><a href="kontakt.html#poptavka">Poptat přepravu</a></li>
+          <li><a href="kontakt.html">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a></li>
+          <li><span style="color:var(--text-tlum);font-size:.94rem">IČO 23359765</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="id-paticka">
+      <span>iDispečink.cz s.r.o. · IČO 23359765 · doprava@idispecink.cz</span>
+      <span>© <span data-rok>2026</span> iDispečink.cz s.r.o.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

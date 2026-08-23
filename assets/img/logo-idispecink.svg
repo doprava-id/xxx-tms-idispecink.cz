@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60" role="img" aria-label="iDispečink.cz">
+  <title>iDispečink.cz</title>
+  <!-- Náhradní wordmark. Až budou po ruce oficiální loga
+       (logo-idispecink-sirka.png / logo-idispecink-ctverec.png),
+       nahraďte tento soubor jimi. -->
+  <rect x="0" y="6" width="48" height="48" fill="#F0B41E"/>
+  <text x="24" y="42" font-family="Segoe UI, Inter, system-ui, sans-serif" font-size="30"
+        font-weight="700" fill="#343F41" text-anchor="middle">iD</text>
+  <text x="60" y="41" font-family="Segoe UI, Inter, system-ui, sans-serif" font-size="27"
+        font-weight="700" fill="#F0EDE6">iDispečink<tspan fill="#F0B41E">.cz</tspan></text>
+</svg>
