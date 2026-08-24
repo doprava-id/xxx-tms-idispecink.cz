@@ -1,0 +1,412 @@
+/* ==========================================================================
+   iDispečink.cz — firemní styl, tmavá technická varianta
+   Barvy a pravidla podle firemního stylu iDispečink.cz s.r.o.
+   Bez gradientů, stínů a dekorací. Plocha, linka, text.
+   ========================================================================== */
+
+:root {
+  /* Firemní barvy — neměnit */
+  --zluta:        #F0B41E;
+  --zluta-tmava:  #C79212;
+  --zluta-svetla: #FFF3DA;
+  --antracit:     #343F41;
+  --krem:         #F0EDE6;
+
+  /* Stavy */
+  --ok-text:    #7BD69A;  --ok-plocha:    #16301F;
+  --pozor-text: #F0C55E;  --pozor-plocha: #33290F;
+  --chyba-text: #F0868F;  --chyba-plocha: #35171A;
+
+  /* Odvozené plochy tmavé varianty */
+  --pozadi:      #23292B;
+  --povrch:      #2A3133;
+  --povrch-2:    var(--antracit);
+  --linka:       #414D50;
+  --linka-slaba: #333C3E;
+
+  --text:      var(--krem);
+  --text-tlum: #A5AEB0;
+
+  --pismo: "Segoe UI", Inter, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --pismo-cislo: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --sirka: 1160px;
+  --mezera: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--pozadi);
+  color: var(--text);
+  font-family: var(--pismo);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--zluta); text-decoration: none; }
+a:hover { color: var(--zluta-tmava); text-decoration: underline; }
+
+h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .5em; font-weight: 700; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+h3 { font-size: 1.2rem; }
+p  { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+
+.cislo { font-family: var(--pismo-cislo); font-variant-numeric: tabular-nums; }
+
+/* --- Layout ------------------------------------------------------------- */
+
+.obal { width: 100%; max-width: var(--sirka); margin: 0 auto; padding: 0 var(--mezera); }
+
+.sekce { padding: 72px 0; border-top: 1px solid var(--linka-slaba); }
+.sekce:first-of-type { border-top: 0; }
+.sekce.uzka { padding: 48px 0; }
+.sekce.plocha { background: var(--povrch); }
+
+.sekce-hlava { max-width: 720px; margin-bottom: 40px; }
+.sekce-hlava p { color: var(--text-tlum); margin-bottom: 0; }
+
+.nadpis-stitek {
+  display: inline-block;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--zluta);
+  border-bottom: 2px solid var(--zluta);
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+}
+
+.mrizka { display: grid; gap: 20px; }
+.mrizka.dva  { grid-template-columns: repeat(2, 1fr); }
+.mrizka.tri  { grid-template-columns: repeat(3, 1fr); }
+.mrizka.ctyri{ grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 900px) {
+  .mrizka.tri, .mrizka.ctyri { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
+  .mrizka.dva, .mrizka.tri, .mrizka.ctyri { grid-template-columns: 1fr; }
+  .sekce { padding: 52px 0; }
+}
+
+/* --- Hlavička ----------------------------------------------------------- */
+
+.hlavicka {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--antracit);
+  border-bottom: 1px solid var(--linka);
+}
+.hlavicka .obal {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; min-height: 74px;
+}
+.logo { display: flex; align-items: center; }
+.logo img { height: 38px; width: auto; }
+
+.menu { display: flex; align-items: center; gap: 4px; }
+.menu a {
+  color: var(--text);
+  font-size: .95rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-bottom: 2px solid transparent;
+}
+.menu a:hover { color: var(--zluta); text-decoration: none; }
+.menu a[aria-current="page"] { color: var(--zluta); border-bottom-color: var(--zluta); }
+
+.menu-prepinac {
+  display: none;
+  background: none; border: 1px solid var(--linka); color: var(--text);
+  padding: 8px 12px; font: inherit; font-size: .9rem; cursor: pointer;
+}
+.menu-prepinac:hover { border-color: var(--zluta); color: var(--zluta); }
+
+@media (max-width: 880px) {
+  .menu-prepinac { display: block; }
+  .menu {
+    display: none;
+    position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; align-items: stretch; gap: 0;
+    /* Odlišné pozadí od hlavičky i od obsahu pod ní, ať je rozbalené
+       menu jasně čitelné jako samostatný panel. */
+    background: var(--povrch);
+    border-bottom: 2px solid var(--zluta);
+    padding: 8px var(--mezera) 16px;
+  }
+  .menu.otevreno { display: flex; }
+  .menu a { padding: 12px 0; border-bottom: 1px solid var(--linka-slaba); }
+  .menu a[aria-current="page"] { border-bottom-color: var(--zluta); }
+}
+
+/* --- Tlačítka ----------------------------------------------------------- */
+
+.tlacitko {
+  display: inline-block;
+  font-weight: 700; font-size: .98rem;
+  padding: 13px 24px;
+  border: 1px solid var(--zluta);
+  background: var(--zluta);
+  color: var(--antracit);
+  cursor: pointer;
+  font-family: inherit;
+}
+.tlacitko:hover { background: var(--zluta-tmava); border-color: var(--zluta-tmava); color: var(--antracit); text-decoration: none; }
+.tlacitko.obrys { background: none; color: var(--zluta); }
+.tlacitko.obrys:hover { background: none; border-color: var(--krem); color: var(--krem); }
+
+.tlacitka { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+/* --- Hero --------------------------------------------------------------- */
+
+.hero { background: var(--antracit); border-bottom: 1px solid var(--linka); padding: 84px 0; }
+.hero .obal { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; }
+.hero p.uvod { font-size: 1.15rem; color: var(--text-tlum); max-width: 56ch; }
+
+.hero-panel { border: 1px solid var(--linka); background: var(--pozadi); }
+.hero-panel .panel-hlava {
+  background: var(--zluta); color: var(--antracit);
+  font-weight: 700; font-size: .82rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 8px 16px;
+}
+.hero-panel ul { list-style: none; margin: 0; padding: 8px 16px 16px; }
+.hero-panel li {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 11px 0; border-bottom: 1px solid var(--linka-slaba);
+  font-size: .93rem;
+}
+.hero-panel li:last-child { border-bottom: 0; }
+.hero-panel li span:first-child { color: var(--text-tlum); }
+.hero-panel li span:last-child { font-weight: 700; text-align: right; }
+
+.hero.jednoduchy { padding: 64px 0; }
+.hero.jednoduchy .obal { grid-template-columns: 1fr; gap: 0; }
+.hero.jednoduchy h1 { max-width: 20ch; }
+
+@media (max-width: 900px) {
+  .hero { padding: 56px 0; }
+  .hero .obal { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* --- Karty -------------------------------------------------------------- */
+
+.karta {
+  border: 1px solid var(--linka);
+  background: var(--povrch);
+  padding: 26px;
+}
+.karta.akcent { border-left: 3px solid var(--zluta); }
+.karta h3 { margin-bottom: .4em; }
+.karta p { color: var(--text-tlum); font-size: .96rem; }
+.karta .cislo-kroku {
+  font-family: var(--pismo-cislo);
+  font-size: .82rem; font-weight: 700;
+  color: var(--zluta);
+  display: block; margin-bottom: 10px;
+}
+
+.seznam { list-style: none; margin: 0; padding: 0; }
+.seznam li {
+  position: relative;
+  padding: 10px 0 10px 26px;
+  border-bottom: 1px solid var(--linka-slaba);
+  color: var(--text-tlum);
+  font-size: .96rem;
+}
+.seznam li:last-child { border-bottom: 0; }
+.seznam li::before {
+  content: ""; position: absolute; left: 0; top: 20px;
+  width: 12px; height: 2px; background: var(--zluta);
+}
+.seznam li b, .seznam li strong { color: var(--text); }
+
+/* --- KPI pás ------------------------------------------------------------ */
+
+.kpi-radek { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--linka); border: 1px solid var(--linka); }
+.kpi { background: var(--povrch); padding: 22px 20px; border-left: 3px solid var(--zluta); }
+.kpi b { display: block; font-family: var(--pismo-cislo); font-size: 1.7rem; line-height: 1.1; }
+.kpi span { display: block; margin-top: 4px; font-size: .85rem; color: var(--text-tlum); }
+@media (max-width: 780px) { .kpi-radek { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px) { .kpi-radek { grid-template-columns: 1fr; } }
+
+/* --- Tabulka ------------------------------------------------------------ */
+
+.tabulka-obal { overflow-x: auto; border: 1px solid var(--linka); }
+table.id-tabulka { width: 100%; border-collapse: collapse; font-size: .94rem; min-width: 520px; }
+table.id-tabulka th {
+  background: var(--zluta); color: var(--antracit);
+  text-align: left; font-weight: 700;
+  padding: 11px 16px; white-space: nowrap;
+}
+table.id-tabulka td { padding: 11px 16px; border-top: 1px solid var(--linka-slaba); color: var(--text-tlum); }
+table.id-tabulka td:first-child { color: var(--text); font-weight: 600; }
+table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --- Štítky ------------------------------------------------------------- */
+
+.id-stitek {
+  display: inline-block;
+  font-size: .78rem; font-weight: 700;
+  padding: 3px 9px;
+  border: 1px solid var(--linka);
+  color: var(--text-tlum);
+}
+.id-stitek.ok    { background: var(--ok-plocha);    color: var(--ok-text);    border-color: var(--ok-text); }
+.id-stitek.pozor { background: var(--pozor-plocha); color: var(--pozor-text); border-color: var(--pozor-text); }
+.id-stitek.chyba { background: var(--chyba-plocha); color: var(--chyba-text); border-color: var(--chyba-text); }
+
+/* --- Doplnit (viditelný placeholder pro nedodaný obsah) ----------------- */
+
+.doplnit {
+  border: 1px dashed var(--pozor-text);
+  background: var(--pozor-plocha);
+  color: var(--pozor-text);
+  padding: 16px 20px;
+  font-size: .9rem;
+}
+.doplnit b { color: var(--pozor-text); }
+
+/* --- Výzva (CTA pás) ---------------------------------------------------- */
+
+.vyzva { background: var(--zluta); color: var(--antracit); padding: 48px 0; }
+.vyzva .obal { display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+.vyzva h2 { margin-bottom: .25em; }
+.vyzva p { color: #4A3A10; margin: 0; font-weight: 600; }
+.vyzva .tlacitko { background: var(--antracit); border-color: var(--antracit); color: var(--krem); }
+.vyzva .tlacitko:hover { background: var(--pozadi); border-color: var(--pozadi); color: var(--krem); }
+
+/* --- Formulář ----------------------------------------------------------- */
+
+.formular { border: 1px solid var(--linka); background: var(--povrch); padding: 28px; }
+.pole { margin-bottom: 18px; }
+.pole label { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 6px; }
+.pole .napoveda { font-weight: 400; color: var(--text-tlum); }
+.pole input, .pole select, .pole textarea {
+  width: 100%;
+  background: var(--pozadi);
+  border: 1px solid var(--linka);
+  color: var(--text);
+  font: inherit; font-size: .96rem;
+  padding: 11px 13px;
+}
+.pole input:focus, .pole select:focus, .pole textarea:focus {
+  outline: none; border-color: var(--zluta);
+}
+.pole textarea { min-height: 130px; resize: vertical; }
+.pole-radek { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 620px) { .pole-radek { grid-template-columns: 1fr; } }
+.formular-poznamka { font-size: .85rem; color: var(--text-tlum); margin-top: 14px; }
+
+/* --- Kontaktní údaje ---------------------------------------------------- */
+
+.udaje { list-style: none; margin: 0; padding: 0; }
+.udaje li { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--linka-slaba); font-size: .96rem; }
+.udaje li:last-child { border-bottom: 0; }
+.udaje .klic { color: var(--text-tlum); }
+.udaje .hodnota { font-weight: 600; }
+@media (max-width: 520px) { .udaje li { grid-template-columns: 1fr; gap: 2px; } }
+
+/* --- Patička ------------------------------------------------------------ */
+
+.paticka { background: var(--antracit); border-top: 1px solid var(--linka); padding: 48px 0 28px; margin-top: 0; }
+.paticka .mrizka { gap: 32px; }
+.paticka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta); margin-bottom: 14px; }
+.paticka ul { list-style: none; margin: 0; padding: 0; }
+.paticka li { padding: 5px 0; }
+.paticka a { color: var(--text-tlum); font-size: .94rem; }
+.paticka a:hover { color: var(--zluta); }
+.paticka .logo img { height: 34px; margin-bottom: 14px; }
+.paticka p { color: var(--text-tlum); font-size: .92rem; }
+.id-paticka {
+  margin-top: 32px; padding-top: 20px;
+  border-top: 1px solid var(--linka);
+  color: var(--text-tlum); font-size: .86rem;
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+
+/* --- Zaostření klávesnicí ----------------------------------------------- */
+
+:focus-visible {
+  outline: 3px solid var(--zluta);
+  outline-offset: 2px;
+}
+.vyzva :focus-visible { outline-color: var(--antracit); }
+.pole input:focus-visible,
+.pole select:focus-visible,
+.pole textarea:focus-visible { outline-offset: 0; }
+
+/* --- Přeskočit na obsah ------------------------------------------------- */
+
+.preskocit {
+  position: absolute; left: -9999px;
+  background: var(--zluta); color: var(--antracit);
+  padding: 10px 16px; font-weight: 700; z-index: 100;
+}
+.preskocit:focus { left: 8px; top: 8px; }
+
+/* --- Tisk --------------------------------------------------------------- */
+
+@media print {
+  /* Navigace, výzvy a tlačítka na papíře nedávají smysl. */
+  .hlavicka, .paticka, .vyzva, .tlacitka, .preskocit, .menu-prepinac { display: none; }
+
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel {
+    background: #fff !important;
+    border-color: #999;
+    color: #000;
+  }
+  .sekce { padding: 18pt 0; border-top: 1px solid #ccc; }
+
+  /* Tlumená barva textu je zapsaná i v atributu style jednotlivých prvků,
+     proto se přebíjí přes !important — jinak by na papíře zůstala šedá. */
+  [style*="--text-tlum"],
+  .sekce-hlava p, .karta p, .seznam li, .udaje .klic,
+  table.id-tabulka td, .hero p.uvod, .formular-poznamka {
+    color: #222 !important;
+  }
+  .hodnota[style*="--pozor-text"], [style*="--pozor-text"] { color: #000 !important; }
+  .pole .napoveda { color: #444 !important; }
+  /* Tučné uvození položek seznamu má barvu textu tmavého motivu — na bílé
+     by bylo neviditelné. */
+  .seznam li b, .seznam li strong, .karta p b, .udaje .hodnota { color: #000 !important; }
+  .cislo-kroku { color: #000 !important; }
+  .hero-panel li span:first-child { color: #222 !important; }
+  .hero-panel li span:last-child { color: #000 !important; }
+
+  /* Formulářová pole vytisknout jako prázdné linkované rámečky, ne tmavé plochy. */
+  .pole input, .pole select, .pole textarea {
+    background: #fff !important;
+    color: #000;
+    border: 1px solid #999;
+  }
+  .pole textarea { min-height: 60pt; }
+
+  a { color: #000; text-decoration: underline; }
+  .nadpis-stitek { color: #000; border-bottom-color: #000; }
+
+  table.id-tabulka th { background: #eee !important; color: #000; }
+  table.id-tabulka td:first-child { color: #000; }
+  .karta.akcent { border-left: 3px solid #666; }
+  .seznam li::before { background: #666; }
+  .hero-panel .panel-hlava { background: #eee !important; color: #000; }
+
+  .id-stitek { border-color: #666; color: #000; background: #fff !important; }
+
+  /* Poznámky pro zadavatele: na papíře zůstávají, ale bez tmavé plochy. */
+  .doplnit, .doplnit b { background: #fff !important; color: #000 !important; }
+  .doplnit { border: 1px dashed #666; }
+
+  /* Oddíly nerozdělovat přes stránky, kde to jde. */
+  .karta, table.id-tabulka tr { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}
