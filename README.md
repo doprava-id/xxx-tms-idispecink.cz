@@ -24,32 +24,41 @@ assets/img/                  Logo, favicon a náhledový obrázek
 
 ## Logo
 
-Logo je vektor překreslený podle dodané předlohy. Nápis je převedený do křivek,
-takže vypadá stejně všude a nezávisí na tom, jaká písma má prohlížeč nebo
-tiskárna k dispozici.
+Všechny soubory pocházejí z **originálního vektoru** dodaného v PDF
+(`idispecink-logo-vektor-transparent.pdf`) — nejde o překres. Křivky jsou
+převzaté beze změny, mění se jen výřez, uspořádání a u tmavých variant barva
+antracitových tvarů na krémovou.
 
 | Soubor | Použití |
 |---|---|
 | `logo-idispecink.svg` | vodorovné, na tmavé pozadí — hlavička a patička webu |
 | `logo-idispecink-tmavy.svg` | vodorovné, na světlé pozadí — dokumenty, faktury |
-| `logo-idispecink-ctverec.svg` | svislé, na světlé pozadí — profilovky, dlaždice |
+| `logo-idispecink-ctverec.svg` | svislé (původní sazba), na světlé pozadí |
 | `logo-idispecink-ctverec-tmave-pozadi.svg` | svislé, na tmavé pozadí |
 | `znacka.svg`, `znacka-tmava.svg` | samotný piktogram bez nápisu |
-| `favicon.svg` | ikona v záložce prohlížeče |
+| `favicon.svg` | ikona v záložce — čtvercový výřez s vozem |
 | `apple-touch-icon.png` | ikona po přidání webu na plochu mobilu |
 | `og-idispecink.png` | náhled při sdílení odkazu (1200×630) |
 | `logo-idispecink*.png` | rastrové exporty pro e-mailové podpisy a dokumenty |
 
-Poměr stran vodorovného loga je 6,825 : 1, svislého 2,120 : 1. Při výměně
-souborů upravte i `width`/`height` u `<img>` v HTML, jinak se stránka
-při načítání poskočí.
+Poměry stran: vodorovné **6,589 : 1**, svislé **1,992 : 1**, piktogram
+**2,027 : 1**. Při výměně souborů upravte i `width`/`height` u `<img>`
+v HTML, jinak stránka při načítání poskočí.
 
-Tvary písmen vycházejí z písma **Poppins SemiBold** (SIL Open Font License),
-které se z dodané předlohy jevilo jako nejbližší. Obrysy jsou v souborech
-zapsané jako křivky, žádný soubor s písmem se nikam nenahrává.
+### Na co si dát pozor při úpravách
 
-Pokud existuje originální zdroj loga (AI, EPS nebo PDF s křivkami), je lepší
-použít ten — tohle je poctivý překres, ne originál.
+Obě barvy jsou v každém souboru vždy **jedna cesta** s `fill-rule="evenodd"`.
+Díry — okna kabiny, náboje kol, vnitřek monitoru — drží právě tímto pravidlem.
+Když podcesty rozdělíte do samostatných elementů `<path>`, díry se vyplní
+a z kabiny se stane tmavá plocha.
+
+Piktogram a nápis nejdou v originálu oddělit podle barev — obrys monitoru
+a tmavé části vozu jsou jedna souvislá kontura. Rozdělení na značku a nápis
+je proto vedené vodorovným předělem: podcesty se středem nad y = 337
+(v souřadnicích původního PDF) tvoří piktogram, ostatní nápis.
+
+Vodorovná varianta má nápis zvětšený na 130 % vůči původní sazbě — vedle
+piktogramu by v původním poměru působil drobně.
 
 ## Formuláře
 
