@@ -41,9 +41,28 @@ antracitových tvarů na krémovou.
 | `og-idispecink.png` | náhled při sdílení odkazu (1200×630) |
 | `logo-idispecink*.png` | rastrové exporty pro e-mailové podpisy a dokumenty |
 
-Poměry stran: vodorovné **6,589 : 1**, svislé **1,992 : 1**, piktogram
-**2,027 : 1**. Při výměně souborů upravte i `width`/`height` u `<img>`
+Poměry stran: vodorovné **6,305 : 1**, svislé **1,961 : 1**, piktogram
+**1,975 : 1**. Při výměně souborů upravte i `width`/`height` u `<img>`
 v HTML, jinak stránka při načítání poskočí.
+
+### Tmavé pozadí
+
+V originálu je korba vozu žlutá, ale **kabina antracitová**. Překlopení všech
+antracitových tvarů na krémovou proto nefunguje — vůz dostane bílou kabinu
+a značka čte jako jiné logo.
+
+Tmavé varianty místo toho drží původní barvy a od pozadí je odděluje krémová
+linka: antracitová cesta má `stroke="#F0EDE6"` o tloušťce **6,5** jednotky
+souřadnic původního PDF, s `paint-order="stroke fill"`, takže linka vede vně
+tvaru a nesnídá výplň. Nápis je na tmavém pozadí plnou krémovou — obrysové
+písmo se špatně čte.
+
+Tloušťka je kompromis ověřený vykreslením: pod 3 jednotky oddělení mizí
+ve velikosti hlavičky (38 px) i ve faviconu, nad 8 začne linka požírat okna
+a mřížku kabiny.
+
+Všechny varianty — světlé i tmavé — mají v `viewBox` odsazení 4 jednotky,
+aby měly shodný poměr stran a linka se neořízla.
 
 ### Na co si dát pozor při úpravách
 
