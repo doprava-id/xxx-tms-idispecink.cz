@@ -4,12 +4,14 @@ Guidance for Claude Code (and other AI assistants) working in this repository.
 
 ## Status of this document
 
-**This repository is currently an empty scaffold.** As of commit `5c83999` ("Initial
-commit", 2026-08-22) the entire tracked contents are:
+**This repository is currently an empty scaffold.** It was created by a single commit
+(`5c83999`, "Initial commit", 2026-08-22) carrying only a licence and a one-line README.
+The entire tracked contents, documentation included, are:
 
 ```
+CLAUDE.md    this file
 LICENSE      Apache License 2.0
-README.md    single heading line: "# xxx-tms-idispecink.cz"
+README.md    project intro (was a single heading line at the initial commit)
 ```
 
 There is no source code, no build system, no dependency manifest, no test suite, no
@@ -34,29 +36,56 @@ rather than guessing at an architecture that does not exist.
 | License | Apache License 2.0 (`LICENSE`, unmodified boilerplate) |
 | Sole commit author | `doprava-id <doprava@idispecink.cz>` |
 | Language/runtime | none committed |
+| Domain | road-freight dispatching (TMS) for iDispečink.cz s.r.o. — see below |
 
-### Domain context (inferred, unconfirmed)
+The `xxx-` prefix in the repository name reads as a placeholder rather than a released
+product name; no intended name has been stated.
 
-The repository name reads as **TMS** (Transport Management System) for
-**iDispečink.cz**, a Czech road-freight dispatching operation. The `xxx-` prefix
-reads as a placeholder in the name, not a released product name. Nothing in the
-committed files confirms any of this — treat it as a working hypothesis and confirm
-with the user before building on it.
+### Domain context
 
-Practical consequences if that reading holds:
+Confirmed from the surrounding iDispečink.cz workspace tooling — the installed Claude
+skills and the operation they automate — **not** from files in this repository, which is
+still empty. Treat the systems below as reliable background and the boundary in
+"Where the automation actually lives" as the part that matters most.
 
-- The working language is **Czech**. Domain vocabulary (`přeprava` = shipment,
-  `zásilka` = consignment, `řidič` = driver, `nakládka`/`vykládka` = loading/unloading,
-  `dispečink` = dispatching, `objednávka` = order, `dopravce` = carrier) will show up
-  in requirements, and probably in UI strings and data.
-- User-facing text, documents and reports should be written in Czech unless the user
-  says otherwise. Code identifiers, comments and commit messages default to English —
-  but if the first real code that lands uses Czech identifiers, follow that instead
-  and update this file.
-- Likely integration surfaces, based on how the surrounding iDispečink.cz tooling
-  works: Airtable (shipment records), Trello (daily dispatch boards), Blue Yonder TMS
-  (ESA / Wellpack-Chep imports), Excel exports, and PDF/Word transport orders. None of
-  these are wired into this repository yet.
+**The operation.** iDispečink.cz s.r.o. runs Czech road-freight dispatching. The working
+language is Czech. User-facing text, documents and reports are written in Czech unless
+the user says otherwise; code identifiers, comments and commit messages default to
+English. If the first real code that lands here uses Czech identifiers, follow that
+instead and update this file.
+
+**Systems in the operation** (none of them wired into this repository yet):
+
+| System | Role |
+|---|---|
+| Airtable | System of record for shipments (`Přepravy` table). Also holds the place/company mapping tables used as the source of truth for normalization, and the Trello card-name formula. |
+| Blue Yonder TMS | Upstream source for the `ESA` and `WELLPACK`/Chep accounts; rows are pulled from its smartbench grid. |
+| Trello | Daily dispatch boards named `RRMMDD_base` (e.g. `260803_base`), one card per run. Basis for the weekly KT report. |
+| Excel | Weekly KT reports, dispo exports, carrier price lists. |
+| PDF / Word | Incoming transport orders (HOPI and others) and outgoing carrier orders. |
+
+Shipment sources are tracked with the codes `ESA`, `WP`, `HOPI`, `DBS`, `PDF`.
+
+**Where the automation actually lives — not here.** The working import/report tooling is
+a local Python pipeline (`esa_wp_pipeline`, Playwright + Airtable REST) on an operator
+workstation, plus a set of Claude skills. When a user asks to run an import, build a KT
+report, price a dispo export or issue a carrier order, that work happens in those tools.
+Do not assume this repository contains, mirrors or replaces them, and do not migrate any
+of it here without being asked.
+
+**Keep operational identifiers out of this repository.** Airtable base and table IDs,
+Blue Yonder logins, Trello board codes and local workstation paths belong to that
+pipeline's own configuration. Referring to a system by name here is fine; copying its
+identifiers or credentials into this repo is not.
+
+**Brand.** Visual outputs follow the iDispečink.cz house style — yellow `#F0B41E`,
+anthracite `#343F41`, cream `#F0EDE6`, Segoe UI. The canonical stylesheet and logos live
+in the operations project, not in this repository.
+
+**Glossary** (Czech → English): `přeprava` = shipment · `zásilka` = consignment ·
+`řidič` = driver · `nakládka`/`vykládka` = loading/unloading · `dispečink` = dispatching ·
+`objednávka` = order · `dopravce` = carrier · `cena` = price · `trasa` = route ·
+`jízda` = run/trip.
 
 ## Conventions
 
@@ -129,7 +158,7 @@ there is no test or build step to run.
 .
 ├── CLAUDE.md    this file
 ├── LICENSE      Apache License 2.0
-└── README.md    placeholder heading only
+└── README.md    project intro, current status, pointer to this file
 ```
 
 That is the complete tree. When directories appear, document what each one is *for*,
