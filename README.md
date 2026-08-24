@@ -14,11 +14,12 @@ o-nas.html                   O společnosti a identifikační údaje
 kontakt.html                 Kontaktní údaje + poptávkový formulář
 zasady-osobnich-udaju.html   Informace o zpracování osobních údajů (osnova)
 404.html                     Chybová stránka
+.htaccess                    Nastavení pro Apache (404, komprese, cache, hlavičky)
 robots.txt                   Pravidla pro roboty
 sitemap.xml                  Mapa webu
 assets/css/                  firemni-styl.css — jediná definice barev a komponent
 assets/js/                   main.js — mobilní menu a odesílání formulářů
-assets/img/                  Logo a favicon
+assets/img/                  Logo, favicon a náhledový obrázek
 ```
 
 ## Logo
@@ -33,6 +34,11 @@ originální PNG, nahraďte jím soubory v `assets/img/` a v HTML upravte
 Nápis v lockupu je vysázený písmem Segoe UI s `textLength`, takže drží šířku
 i na strojích, kde Segoe UI není. Pro naprostou věrnost by bylo lepší mít
 nápis převedený do křivek — to lze udělat z originálního zdroje loga.
+
+`og-idispecink.png` (1200×630) je náhled při sdílení odkazu na sociálních
+sítích a v chatech, `apple-touch-icon.png` (180×180) ikona po přidání webu
+na plochu mobilu. Oba jsou vygenerované z loga — když změníte logo nebo
+hlavní nadpis, přegenerujte je také.
 
 ## Firemní styl
 
@@ -91,6 +97,23 @@ Při změně je potřeba je upravit na všech těchto místech.
 
 `zasady-osobnich-udaju.html` je připravená osnova, ne hotové právní znění —
 před zveřejněním ji nechte zkontrolovat.
+
+## Nasazení
+
+Soubory nakopírujte do kořene webu — celý obsah repozitáře kromě `README.md`
+a `LICENSE`. Web nic nekompiluje, takže funguje hned po nahrání.
+
+`.htaccess` nastaví chybovou stránku, kompresi, cache a bezpečnostní
+hlavičky. Na hostingu bez Apache se ignoruje a nic nerozbije; tytéž věci
+si pak nastavte v administraci hostingu.
+
+**Přesměrování na HTTPS a na doménu bez www je v `.htaccess` zakomentované.**
+Odkomentujte ho, až budete mít na doméně funkční certifikát — dřív by web
+znepřístupnilo.
+
+Po nasazení stojí za kontrolu: náhled odkazu při sdílení (og obrázek),
+funkčnost obou formulářů z běžného počítače a to, že `sitemap.xml`
+a `robots.txt` odpovídají skutečné doméně.
 
 ## Lokální spuštění
 

@@ -319,7 +319,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 
 .paticka { background: var(--antracit); border-top: 1px solid var(--linka); padding: 48px 0 28px; margin-top: 0; }
 .paticka .mrizka { gap: 32px; }
-.paticka h4 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta); margin-bottom: 14px; }
+.paticka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta); margin-bottom: 14px; }
 .paticka ul { list-style: none; margin: 0; padding: 0; }
 .paticka li { padding: 5px 0; }
 .paticka a { color: var(--text-tlum); font-size: .94rem; }
@@ -332,6 +332,17 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   color: var(--text-tlum); font-size: .86rem;
   display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
+
+/* --- Zaostření klávesnicí ----------------------------------------------- */
+
+:focus-visible {
+  outline: 3px solid var(--zluta);
+  outline-offset: 2px;
+}
+.vyzva :focus-visible { outline-color: var(--antracit); }
+.pole input:focus-visible,
+.pole select:focus-visible,
+.pole textarea:focus-visible { outline-offset: 0; }
 
 /* --- Přeskočit na obsah ------------------------------------------------- */
 
