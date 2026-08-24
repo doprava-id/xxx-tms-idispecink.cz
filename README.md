@@ -14,6 +14,7 @@ o-nas.html                   O společnosti a identifikační údaje
 kontakt.html                 Kontaktní údaje + poptávkový formulář
 zasady-osobnich-udaju.html   Informace o zpracování osobních údajů (osnova)
 404.html                     Chybová stránka
+favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Nastavení pro Apache (404, komprese, cache, hlavičky)
 robots.txt                   Pravidla pro roboty
 sitemap.xml                  Mapa webu
@@ -24,28 +25,61 @@ assets/img/                  Logo, favicon a náhledový obrázek
 
 ## Logo
 
-`logo-idispecink.svg` je vodorovný lockup pro tmavé pozadí (hlavička, patička),
-`logo-idispecink-tmavy.svg` totéž pro světlé pozadí, `znacka.svg` /
-`znacka-tmava.svg` je samotný piktogram bez nápisu a `favicon.svg` ikona do
-záložky. Všechno je vektor překreslený podle dodaného loga — pokud máte
-originální PNG, nahraďte jím soubory v `assets/img/` a v HTML upravte
-`width`/`height` u `<img>` podle nového poměru stran.
+Všechny soubory pocházejí z **originálního vektoru** dodaného v PDF
+(`idispecink-logo-vektor-transparent.pdf`) — nejde o překres. Křivky jsou
+převzaté beze změny, mění se jen výřez, uspořádání a u tmavých variant barva
+antracitových tvarů na krémovou.
 
-Nápis v lockupu je vysázený písmem Segoe UI s `textLength`, takže drží šířku
-i na strojích, kde Segoe UI není. Pro naprostou věrnost by bylo lepší mít
-nápis převedený do křivek — to lze udělat z originálního zdroje loga.
+| Soubor | Použití |
+|---|---|
+| `logo-idispecink.svg` | vodorovné, na tmavé pozadí — hlavička a patička webu |
+| `logo-idispecink-tmavy.svg` | vodorovné, na světlé pozadí — dokumenty, faktury |
+| `logo-idispecink-ctverec.svg` | svislé (původní sazba), na světlé pozadí |
+| `logo-idispecink-ctverec-tmave-pozadi.svg` | svislé, na tmavé pozadí |
+| `znacka.svg`, `znacka-tmava.svg` | samotný piktogram bez nápisu |
+| `favicon.svg` | ikona v záložce — čtvercový výřez s vozem |
+| `favicon.ico` | tatáž ikona pro starší prohlížeče; leží v kořeni, protože prohlížeče i některé nástroje si ji vyžádají z `/favicon.ico` bez ohledu na odkazy v HTML |
+| `apple-touch-icon.png` | ikona po přidání webu na plochu mobilu |
+| `og-idispecink.png` | náhled při sdílení odkazu (1200×630) |
+| `logo-idispecink*.png` | rastrové exporty pro e-mailové podpisy a dokumenty |
 
-`og-idispecink.png` (1200×630) je náhled při sdílení odkazu na sociálních
-sítích a v chatech, `apple-touch-icon.png` (180×180) ikona po přidání webu
-na plochu mobilu. Oba jsou vygenerované z loga — když změníte logo nebo
-hlavní nadpis, přegenerujte je také.
+Poměry stran: vodorovné **6,305 : 1**, svislé **1,961 : 1**, piktogram
+**1,975 : 1**. Při výměně souborů upravte i `width`/`height` u `<img>`
+v HTML, jinak stránka při načítání poskočí.
 
-## Firemní styl
+### Tmavé pozadí
 
-Barvy a pravidla odpovídají firemnímu stylu iDispečink.cz — žlutá `#F0B41E`,
-antracit `#343F41`, krém `#F0EDE6`. Web používá tmavou technickou variantu.
-Barvy jsou na jednom místě jako CSS proměnné v `assets/css/firemni-styl.css`;
-měňte je jen tam, ne v jednotlivých stránkách.
+V originálu je korba vozu žlutá, ale **kabina antracitová**. Překlopení všech
+antracitových tvarů na krémovou proto nefunguje — vůz dostane bílou kabinu
+a značka čte jako jiné logo.
+
+Tmavé varianty místo toho drží původní barvy a od pozadí je odděluje krémová
+linka: antracitová cesta má `stroke="#F0EDE6"` o tloušťce **6,5** jednotky
+souřadnic původního PDF, s `paint-order="stroke fill"`, takže linka vede vně
+tvaru a nesnídá výplň. Nápis je na tmavém pozadí plnou krémovou — obrysové
+písmo se špatně čte.
+
+Tloušťka je kompromis ověřený vykreslením: pod 3 jednotky oddělení mizí
+ve velikosti hlavičky (38 px) i ve faviconu, nad 8 začne linka požírat okna
+a mřížku kabiny.
+
+Všechny varianty — světlé i tmavé — mají v `viewBox` odsazení 4 jednotky,
+aby měly shodný poměr stran a linka se neořízla.
+
+### Na co si dát pozor při úpravách
+
+Obě barvy jsou v každém souboru vždy **jedna cesta** s `fill-rule="evenodd"`.
+Díry — okna kabiny, náboje kol, vnitřek monitoru — drží právě tímto pravidlem.
+Když podcesty rozdělíte do samostatných elementů `<path>`, díry se vyplní
+a z kabiny se stane tmavá plocha.
+
+Piktogram a nápis nejdou v originálu oddělit podle barev — obrys monitoru
+a tmavé části vozu jsou jedna souvislá kontura. Rozdělení na značku a nápis
+je proto vedené vodorovným předělem: podcesty se středem nad y = 337
+(v souřadnicích původního PDF) tvoří piktogram, ostatní nápis.
+
+Vodorovná varianta má nápis zvětšený na 130 % vůči původní sazbě — vedle
+piktogramu by v původním poměru působil drobně.
 
 ## Formuláře
 

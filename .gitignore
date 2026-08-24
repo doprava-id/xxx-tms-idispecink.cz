@@ -1,0 +1,29 @@
+# Přihlašovací údaje — nikdy necommitovat.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# Provozní data. Exporty přeprav, reporty a objednávky obsahují osobní údaje
+# zákazníků, dopravců i řidičů. Do repozitáře prezentačního webu nepatří.
+*.xlsx
+*.xlsm
+*.csv
+*.docx
+/data/
+/exports/
+/logs/
+
+# Pomocné soubory při práci na webu
+nahled-tmp.html
+/undefined/
+
+# Systém a editory
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
