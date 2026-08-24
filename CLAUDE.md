@@ -12,7 +12,8 @@ Ověřená fakta o repozitáři:
 
 | | |
 |---|---|
-| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub, soukromý) |
+| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub) |
+| Viditelnost | **veřejný** — cokoliv se sem commitne, je čitelné komukoliv |
 | Výchozí větev | `main` |
 | Licence | Apache License 2.0 |
 | Runtime | žádný — statické soubory |
@@ -123,6 +124,11 @@ v samostatné lokální pipeline a v Claude skillech.
 Do repozitáře nekopíruj identifikátory Airtable bází a tabulek, přihlašovací údaje
 k Blue Yonderu, kódy Trello nástěnek ani cesty na pracovní stanici. Zmínit systém
 jménem je v pořádku, kopírovat jeho konfiguraci ne.
+
+**Repozitář je veřejný.** Commit je publikace: obsah zůstane v historii i poté, co ho
+další commit smaže, takže uniklý klíč se musí zneplatnit, ne jen odstranit. U webu
+samotného to nevadí — je stejně veřejný —, ale provozní data a přístupy sem nesmí
+ani na okamžik.
 
 ## Práce s Gitem
 
