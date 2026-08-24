@@ -92,9 +92,9 @@ in the operations project, not in this repository.
 ### Branching and pushing
 
 - Develop on a feature branch; never commit directly to `main`.
-- AI-assistant sessions use the branch handed to them in the task setup
-  (for this session: `claude/claude-md-documentation-coq8vc`). Do not push to a
-  different branch without explicit permission.
+- AI-assistant sessions use the branch handed to them in the task setup (these are
+  named `claude/<topic>-<suffix>`). Do not push to a different branch without
+  explicit permission.
 - Push with `git push -u origin <branch-name>`. On network failure, retry with
   exponential backoff (2s, 4s, 8s, 16s) — do not switch branches to work around a
   push error.
