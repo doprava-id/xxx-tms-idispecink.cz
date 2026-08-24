@@ -21,6 +21,28 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#343F41">
 <link rel="stylesheet" href="assets/css/firemni-styl.css">
+<noscript>
+  <!-- Bez JavaScriptu tlačítko Menu nefunguje. Rozbalovací menu proto
+       na úzkých displejích zobrazíme rovnou a tlačítko schováme. -->
+  <style>
+    @media (max-width: 880px) {
+      .menu-prepinac { display: none; }
+      .hlavicka .obal { flex-wrap: wrap; }
+      #hlavni-menu {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: static;
+        background: none;
+        border-bottom: 0;
+        padding: 0 0 12px;
+        gap: 2px 18px;
+      }
+      #hlavni-menu a { padding: 6px 0; border-bottom: 2px solid transparent; }
+      #hlavni-menu a[aria-current="page"] { border-bottom-color: var(--zluta); }
+    }
+  </style>
+</noscript>
 </head>
 <body>
 <a class="preskocit" href="#obsah">Přeskočit na obsah</a>

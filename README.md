@@ -97,6 +97,19 @@ Při změně je potřeba je upravit na všech těchto místech.
 `zasady-osobnich-udaju.html` je připravená osnova, ne hotové právní znění —
 před zveřejněním ji nechte zkontrolovat.
 
+## Chování bez JavaScriptu a při tisku
+
+Web funguje i s vypnutým JavaScriptem. Skript obsluhuje jen rozbalovací menu
+na úzkých displejích a odesílání formulářů; bez něj se menu zobrazí rovnou
+rozbalené (`<noscript>` blok v hlavičce každé stránky) a formuláře zůstanou
+vyplnitelné, jen se neodešlou — proto je u nich vždy uvedená i e-mailová
+adresa.
+
+Tiskový styl v `firemni-styl.css` převádí tmavý motiv na černobílý: skryje
+navigaci, patičku a tlačítka, zesvětlí plochy a ztmaví text. Barvy z tmavého
+motivu jsou na několika místech zapsané přímo v atributu `style`, proto je
+tiskový blok přebíjí přes `!important` — při úpravách stránek na to pozor.
+
 ## Nasazení
 
 Soubory nakopírujte do kořene webu — celý obsah repozitáře kromě `README.md`

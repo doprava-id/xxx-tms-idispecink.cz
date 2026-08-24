@@ -356,7 +356,57 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 /* --- Tisk --------------------------------------------------------------- */
 
 @media print {
-  .hlavicka, .paticka, .vyzva, .tlacitka { display: none; }
-  body { background: #fff; color: #000; }
-  .karta, .formular, .hero { background: #fff; border-color: #999; color: #000; }
+  /* Navigace, výzvy a tlačítka na papíře nedávají smysl. */
+  .hlavicka, .paticka, .vyzva, .tlacitka, .preskocit, .menu-prepinac { display: none; }
+
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel {
+    background: #fff !important;
+    border-color: #999;
+    color: #000;
+  }
+  .sekce { padding: 18pt 0; border-top: 1px solid #ccc; }
+
+  /* Tlumená barva textu je zapsaná i v atributu style jednotlivých prvků,
+     proto se přebíjí přes !important — jinak by na papíře zůstala šedá. */
+  [style*="--text-tlum"],
+  .sekce-hlava p, .karta p, .seznam li, .udaje .klic,
+  table.id-tabulka td, .hero p.uvod, .formular-poznamka {
+    color: #222 !important;
+  }
+  .hodnota[style*="--pozor-text"], [style*="--pozor-text"] { color: #000 !important; }
+  .pole .napoveda { color: #444 !important; }
+  /* Tučné uvození položek seznamu má barvu textu tmavého motivu — na bílé
+     by bylo neviditelné. */
+  .seznam li b, .seznam li strong, .karta p b, .udaje .hodnota { color: #000 !important; }
+  .cislo-kroku { color: #000 !important; }
+  .hero-panel li span:first-child { color: #222 !important; }
+  .hero-panel li span:last-child { color: #000 !important; }
+
+  /* Formulářová pole vytisknout jako prázdné linkované rámečky, ne tmavé plochy. */
+  .pole input, .pole select, .pole textarea {
+    background: #fff !important;
+    color: #000;
+    border: 1px solid #999;
+  }
+  .pole textarea { min-height: 60pt; }
+
+  a { color: #000; text-decoration: underline; }
+  .nadpis-stitek { color: #000; border-bottom-color: #000; }
+
+  table.id-tabulka th { background: #eee !important; color: #000; }
+  table.id-tabulka td:first-child { color: #000; }
+  .karta.akcent { border-left: 3px solid #666; }
+  .seznam li::before { background: #666; }
+  .hero-panel .panel-hlava { background: #eee !important; color: #000; }
+
+  .id-stitek { border-color: #666; color: #000; background: #fff !important; }
+
+  /* Poznámky pro zadavatele: na papíře zůstávají, ale bez tmavé plochy. */
+  .doplnit, .doplnit b { background: #fff !important; color: #000 !important; }
+  .doplnit { border: 1px dashed #666; }
+
+  /* Oddíly nerozdělovat přes stránky, kde to jde. */
+  .karta, table.id-tabulka tr { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
 }
