@@ -1,0 +1,29 @@
+# Secrets — never commit. See CLAUDE.md, "Secrets and credentials".
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# Operational data and generated artifacts.
+# Shipment exports, reports and transport orders carry customer, carrier and
+# driver personal data. Keep them out of the repository; anonymized fixtures
+# under tests/fixtures/ are the exception.
+*.xlsx
+*.xlsm
+*.csv
+*.pdf
+*.docx
+!tests/fixtures/**
+!docs/**
+/data/
+/exports/
+/logs/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp

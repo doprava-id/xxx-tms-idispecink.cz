@@ -9,6 +9,7 @@ Guidance for Claude Code (and other AI assistants) working in this repository.
 The entire tracked contents, documentation included, are:
 
 ```
+.gitignore   secrets and operational-data guardrails
 CLAUDE.md    this file
 LICENSE      Apache License 2.0
 README.md    project intro (was a single heading line at the initial commit)
@@ -128,8 +129,9 @@ This is an operational dispatching system touching carrier, driver and customer 
 - Never commit credentials, API keys, Airtable/Trello tokens, Blue Yonder logins, or
   customer/driver personal data. Use environment variables and commit a
   `.env.example` with keys and empty values.
-- Add a `.gitignore` covering `.env`, local data exports, and generated
-  `.xlsx`/`.pdf` artifacts before any pipeline code lands.
+- `.gitignore` already covers `.env`, local data exports and generated
+  `.xlsx`/`.pdf`/`.docx` artifacts. Extend it with language-specific build and
+  dependency directories when a runtime is chosen — do not weaken the data rules.
 - Real shipment, driver or pricing data belongs in fixtures that are anonymized, not
   in the repository as-is.
 
@@ -156,6 +158,7 @@ there is no test or build step to run.
 
 ```
 .
+├── .gitignore   secrets and operational-data guardrails
 ├── CLAUDE.md    this file
 ├── LICENSE      Apache License 2.0
 └── README.md    project intro, current status, pointer to this file
