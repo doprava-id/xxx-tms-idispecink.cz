@@ -70,10 +70,8 @@ grep -rn "doplnit\|PLACEHOLDER" *.html
 
 Konkrétně jde o:
 
-- provozní dobu (`kontakt.html`)
 - obchodní podmínky pro dopravce — splatnost, doklady, sankce (`pro-dopravce.html`)
-- doby uchování údajů, seznam zpracovatelů a datum účinnosti
-  (`zasady-osobnich-udaju.html`)
+- doby uchování údajů a seznam zpracovatelů (`zasady-osobnich-udaju.html`)
 
 ## Firemní údaje na webu
 
@@ -90,6 +88,7 @@ Konkrétně jde o:
 | Jednatel | Jakub Pěsta |
 | Telefon | +420 734 580 243 |
 | E-mail | doprava@idispecink.cz |
+| Provozní doba | nonstop 24/7 |
 
 Objevují se na stránkách *Kontakt*, *O nás*, v zásadách zpracování údajů,
 v patičce všech stránek a ve strukturovaných datech (JSON-LD) na úvodní stránce.
