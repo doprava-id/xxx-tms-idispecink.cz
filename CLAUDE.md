@@ -32,6 +32,7 @@ o-nas.html                   O společnosti a identifikační údaje
 kontakt.html                 Kontaktní údaje + poptávkový formulář
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
+favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml      Pro vyhledávače
 assets/css/firemni-styl.css  Jediná definice barev a komponent

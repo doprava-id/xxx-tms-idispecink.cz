@@ -14,6 +14,7 @@ o-nas.html                   O společnosti a identifikační údaje
 kontakt.html                 Kontaktní údaje + poptávkový formulář
 zasady-osobnich-udaju.html   Informace o zpracování osobních údajů (osnova)
 404.html                     Chybová stránka
+favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Nastavení pro Apache (404, komprese, cache, hlavičky)
 robots.txt                   Pravidla pro roboty
 sitemap.xml                  Mapa webu
@@ -37,6 +38,7 @@ antracitových tvarů na krémovou.
 | `logo-idispecink-ctverec-tmave-pozadi.svg` | svislé, na tmavé pozadí |
 | `znacka.svg`, `znacka-tmava.svg` | samotný piktogram bez nápisu |
 | `favicon.svg` | ikona v záložce — čtvercový výřez s vozem |
+| `favicon.ico` | tatáž ikona pro starší prohlížeče; leží v kořeni, protože prohlížeče i některé nástroje si ji vyžádají z `/favicon.ico` bez ohledu na odkazy v HTML |
 | `apple-touch-icon.png` | ikona po přidání webu na plochu mobilu |
 | `og-idispecink.png` | náhled při sdílení odkazu (1200×630) |
 | `logo-idispecink*.png` | rastrové exporty pro e-mailové podpisy a dokumenty |
