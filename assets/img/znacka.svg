@@ -1,15 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64" role="img" aria-label="iDispečink.cz">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 118" role="img" aria-label="iDispečink.cz">
   <title>iDispečink.cz</title>
   <g fill="none">
-    <rect x="1" y="3" width="54" height="40" rx="5" stroke="#343F41" stroke-width="6"/>
-    <rect x="22" y="43" width="10" height="8" fill="#343F41"/>
-    <rect x="12" y="51" width="28" height="6" rx="3" fill="#343F41"/>
+    <rect x="5" y="4" width="86" height="80" rx="10" stroke="#343F41" stroke-width="9"/>
+    <rect x="38" y="84" width="20" height="13" fill="#343F41"/>
+    <rect x="25" y="95" width="46" height="11" rx="5.5" fill="#343F41"/>
   </g>
-  <path d="M32 28 L68 17 L68 48 L32 48 Z" fill="#F0B41E"/>
-  <path d="M68 22 h14 a4 4 0 0 1 3.3 1.8 L93 35 a5 5 0 0 1 .9 2.8 V48 H68 Z" fill="#F0B41E"/>
-  <rect x="71" y="25.5" width="7.5" height="7.5" rx="1.7" fill="#343F41"/>
-  <path d="M82 25.5 h1.5 a2 2 0 0 1 1.7 1 L89.4 32.6 a1.4 1.4 0 0 1-1.2 2.1 H82 a1.7 1.7 0 0 1-1.7-1.7 v-5.8 a1.7 1.7 0 0 1 1.7-1.7 Z" fill="#343F41"/>
-  <rect x="32" y="48" width="62" height="3.6" fill="#343F41"/>
-  <circle cx="50" cy="55" r="7.5" fill="#343F41"/><circle cx="50" cy="55" r="3.2" fill="#F0B41E"/>
-  <circle cx="85" cy="55" r="7.5" fill="#343F41"/><circle cx="85" cy="55" r="3.2" fill="#F0B41E"/>
+  <path d="M46 51 L132 30 L132 91 L46 91 Z" fill="#F0B41E"/>
+  <path d="M132 44 h26 a7 7 0 0 1 5.4 2.6 L177 65 a8 8 0 0 1 1.8 5 V91 H132 Z" fill="#F0B41E"/>
+  <rect x="137" y="50" width="17.5" height="17" rx="3.4" fill="#343F41"/>
+  <path d="M160.5 50 h3.6 a3.2 3.2 0 0 1 2.5 1.2 L174 62.6 a2.3 2.3 0 0 1-1.8 3.7 h-11.7 a2.8 2.8 0 0 1-2.8-2.8 v-10.7 a2.8 2.8 0 0 1 2.8-2.8 Z" fill="#343F41"/>
+  <rect x="46" y="91" width="132" height="7" fill="#343F41"/>
+  <rect x="170" y="82" width="9" height="9" rx="2" fill="#343F41"/>
+  <circle cx="74" cy="102" r="15.5" fill="#343F41"/><circle cx="74" cy="102" r="6.6" fill="#F0B41E"/>
+  <circle cx="152" cy="102" r="15.5" fill="#343F41"/><circle cx="152" cy="102" r="6.6" fill="#F0B41E"/>
 </svg>
