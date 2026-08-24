@@ -108,10 +108,10 @@ p:last-child { margin-bottom: 0; }
 }
 .hlavicka .obal {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; min-height: 68px;
+  gap: 16px; min-height: 74px;
 }
 .logo { display: flex; align-items: center; }
-.logo img { height: 34px; width: auto; }
+.logo img { height: 38px; width: auto; }
 
 .menu { display: flex; align-items: center; gap: 4px; }
 .menu a {
@@ -324,7 +324,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 .paticka li { padding: 5px 0; }
 .paticka a { color: var(--text-tlum); font-size: .94rem; }
 .paticka a:hover { color: var(--zluta); }
-.paticka .logo img { height: 30px; margin-bottom: 14px; }
+.paticka .logo img { height: 34px; margin-bottom: 14px; }
 .paticka p { color: var(--text-tlum); font-size: .92rem; }
 .id-paticka {
   margin-top: 32px; padding-top: 20px;

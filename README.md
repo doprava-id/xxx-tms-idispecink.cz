@@ -21,6 +21,19 @@ assets/js/                   main.js — mobilní menu a odesílání formulář
 assets/img/                  Logo a favicon
 ```
 
+## Logo
+
+`logo-idispecink.svg` je vodorovný lockup pro tmavé pozadí (hlavička, patička),
+`logo-idispecink-tmavy.svg` totéž pro světlé pozadí, `znacka.svg` /
+`znacka-tmava.svg` je samotný piktogram bez nápisu a `favicon.svg` ikona do
+záložky. Všechno je vektor překreslený podle dodaného loga — pokud máte
+originální PNG, nahraďte jím soubory v `assets/img/` a v HTML upravte
+`width`/`height` u `<img>` podle nového poměru stran.
+
+Nápis v lockupu je vysázený písmem Segoe UI s `textLength`, takže drží šířku
+i na strojích, kde Segoe UI není. Pro naprostou věrnost by bylo lepší mít
+nápis převedený do křivek — to lze udělat z originálního zdroje loga.
+
 ## Firemní styl
 
 Barvy a pravidla odpovídají firemnímu stylu iDispečink.cz — žlutá `#F0B41E`,
@@ -51,12 +64,30 @@ grep -rn "doplnit\|PLACEHOLDER" *.html
 
 Konkrétně jde o:
 
-- telefon a provozní dobu (`kontakt.html`, `index.html`)
-- DIČ, adresu sídla a spisovou značku v OR (`kontakt.html`, `o-nas.html`)
+- provozní dobu (`kontakt.html`)
 - obchodní podmínky pro dopravce — splatnost, doklady, sankce (`pro-dopravce.html`)
 - doby uchování údajů, seznam zpracovatelů a datum účinnosti
   (`zasady-osobnich-udaju.html`)
-- oficiální logo místo dočasného SVG (`assets/img/`)
+
+## Firemní údaje na webu
+
+Údaje jsou převzaté z veřejného rejstříku (stav srpen 2026):
+
+| Údaj | Hodnota |
+|---|---|
+| Společnost | iDispečink.cz s.r.o. |
+| Sídlo | Příčná 1892/4, 110 00 Praha 1 – Nové Město |
+| IČO | 23359765 |
+| DIČ | CZ23359765 |
+| Spisová značka | C 425222, Městský soud v Praze |
+| Datum vzniku | 5. 6. 2025 |
+| Jednatel | Jakub Pěsta |
+| Telefon | +420 734 580 243 |
+| E-mail | doprava@idispecink.cz |
+
+Objevují se na stránkách *Kontakt*, *O nás*, v zásadách zpracování údajů,
+v patičce všech stránek a ve strukturovaných datech (JSON-LD) na úvodní stránce.
+Při změně je potřeba je upravit na všech těchto místech.
 
 `zasady-osobnich-udaju.html` je připravená osnova, ne hotové právní znění —
 před zveřejněním ji nechte zkontrolovat.

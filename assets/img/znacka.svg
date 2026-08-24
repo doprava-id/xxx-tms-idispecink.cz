@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 64" role="img" aria-label="iDispečink.cz">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64" role="img" aria-label="iDispečink.cz">
   <title>iDispečink.cz</title>
   <g fill="none">
     <rect x="1" y="3" width="54" height="40" rx="5" stroke="#343F41" stroke-width="6"/>
@@ -12,8 +12,4 @@
   <rect x="32" y="48" width="62" height="3.6" fill="#343F41"/>
   <circle cx="50" cy="55" r="7.5" fill="#343F41"/><circle cx="50" cy="55" r="3.2" fill="#F0B41E"/>
   <circle cx="85" cy="55" r="7.5" fill="#343F41"/><circle cx="85" cy="55" r="3.2" fill="#F0B41E"/>
-  <!-- textLength drží šířku nápisu stejnou i tam, kde Segoe UI chybí -->
-  <text x="108" y="45" textLength="290" lengthAdjust="spacingAndGlyphs"
-        font-family="'Segoe UI', Inter, system-ui, -apple-system, Arial, sans-serif"
-        font-size="36" font-weight="700" fill="#343F41">iDispečink<tspan fill="#F0B41E">.</tspan>cz</text>
 </svg>
