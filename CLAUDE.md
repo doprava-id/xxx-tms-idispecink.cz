@@ -74,11 +74,19 @@ messages jsou česky (`.id-tabulka`, `.doplnit`, `prepinac`, `formulare`, `prije
 Jsou definované jako CSS proměnné v `assets/css/firemni-styl.css`. Jednotlivé stránky
 si vlastní barvy nedefinují a nesmí začít.
 
-Jedinou výjimkou je `<meta name="theme-color" content="#343F41">` — meta značka na CSS
-proměnnou dosáhnout nemůže, takže antracit je natvrdo v hlavičce všech sedmi stránek.
-**Když se změní firemní barva, změň i těch sedm meta značek**, jinak lišta prohlížeče
-na mobilu zůstane ve staré barvě. Firemní styl zakazuje gradienty, stíny
-a dekorace: „Plocha, linka, text."
+Tmavé plochy pod nimi jsou **kovové**: `--kov-pozadi`, `--kov-povrch` a `--kov-vyssi`
+jsou jemné přechody, `--brouseny` je broušená textura a `--odlesk` světlá hrana nahoře.
+Světlost putuje jen o pár procent — má to číst jako kov, ne jako lesklý plast. Plochy
+se odvozují z firemních barev, samotné firemní barvy se nemění.
+
+Jedinou výjimkou je `<meta name="theme-color" content="#262F32">` — meta značka na CSS
+proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech sedmi
+stránek. **Když se změní odstín hlavičky, změň i těch sedm meta značek**, jinak lišta
+prohlížeče na mobilu zůstane ve staré barvě.
+
+Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
+firemní barvy na web nepatří. Kovové odlesky tmavých ploch jsou jediná povolená výjimka
+a jsou celé v proměnných výše — nepřidávej gradienty ad hoc do jednotlivých pravidel.
 
 **Formuláře nemají backend.** Poskládají text a otevřou poštovního klienta
 návštěvníka (`mailto:`). Chování řídí `assets/js/main.js` přes data-atributy v HTML —

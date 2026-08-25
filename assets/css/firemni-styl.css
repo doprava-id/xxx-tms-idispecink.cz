@@ -1,7 +1,9 @@
 /* ==========================================================================
    iDispečink.cz — firemní styl, tmavá technická varianta
    Barvy a pravidla podle firemního stylu iDispečink.cz s.r.o.
-   Bez gradientů, stínů a dekorací. Plocha, linka, text.
+   Plocha, linka, text. Jedinou povolenou dekorací jsou kovové odlesky
+   tmavých ploch — jemné přechody a broušená textura níže. Nic dalšího:
+   žádné vržené stíny, záře ani barevné přechody přes firemní barvy.
    ========================================================================== */
 
 :root {
@@ -17,12 +19,25 @@
   --pozor-text: #F0C55E;  --pozor-plocha: #33290F;
   --chyba-text: #F0868F;  --chyba-plocha: #35171A;
 
-  /* Odvozené plochy tmavé varianty */
-  --pozadi:      #23292B;
-  --povrch:      #2A3133;
-  --povrch-2:    var(--antracit);
-  --linka:       #414D50;
-  --linka-slaba: #333C3E;
+  /* Odvozené plochy tmavé varianty — kov.
+     Firemní barvy nahoře zůstávají beze změny; tohle jsou plochy z nich
+     odvozené. Světlost putuje jen o pár procent, aby to četlo jako kov,
+     ne jako lesklý plast. */
+  --pozadi:      #14191B;
+  --povrch:      #1C2325;
+  --povrch-2:    #262F32;
+  --linka:       #3A4649;
+  --linka-slaba: #262E30;
+
+  /* Odlesky */
+  --odlesk:       rgba(240, 237, 230, .07);   /* horní hrana plochy */
+  --odlesk-silny: rgba(240, 237, 230, .11);   /* hrana velkých ploch */
+  --brouseny:     repeating-linear-gradient(90deg,
+                    rgba(240, 237, 230, .022) 0 1px, transparent 1px 3px);
+
+  --kov-pozadi: linear-gradient(180deg, #1A2022 0%, #14191B 60%, #101516 100%);
+  --kov-povrch: linear-gradient(165deg, #232B2E 0%, #1C2325 48%, #171D1F 100%);
+  --kov-vyssi:  linear-gradient(165deg, #303A3E 0%, #262F32 52%, #1F272A 100%);
 
   --text:      var(--krem);
   --text-tlum: #A5AEB0;
@@ -40,7 +55,9 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--pozadi);
+  background-color: var(--pozadi);
+  background-image: var(--kov-pozadi);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--pismo);
   font-size: 17px;
@@ -69,7 +86,8 @@ p:last-child { margin-bottom: 0; }
 .sekce { padding: 72px 0; border-top: 1px solid var(--linka-slaba); }
 .sekce:first-of-type { border-top: 0; }
 .sekce.uzka { padding: 48px 0; }
-.sekce.plocha { background: var(--povrch); }
+.sekce.plocha { background-color: var(--povrch); background-image: var(--kov-povrch);
+                box-shadow: inset 0 1px 0 var(--odlesk); }
 
 .sekce-hlava { max-width: 720px; margin-bottom: 40px; }
 .sekce-hlava p { color: var(--text-tlum); margin-bottom: 0; }
@@ -103,8 +121,10 @@ p:last-child { margin-bottom: 0; }
 
 .hlavicka {
   position: sticky; top: 0; z-index: 50;
-  background: var(--antracit);
+  background-color: var(--povrch-2);
+  background-image: var(--brouseny), var(--kov-vyssi);
   border-bottom: 1px solid var(--linka);
+  box-shadow: inset 0 1px 0 var(--odlesk-silny);
 }
 .hlavicka .obal {
   display: flex; align-items: center; justify-content: space-between;
@@ -139,7 +159,8 @@ p:last-child { margin-bottom: 0; }
     flex-direction: column; align-items: stretch; gap: 0;
     /* Odlišné pozadí od hlavičky i od obsahu pod ní, ať je rozbalené
        menu jasně čitelné jako samostatný panel. */
-    background: var(--povrch);
+    background-color: var(--povrch);
+    background-image: var(--kov-povrch);
     border-bottom: 2px solid var(--zluta);
     padding: 8px var(--mezera) 16px;
   }
@@ -168,11 +189,19 @@ p:last-child { margin-bottom: 0; }
 
 /* --- Hero --------------------------------------------------------------- */
 
-.hero { background: var(--antracit); border-bottom: 1px solid var(--linka); padding: 84px 0; }
+.hero {
+  background-color: var(--povrch-2);
+  background-image: var(--brouseny), var(--kov-vyssi);
+  border-bottom: 1px solid var(--linka);
+  box-shadow: inset 0 1px 0 var(--odlesk-silny);
+  padding: 84px 0;
+}
 .hero .obal { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; }
 .hero p.uvod { font-size: 1.15rem; color: var(--text-tlum); max-width: 56ch; }
 
-.hero-panel { border: 1px solid var(--linka); background: var(--pozadi); }
+.hero-panel { border: 1px solid var(--linka); background-color: var(--pozadi);
+              background-image: var(--kov-pozadi);
+              box-shadow: inset 0 1px 0 var(--odlesk); }
 .hero-panel .panel-hlava {
   background: var(--zluta); color: var(--antracit);
   font-weight: 700; font-size: .82rem; letter-spacing: .1em; text-transform: uppercase;
@@ -201,7 +230,9 @@ p:last-child { margin-bottom: 0; }
 
 .karta {
   border: 1px solid var(--linka);
-  background: var(--povrch);
+  background-color: var(--povrch);
+  background-image: var(--kov-povrch);
+  box-shadow: inset 0 1px 0 var(--odlesk);
   padding: 26px;
 }
 .karta.akcent { border-left: 3px solid var(--zluta); }
@@ -232,7 +263,9 @@ p:last-child { margin-bottom: 0; }
 /* --- KPI pás ------------------------------------------------------------ */
 
 .kpi-radek { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--linka); border: 1px solid var(--linka); }
-.kpi { background: var(--povrch); padding: 22px 20px; border-left: 3px solid var(--zluta); }
+.kpi { background-color: var(--povrch); background-image: var(--kov-povrch);
+       box-shadow: inset 0 1px 0 var(--odlesk);
+       padding: 22px 20px; border-left: 3px solid var(--zluta); }
 .kpi b { display: block; font-family: var(--pismo-cislo); font-size: 1.7rem; line-height: 1.1; }
 .kpi span { display: block; margin-top: 4px; font-size: .85rem; color: var(--text-tlum); }
 @media (max-width: 780px) { .kpi-radek { grid-template-columns: repeat(2, 1fr); } }
@@ -286,7 +319,9 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 
 /* --- Formulář ----------------------------------------------------------- */
 
-.formular { border: 1px solid var(--linka); background: var(--povrch); padding: 28px; }
+.formular { border: 1px solid var(--linka); background-color: var(--povrch);
+            background-image: var(--kov-povrch);
+            box-shadow: inset 0 1px 0 var(--odlesk); padding: 28px; }
 .pole { margin-bottom: 18px; }
 .pole label { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 6px; }
 .pole .napoveda { font-weight: 400; color: var(--text-tlum); }
@@ -317,7 +352,11 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 
 /* --- Patička ------------------------------------------------------------ */
 
-.paticka { background: var(--antracit); border-top: 1px solid var(--linka); padding: 48px 0 28px; margin-top: 0; }
+.paticka { background-color: var(--povrch-2);
+           background-image: var(--brouseny), var(--kov-vyssi);
+           border-top: 1px solid var(--linka);
+           box-shadow: inset 0 1px 0 var(--odlesk-silny);
+           padding: 48px 0 28px; margin-top: 0; }
 .paticka .mrizka { gap: 32px; }
 .paticka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta); margin-bottom: 14px; }
 .paticka ul { list-style: none; margin: 0; padding: 0; }
@@ -360,8 +399,9 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   .hlavicka, .paticka, .vyzva, .tlacitka, .preskocit, .menu-prepinac { display: none; }
 
   body { background: #fff; color: #000; font-size: 11pt; }
-  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel {
+  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel, .kpi {
     background: #fff !important;
+    box-shadow: none !important;
     border-color: #999;
     color: #000;
   }
