@@ -124,8 +124,8 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 
 ## Nasazení
 
-Obsah repozitáře kromě `README.md`, `CLAUDE.md` a `LICENSE` se nahraje do kořene
-webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
+Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `LICENSE` a `.gitignore` se nahraje
+do kořene webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
 nezobrazí ani nenahraje.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat až
