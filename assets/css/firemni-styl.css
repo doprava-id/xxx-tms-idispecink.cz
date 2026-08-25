@@ -28,6 +28,10 @@
   --povrch-2:    #262F32;
   --linka:       #3A4649;
   --linka-slaba: #262E30;
+  /* Ohraničení formulářových polí je hranice ovládacího prvku, ne dekorace —
+     musí mít kontrast aspoň 3:1 proti vnitřku pole i proti ploše formuláře
+     (WCAG 1.4.11). Dekorativní --linka ten práh splňovat nemusí. */
+  --linka-pole:  #5E7276;
 
   /* Odlesky */
   --odlesk:       rgba(240, 237, 230, .07);   /* horní hrana plochy */
@@ -57,12 +61,18 @@ body {
   margin: 0;
   background-color: var(--pozadi);
   background-image: var(--kov-pozadi);
-  background-attachment: fixed;
   color: var(--text);
   font-family: var(--pismo);
   font-size: 17px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Přisazené pozadí drží kovovou desku na místě při rolování. Jen na širších
+   displejích — background-attachment: fixed je na mobilních prohlížečích
+   (hlavně iOS Safari) nespolehlivé a drahé na překreslování. */
+@media (min-width: 900px) {
+  body { background-attachment: fixed; }
 }
 
 img { max-width: 100%; height: auto; display: block; }
@@ -328,7 +338,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 .pole input, .pole select, .pole textarea {
   width: 100%;
   background: var(--pozadi);
-  border: 1px solid var(--linka);
+  border: 1px solid var(--linka-pole);
   color: var(--text);
   font: inherit; font-size: .96rem;
   padding: 11px 13px;
