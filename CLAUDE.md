@@ -80,15 +80,14 @@ návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pok
 přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
 upravit i `zasady-osobnich-udaju.html`.
 
-**Placeholdery.** Údaje, které nebyly dodány, jsou označené třídou `.doplnit`
-a komentářem `PLACEHOLDER`. Najdeš je příkazem:
+**Placeholdery.** V současném obsahu žádné nejsou — všechny firemní údaje jsou
+doplněné. Když ale narazíš na údaj, který ti chybí, **nevymýšlej ho**: označ místo
+třídou `.doplnit` a komentářem `PLACEHOLDER` a řekni to uživateli. Ceny, podmínky,
+lhůty ani reference si nelze domyslet. Zbylé placeholdery najdeš příkazem:
 
 ```bash
 grep -rn 'doplnit\|PLACEHOLDER' *.html
 ```
-
-Jsou schválně nápadné. **Nevyplňuj je smyšlenými údaji** — obchodní podmínky, doby
-uchování dat ani reference si nelze domyslet. Buď je doplní uživatel, nebo zůstanou.
 
 **Logo.** Soubory v `assets/img/` pocházejí z originálního vektoru, ne z překresu.
 Dvě věci, které se snadno rozbijí:

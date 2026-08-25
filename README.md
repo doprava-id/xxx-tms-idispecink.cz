@@ -12,7 +12,7 @@ sluzby.html                  Spedice a externí dispečink
 pro-dopravce.html            Podmínky spolupráce + registrační formulář
 o-nas.html                   O společnosti a identifikační údaje
 kontakt.html                 Kontaktní údaje + poptávkový formulář
-zasady-osobnich-udaju.html   Informace o zpracování osobních údajů (osnova)
+zasady-osobnich-udaju.html   Informace o zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Nastavení pro Apache (404, komprese, cache, hlavičky)
@@ -93,19 +93,14 @@ Pokud budete chtít odesílání na pozadí, stačí formuláře přesměrovat n
 službu typu Formspree nebo Web3Forms — obsluha je v `assets/js/main.js`.
 Tím ale začnete data zpracovávat a bude potřeba upravit i zásady ochrany údajů.
 
-## Co je potřeba doplnit před spuštěním
+## Obsah je kompletní
 
-Nedodané údaje jsou v HTML označené žlutým rámečkem `.doplnit` nebo
-slovem „doplnit“. Vyhledáte je takto:
+Web už neobsahuje žádné zástupné texty. Kdyby v budoucnu nějaký vznikl,
+označuje se třídou `.doplnit` a komentářem `PLACEHOLDER` a najdete ho takto:
 
 ```bash
 grep -rn "doplnit\|PLACEHOLDER" *.html
 ```
-
-Konkrétně jde o:
-
-- obchodní podmínky pro dopravce — splatnost, doklady, sankce (`pro-dopravce.html`)
-- doby uchování údajů a seznam zpracovatelů (`zasady-osobnich-udaju.html`)
 
 ## Firemní údaje na webu
 
@@ -128,8 +123,10 @@ Objevují se na stránkách *Kontakt*, *O nás*, v zásadách zpracování údaj
 v patičce všech stránek a ve strukturovaných datech (JSON-LD) na úvodní stránce.
 Při změně je potřeba je upravit na všech těchto místech.
 
-`zasady-osobnich-udaju.html` je připravená osnova, ne hotové právní znění —
-před zveřejněním ji nechte zkontrolovat.
+**Zásady zpracování osobních údajů nebyly právně zkontrolované.** Obsah
+odpovídá skutečnosti — zpracovatelé, doby uchování i účely jsou dodané
+zadavatelem — ale znění nikdo s právním vzděláním neviděl. Před delším
+provozem stojí za to ho nechat projít.
 
 ## Chování bez JavaScriptu a při tisku
 
