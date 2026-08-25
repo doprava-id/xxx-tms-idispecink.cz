@@ -36,7 +36,9 @@ AddDefaultCharset UTF-8
 # --- Komprese -------------------------------------------------------------
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
-  AddOutputFilterByType DEFLATE application/javascript application/json
+  # Novější Apache hlásí skripty jako text/javascript, starší jako
+  # application/javascript — uvedeny jsou obě, jinak se komprese minula účinkem.
+  AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
   AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
 
@@ -48,10 +50,12 @@ AddDefaultCharset UTF-8
   ExpiresActive On
   ExpiresByType text/html                 "access plus 0 seconds"
   ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType text/javascript           "access plus 1 year"
   ExpiresByType application/javascript    "access plus 1 year"
   ExpiresByType image/svg+xml             "access plus 1 year"
   ExpiresByType image/png                 "access plus 1 year"
   ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/vnd.microsoft.icon  "access plus 1 year"
   ExpiresByType image/x-icon              "access plus 1 year"
 </IfModule>
 

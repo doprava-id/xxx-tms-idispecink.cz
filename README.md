@@ -153,6 +153,16 @@ a `LICENSE`. Web nic nekompiluje, takže funguje hned po nahrání.
 hlavičky. Na hostingu bez Apache se ignoruje a nic nerozbije; tytéž věci
 si pak nastavte v administraci hostingu.
 
+Chování je ověřené na skutečném Apachi: chybová stránka vrací stav 404,
+komprese ušetří 58–74 % objemu HTML, CSS i JavaScriptu, statická aktiva mají
+roční cache a HTML žádnou, bezpečnostní hlavičky se posílají a `.htaccess`
+sám je zvenčí nedostupný (403).
+
+Seznamy typů obsahu uvádějí u skriptů `text/javascript` i
+`application/javascript` a u ikony `image/vnd.microsoft.icon` i `image/x-icon`
+— novější a starší Apache je hlásí odlišně a při uvedení jen jednoho z nich
+se komprese i cache tiše minou účinkem.
+
 **Přesměrování na HTTPS a na doménu bez www je v `.htaccess` zakomentované.**
 Odkomentujte ho, až budete mít na doméně funkční certifikát — dřív by web
 znepřístupnilo.
