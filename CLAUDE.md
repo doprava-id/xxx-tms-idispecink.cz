@@ -67,16 +67,33 @@ Netvrď, že něco funguje, dokud jsi to nevykreslil a neviděl.
 ## Konvence
 
 **Jazyk.** Obsah, názvy tříd, identifikátory v JavaScriptu, komentáře i commit
-messages jsou česky (`.id-tabulka`, `.doplnit`, `sestav_mailto`, `prepinac`). Drž se
-toho — nemíchej angličtinu do existujícího kódu.
+messages jsou česky (`.id-tabulka`, `.doplnit`, `prepinac`, `formulare`, `prijemce`,
+`radky`, `spousteci`). Drž se toho — nemíchej angličtinu do existujícího kódu.
 
 **Barvy jsou na jednom místě.** Žlutá `#F0B41E`, antracit `#343F41`, krém `#F0EDE6`.
 Jsou definované jako CSS proměnné v `assets/css/firemni-styl.css`. Jednotlivé stránky
-si vlastní barvy nedefinují a nesmí začít. Firemní styl zakazuje gradienty, stíny
+si vlastní barvy nedefinují a nesmí začít.
+
+Jedinou výjimkou je `<meta name="theme-color" content="#343F41">` — meta značka na CSS
+proměnnou dosáhnout nemůže, takže antracit je natvrdo v hlavičce všech sedmi stránek.
+**Když se změní firemní barva, změň i těch sedm meta značek**, jinak lišta prohlížeče
+na mobilu zůstane ve staré barvě. Firemní styl zakazuje gradienty, stíny
 a dekorace: „Plocha, linka, text."
 
 **Formuláře nemají backend.** Poskládají text a otevřou poštovního klienta
-návštěvníka (`mailto:`). Web proto nesbírá žádná data, nepoužívá cookies ani měření
+návštěvníka (`mailto:`). Chování řídí `assets/js/main.js` přes data-atributy v HTML —
+je to smlouva, kterou nic nehlídá, takže se tiše rozbije:
+
+| Atribut | Kde | Co dělá |
+|---|---|---|
+| `data-mailto` | `<form>` | bez něj se formulář vůbec neodchytí a odešle se naprázdno |
+| `data-prijemce` | `<form>` | adresát; výchozí `doprava@idispecink.cz` |
+| `data-predmet` | `<form>` | předmět; výchozí „Poptávka z webu" |
+| `data-popisek` | pole | popisek řádku v těle e-mailu; bez něj se použije `name` |
+| `.formular-stav` | prvek ve formuláři | sem se vypíše hláška po odeslání |
+
+Pole bez `name` a prázdná pole se do e-mailu nedávají. Formuláře jsou na
+`kontakt.html` a `pro-dopravce.html`. Web proto nesbírá žádná data, nepoužívá cookies ani měření
 návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pokud formuláře
 přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
 upravit i `zasady-osobnich-udaju.html`.
