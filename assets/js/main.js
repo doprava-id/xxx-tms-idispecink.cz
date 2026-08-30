@@ -10,6 +10,14 @@
     prepinac.addEventListener("click", function () {
       var otevreno = menu.classList.toggle("otevreno");
       prepinac.setAttribute("aria-expanded", otevreno ? "true" : "false");
+
+      /* Menu je v DOM před svým tlačítkem, takže by Tab po otevření
+         pokračoval do obsahu stránky a rozbalené položky přeskočil.
+         Zaostření první položky drží pořadí smysluplné. */
+      if (otevreno) {
+        var prvni = menu.querySelector("a");
+        if (prvni) prvni.focus();
+      }
     });
   }
 

@@ -55,7 +55,13 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* Plynulé rolování jen pro ty, kdo si nevypnuli animace; odsazení kotev
+   kompenzuje přilepenou hlavičku (74 px), jinak by zakryla cíl skoku
+   i prvek zaostřený klávesnicí. */
+html { scroll-padding-top: 90px; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 body {
   margin: 0;
@@ -95,7 +101,6 @@ p:last-child { margin-bottom: 0; }
 
 .sekce { padding: 72px 0; border-top: 1px solid var(--linka-slaba); }
 .sekce:first-of-type { border-top: 0; }
-.sekce.uzka { padding: 48px 0; }
 .sekce.plocha { background-color: var(--povrch); background-image: var(--kov-povrch);
                 box-shadow: inset 0 1px 0 var(--odlesk); }
 
@@ -328,17 +333,6 @@ p:last-child { margin-bottom: 0; }
 }
 .seznam li b, .seznam li strong { color: var(--text); }
 
-/* --- KPI pás ------------------------------------------------------------ */
-
-.kpi-radek { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--linka); border: 1px solid var(--linka); }
-.kpi { background-color: var(--povrch); background-image: var(--kov-povrch);
-       box-shadow: inset 0 1px 0 var(--odlesk);
-       padding: 22px 20px; border-left: 3px solid var(--zluta); }
-.kpi b { display: block; font-family: var(--pismo-cislo); font-size: 1.7rem; line-height: 1.1; }
-.kpi span { display: block; margin-top: 4px; font-size: .85rem; color: var(--text-tlum); }
-@media (max-width: 780px) { .kpi-radek { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 460px) { .kpi-radek { grid-template-columns: 1fr; } }
-
 /* --- Tabulka ------------------------------------------------------------ */
 
 .tabulka-obal { overflow-x: auto; border: 1px solid var(--linka); }
@@ -351,19 +345,6 @@ table.id-tabulka th {
 table.id-tabulka td { padding: 11px 16px; border-top: 1px solid var(--linka-slaba); color: var(--text-tlum); }
 table.id-tabulka td:first-child { color: var(--text); font-weight: 600; }
 table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; font-variant-numeric: tabular-nums; }
-
-/* --- Štítky ------------------------------------------------------------- */
-
-.id-stitek {
-  display: inline-block;
-  font-size: .78rem; font-weight: 700;
-  padding: 3px 9px;
-  border: 1px solid var(--linka);
-  color: var(--text-tlum);
-}
-.id-stitek.ok    { background: var(--ok-plocha);    color: var(--ok-text);    border-color: var(--ok-text); }
-.id-stitek.pozor { background: var(--pozor-plocha); color: var(--pozor-text); border-color: var(--pozor-text); }
-.id-stitek.chyba { background: var(--chyba-plocha); color: var(--chyba-text); border-color: var(--chyba-text); }
 
 /* --- Doplnit (viditelný placeholder pro nedodaný obsah) ----------------- */
 
@@ -473,9 +454,11 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   outline-offset: 2px;
 }
 .vyzva :focus-visible { outline-color: var(--antracit); }
+/* Pravidlo :focus výše ruší obrys kvůli žlutému rámečku — pro klávesnici
+   ho tady musíme vrátit, jinak by pole neměla viditelné zaostření. */
 .pole input:focus-visible,
 .pole select:focus-visible,
-.pole textarea:focus-visible { outline-offset: 0; }
+.pole textarea:focus-visible { outline: 3px solid var(--zluta); outline-offset: 0; }
 
 /* --- Přeskočit na obsah ------------------------------------------------- */
 
@@ -494,7 +477,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   .cookies-lista { display: none; }
 
   body { background: #fff; color: #000; font-size: 11pt; }
-  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel, .kpi {
+  .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel {
     background: #fff !important;
     box-shadow: none !important;
     border-color: #999;
@@ -535,7 +518,6 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   .seznam li::before { background: #666; }
   .hero-panel .panel-hlava { background: #eee !important; color: #000; }
 
-  .id-stitek { border-color: #666; color: #000; background: #fff !important; }
 
   /* Poznámky pro zadavatele: na papíře zůstávají, ale bez tmavé plochy. */
   .doplnit, .doplnit b { background: #fff !important; color: #000 !important; }
