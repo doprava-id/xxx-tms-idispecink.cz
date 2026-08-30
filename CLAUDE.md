@@ -39,7 +39,13 @@ assets/css/firemni-styl.css  Jediná definice barev a komponent
 assets/js/main.js            Mobilní menu a odesílání formulářů
 assets/img/                  Logo, favicon, náhledový obrázek
 README.md                    Podrobná dokumentace webu — čti ji taky
+PREDANI-WEBU.md              Předávací soubor pro revizi — čti před obsahovými změnami
 ```
+
+**Chystá se obsahová revize webu.** Závazná rozhodnutí, osm otevřených otázek
+a důsledky, které se nesmí přehlédnout (přepis zásad zpracování údajů společně
+s formulářem, CMR versus vnitrostátní rozsah, tvrzení o 24/7 na pěti místech),
+jsou v `PREDANI-WEBU.md`. Než začneš měnit obsah, přečti si ho.
 
 Hlavička, patička a `<head>` jsou v každé stránce zvlášť. **Když měníš navigaci,
 patičku nebo meta značky, uprav všech sedm stránek.** Neexistuje šablonovací vrstva,
@@ -105,8 +111,8 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 
 ## Nasazení
 
-Obsah repozitáře kromě `README.md`, `CLAUDE.md` a `LICENSE` se nahraje do kořene
-webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
+Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `PREDANI-WEBU.md` a `LICENSE`
+se nahraje do kořene webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
 nezobrazí ani nenahraje.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat až

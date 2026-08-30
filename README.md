@@ -21,7 +21,11 @@ sitemap.xml                  Mapa webu
 assets/css/                  firemni-styl.css — jediná definice barev a komponent
 assets/js/                   main.js — mobilní menu a odesílání formulářů
 assets/img/                  Logo, favicon a náhledový obrázek
+PREDANI-WEBU.md              Předávací soubor — stav, rozhodnutí revize, otevřené otázky
 ```
+
+Chystá se obsahová revize webu. Její závazná rozhodnutí, otevřené otázky
+a důsledky, které se nesmí přehlédnout, jsou v `PREDANI-WEBU.md`.
 
 ## Logo
 
@@ -143,8 +147,9 @@ tiskový blok přebíjí přes `!important` — při úpravách stránek na to p
 
 ## Nasazení
 
-Soubory nakopírujte do kořene webu — celý obsah repozitáře kromě `README.md`
-a `LICENSE`. Web nic nekompiluje, takže funguje hned po nahrání.
+Soubory nakopírujte do kořene webu — celý obsah repozitáře kromě `README.md`,
+`CLAUDE.md`, `PREDANI-WEBU.md` a `LICENSE`. Web nic nekompiluje, takže funguje
+hned po nahrání.
 
 `.htaccess` nastaví chybovou stránku, kompresi, cache a bezpečnostní
 hlavičky. Na hostingu bez Apache se ignoruje a nic nerozbije; tytéž věci
