@@ -40,7 +40,13 @@ assets/css/firemni-styl.css  Jediná definice barev a komponent
 assets/js/main.js            Mobilní menu a odesílání formulářů
 assets/img/                  Logo, favicon, náhledový obrázek
 README.md                    Podrobná dokumentace webu — čti ji taky
+PREDANI-WEBU.md              Předávací soubor pro revizi — čti před obsahovými změnami
 ```
+
+**Chystá se obsahová revize webu.** Závazná rozhodnutí, osm otevřených otázek
+a důsledky, které se nesmí přehlédnout (přepis zásad zpracování údajů společně
+s formulářem, CMR versus vnitrostátní rozsah, tvrzení o 24/7 na pěti místech),
+jsou v `PREDANI-WEBU.md`. Než začneš měnit obsah, přečti si ho.
 
 Hlavička, patička a `<head>` jsou v každé stránce zvlášť. **Když měníš navigaci,
 patičku nebo meta značky, uprav všech sedm stránek.** Neexistuje šablonovací vrstva,
@@ -106,15 +112,14 @@ návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pok
 přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
 upravit i `zasady-osobnich-udaju.html`.
 
-**Placeholdery.** Údaje, které nebyly dodány, jsou označené třídou `.doplnit`
-a komentářem `PLACEHOLDER`. Najdeš je příkazem:
+**Placeholdery.** V současném obsahu žádné nejsou — všechny firemní údaje jsou
+doplněné. Když ale narazíš na údaj, který ti chybí, **nevymýšlej ho**: označ místo
+třídou `.doplnit` a komentářem `PLACEHOLDER` a řekni to uživateli. Ceny, podmínky,
+lhůty ani reference si nelze domyslet. Zbylé placeholdery najdeš příkazem:
 
 ```bash
 grep -rn 'doplnit\|PLACEHOLDER' *.html
 ```
-
-Jsou schválně nápadné. **Nevyplňuj je smyšlenými údaji** — obchodní podmínky, doby
-uchování dat ani reference si nelze domyslet. Buď je doplní uživatel, nebo zůstanou.
 
 **Logo.** Soubory v `assets/img/` pocházejí z originálního vektoru, ne z překresu.
 Dvě věci, které se snadno rozbijí:
@@ -132,8 +137,9 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 
 ## Nasazení
 
-Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `LICENSE` a `.gitignore` se nahraje
-do kořene webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
+Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `PREDANI-WEBU.md`, `LICENSE`
+a `.gitignore` se nahraje do kořene webu; ty na hosting nepatří. `.htaccess`
+začíná tečkou — většina FTP klientů ho ve výchozím nastavení
 nezobrazí ani nenahraje.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat až
