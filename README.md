@@ -13,6 +13,8 @@ pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
 poptat-prepravu.html         Jediný poptávkový formulář
 kontakt.html                 Kontaktní údaje — na formulář jen navádí
+odeslani.php                 Server: odeslání obou formulářů e-mailem
+odeslano.html                Potvrzení po odeslání (noindex)
 zasady-osobnich-udaju.html   Informace o zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
@@ -20,7 +22,7 @@ favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v k
 robots.txt                   Pravidla pro roboty
 sitemap.xml                  Mapa webu
 assets/css/                  firemni-styl.css — jediná definice barev a komponent
-assets/js/                   main.js — menu, schovávání hlavičky, formuláře
+assets/js/                   main.js — menu a hlavička; mereni.js — analytika
 assets/img/                  Logo, favicon a náhledový obrázek
 PREDANI-WEBU.md              Předávací soubor — stav, rozhodnutí revize, otevřené otázky
 ```
@@ -96,15 +98,32 @@ piktogramu by v původním poměru působil drobně.
 
 ## Formuláře
 
-Statický web nemá backend. Formuláře na stránkách *Poptat přepravu* a *Pro dopravce*
-poskládají text zprávy a otevřou poštovního klienta návštěvníka (`mailto:`) —
-odeslání provede sám návštěvník. Web tedy sám nesbírá a neukládá žádná data,
-nepoužívá cookies ani měření návštěvnosti.
+Formuláře na stránkách *Poptat přepravu* a *Pro dopravce* odesílá server:
+běžný POST na `odeslani.php`, který zprávu pošle e-mailem na
+`doprava@idispecink.cz` a přesměruje na potvrzení `odeslano.html`. Funguje
+to i s vypnutým JavaScriptem. Roboty odchytává skryté pole (honeypot) —
+vyplněná past znamená zahození zprávy. Web obsah formulářů nikam neukládá,
+jen ho předá poštou.
 
-Příjemce se nastavuje atributem `data-prijemce` na elementu `<form>`.
-Pokud budete chtít odesílání na pozadí, stačí formuláře přesměrovat na
-službu typu Formspree nebo Web3Forms — obsluha je v `assets/js/main.js`.
-Tím ale začnete data zpracovávat a bude potřeba upravit i zásady ochrany údajů.
+**Hosting proto musí umět PHP a funkci `mail()`** — na VAS Hostingu běžně
+k dispozici. A pozor na doručitelnost: skript posílá z adresy
+`web@idispecink.cz` přes servery VAS Hostingu, zatímco pošta domény běží na
+Microsoft 365. Aby zprávy nepadaly do spamu, **přidejte do SPF záznamu domény
+servery VAS Hostingu** (v DNS administraci; přesný include sdělí podpora
+hostingu).
+
+## Měření návštěvnosti
+
+Web je připravený na Google Analytics 4 se souhlasovou lištou: skript
+`assets/js/mereni.js` načte měření **až po souhlasu návštěvníka**, volbu si
+pamatuje v prohlížeči a tlačítko „Nastavení cookies" v patičce ji kdykoliv
+změní. Bez souhlasu se skript Googlu vůbec nenačte.
+
+Před nasazením **vyplňte měřicí ID** (konstanta `GA_MERENI` v `mereni.js`,
+tvar `G-XXXXXXXXXX` z administrace GA). Dokud je prázdné, web nic neměří
+a lišta se nezobrazuje — zásady zpracování údajů ale měření už popisují,
+takže bez ID slibují víc, než web dělá. V administraci GA zároveň nastavte
+dobu uchování dat na **14 měsíců**, aby odpovídala zásadám.
 
 ## Obsah je kompletní
 
@@ -143,12 +162,10 @@ provozem stojí za to ho nechat projít.
 
 ## Chování bez JavaScriptu a při tisku
 
-Web funguje i s vypnutým JavaScriptem. Skript obsluhuje rozbalovací menu
-na úzkých displejích, schovávání hlavičky při rolování a odesílání
-formulářů; bez něj hlavička prostě zůstává přilepená nahoře, menu se zobrazí
-rozbalené (`<noscript>` blok v hlavičce každé stránky) a formuláře zůstanou
-vyplnitelné, jen se neodešlou — proto je u nich vždy uvedená i e-mailová
-adresa.
+Web funguje i s vypnutým JavaScriptem. Formuláře jsou obyčejný POST, takže
+se odešlou i bez skriptů; menu se zobrazí rozbalené (`<noscript>` blok
+v hlavičce každé stránky), hlavička zůstává přilepená nahoře a měření
+návštěvnosti se bez JavaScriptu vůbec nespustí.
 
 Tiskový styl v `firemni-styl.css` převádí tmavý motiv na černobílý: skryje
 navigaci, patičku a tlačítka, zesvětlí plochy a ztmaví text. Barvy z tmavého

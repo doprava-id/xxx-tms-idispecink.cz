@@ -153,7 +153,7 @@
         </p>
         <ul class="seznam" style="margin-top:20px">
           <li><b>Koncesní listina</b> na silniční nákladní dopravu (u vozidel do 3,5 t postačí živnostenské oprávnění)</li>
-          <li><b>Pojištění odpovědnosti dopravce</b> — CMR pro mezinárodní přepravu, vnitrostátní pojištění pro ČR</li>
+          <li><b>Pojištění odpovědnosti dopravce</b> pro vnitrostátní přepravu po ČR</li>
           <li><b>Výpis z obchodního rejstříku</b> nebo živnostenského rejstříku</li>
           <li><b>Bankovní spojení</b> zveřejněné u správce daně</li>
           <li><b>Spolehlivost plátce DPH</b> — ověřujeme automaticky u každé objednávky</li>
@@ -215,43 +215,47 @@
         </p>
       </div>
 
-      <form class="formular" data-mailto data-prijemce="doprava@idispecink.cz"
-            data-predmet="Registrace dopravce z webu">
+      <form class="formular" action="odeslani.php" method="post">
+        <input type="hidden" name="formular" value="registrace">
+        <div class="pole nevyplnovat" aria-hidden="true">
+          <label for="d-www">Web</label>
+          <input type="text" id="d-www" name="www" tabindex="-1" autocomplete="off">
+        </div>
         <div class="pole-radek">
           <div class="pole">
             <label for="d-firma">Firma <span class="napoveda">*</span></label>
-            <input type="text" id="d-firma" name="firma" data-popisek="Firma" required autocomplete="organization">
+            <input type="text" id="d-firma" name="firma" required autocomplete="organization">
           </div>
           <div class="pole">
             <label for="d-ico">IČO <span class="napoveda">*</span></label>
-            <input type="text" id="d-ico" name="ico" data-popisek="IČO" required inputmode="numeric">
+            <input type="text" id="d-ico" name="ico" required inputmode="numeric">
           </div>
         </div>
 
         <div class="pole-radek">
           <div class="pole">
             <label for="d-osoba">Kontaktní osoba <span class="napoveda">*</span></label>
-            <input type="text" id="d-osoba" name="osoba" data-popisek="Kontaktní osoba" required autocomplete="name">
+            <input type="text" id="d-osoba" name="osoba" required autocomplete="name">
           </div>
           <div class="pole">
             <label for="d-telefon">Telefon <span class="napoveda">*</span></label>
-            <input type="tel" id="d-telefon" name="telefon" data-popisek="Telefon" required autocomplete="tel">
+            <input type="tel" id="d-telefon" name="telefon" required autocomplete="tel">
           </div>
         </div>
 
         <div class="pole">
           <label for="d-email">E-mail <span class="napoveda">*</span></label>
-          <input type="email" id="d-email" name="email" data-popisek="E-mail" required autocomplete="email">
+          <input type="email" id="d-email" name="email" required autocomplete="email">
         </div>
 
         <div class="pole-radek">
           <div class="pole">
             <label for="d-vozy">Počet vozidel</label>
-            <input type="number" id="d-vozy" name="vozy" data-popisek="Počet vozidel" min="1" step="1">
+            <input type="number" id="d-vozy" name="vozy" min="1" step="1">
           </div>
           <div class="pole">
             <label for="d-typ">Převažující typ vozidla</label>
-            <select id="d-typ" name="typ" data-popisek="Typ vozidla">
+            <select id="d-typ" name="typ">
               <option value="">— vyberte —</option>
               <option>Plachtový návěs 13,6 m</option>
               <option>Mega / lowdeck</option>
@@ -265,19 +269,20 @@
 
         <div class="pole">
           <label for="d-oblast">Oblast působení</label>
-          <input type="text" id="d-oblast" name="oblast" data-popisek="Oblast působení"
+          <input type="text" id="d-oblast" name="oblast"
                  placeholder="např. Morava, celá ČR, ČR + SK + DE">
         </div>
 
         <div class="pole">
           <label for="d-zprava">Poznámka</label>
-          <textarea id="d-zprava" name="zprava" data-popisek="Poznámka"
+          <textarea id="d-zprava" name="zprava"
                     placeholder="Jaké komodity přepravujete, jaké máte vybavení, případné dotazy."></textarea>
         </div>
 
         <button class="tlacitko" type="submit">Odeslat registraci</button>
         <p class="formular-poznamka formular-stav" role="status" aria-live="polite">
-          Formulář otevře váš poštovní klient s předvyplněnou zprávou. Odeslání pak potvrdíte v něm.
+          Po odeslání vás přesměrujeme na potvrzení. Kdyby formulář nefungoval,
+          napište přímo na <a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a>.
         </p>
       </form>
     </div>
@@ -374,12 +379,13 @@
     </div>
     <div class="id-paticka">
       <span>iDispečink.cz s.r.o. · Příčná 1892/4, 110 00 Praha 1 · IČO 23359765 · DIČ CZ23359765</span>
-      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a></span>
+      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a> <button type="button" class="cookies-nastaveni" hidden>Nastavení cookies</button></span>
       <span>© <span data-rok>2026</span> iDispečink.cz s.r.o.</span>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/mereni.js"></script>
 </body>
 </html>

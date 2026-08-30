@@ -115,16 +115,18 @@
       <li><b>Kontaktní údaje</b> — e-mailová adresa, telefonní číslo, adresa</li>
       <li><b>Údaje o zakázce</b> — místa nakládky a vykládky, termíny, druh zásilky, sjednaná cena</li>
       <li><b>Údaje z obchodní komunikace</b> — obsah e-mailů a příloh, které nám zašlete</li>
+      <li><b>Údaje o užívání webu</b> — jen pokud měření návštěvnosti povolíte, viz část 7</li>
     </ul>
 
     <div class="karta akcent" style="margin-bottom:32px">
-      <h3>Tento web sám o sobě žádné údaje nesbírá</h3>
+      <h3>Jak web s údaji nakládá</h3>
       <p>
-        Formuláře na stránkách <a href="kontakt.html">Kontakt</a>
-        a <a href="pro-dopravce.html">Pro dopravce</a> nic neodesílají na server.
-        Pouze poskládají text zprávy a otevřou váš vlastní poštovní klient —
-        odeslání provedete vy sami. Web nepoužívá cookies, analytické nástroje
-        ani sledovací skripty a neukládá si o návštěvnících nic.
+        Formuláře na stránkách <a href="poptat-prepravu.html">Poptat přepravu</a>
+        a <a href="pro-dopravce.html">Pro dopravce</a> odešlou vyplněné údaje
+        e-mailem na naši adresu; web sám je do žádné databáze neukládá.
+        Návštěvnost měříme nástrojem Google Analytics — spustí se ale jen
+        s vaším souhlasem uděleným v liště, bez něj se o vaší návštěvě
+        neměří nic. Podrobnosti o cookies jsou v části 7.
       </p>
     </div>
 
@@ -150,6 +152,10 @@
           <tr>
             <td>Ochrana právních nároků a evidence obchodních kontaktů</td>
             <td>Oprávněný zájem — čl. 6 odst. 1 písm. f) GDPR</td>
+          </tr>
+          <tr>
+            <td>Měření návštěvnosti webu</td>
+            <td>Souhlas — čl. 6 odst. 1 písm. a) GDPR; lze kdykoliv odvolat</td>
           </tr>
         </tbody>
       </table>
@@ -177,6 +183,10 @@
             <td>Poptávky, které nevedly ke spolupráci</td>
             <td>6 měsíců od poslední komunikace</td>
           </tr>
+          <tr>
+            <td>Údaje o návštěvnosti (Google Analytics)</td>
+            <td>nejdéle 14 měsíců</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -190,19 +200,21 @@
     <ul class="seznam" style="margin-bottom:32px">
       <li><b>Dopravci</b> zajišťující konkrétní přepravu — v rozsahu nutném k jejímu provedení</li>
       <li><b>Microsoft 365</b> — provoz e-mailové schránky</li>
-      <li><b>VAS Hosting</b> — provoz webu</li>
+      <li><b>VAS Hosting</b> — provoz webu a odeslání zpráv z formulářů</li>
       <li><b>Airtable</b> — evidence přeprav a obchodních kontaktů</li>
+      <li><b>Google</b> — měření návštěvnosti (Google Analytics), jen po udělení souhlasu</li>
       <li><b>Externí účetní</b> — zpracování účetnictví</li>
       <li><b>Orgány veřejné moci</b>, stanoví-li tak právní předpis</li>
     </ul>
 
     <h3>Předávání mimo Evropskou unii</h3>
     <p style="color:var(--text-tlum)">
-      Microsoft 365 a Airtable jsou služby se zázemím mimo Evropskou unii a údaje
-      v nich mohou být zpracovávány i mimo Evropský hospodářský prostor. Přenos je
-      v takovém případě ošetřen standardními smluvními doložkami schválenými
-      Evropskou komisí, které jsou součástí podmínek zpracování údajů obou
-      poskytovatelů.
+      Microsoft 365, Airtable a Google jsou služby se zázemím mimo Evropskou
+      unii a údaje v nich mohou být zpracovávány i mimo Evropský hospodářský
+      prostor. Přenos je ošetřen rozhodnutím Evropské komise o odpovídající
+      ochraně (rámec EU–U.S. Data Privacy Framework), případně standardními
+      smluvními doložkami, které jsou součástí podmínek zpracování údajů
+      těchto poskytovatelů.
     </p>
     <p style="color:var(--text-tlum);margin-bottom:32px">
       Údaje nikomu neprodáváme ani nepředáváme k marketingovým účelům.
@@ -228,11 +240,37 @@
       Odpovíme nejpozději do jednoho měsíce od doručení žádosti.
     </p>
 
-    <h2 style="margin-top:40px">7. Cookies</h2>
+    <h2 style="margin-top:40px">7. Cookies a měření návštěvnosti</h2>
     <p style="color:var(--text-tlum)">
-      Tento web nepoužívá cookies ani žádné nástroje pro měření návštěvnosti.
-      Nezískáváme o návštěvnících žádné údaje a nic si neukládáme do vašeho
-      prohlížeče.
+      Technické cookies web nepoužívá — není tu přihlašování ani košík.
+      Jediné cookies ukládá měření návštěvnosti Google Analytics, a to až
+      poté, co je v liště povolíte. Bez souhlasu se měřicí skript vůbec
+      nenačte.
+    </p>
+    <div class="tabulka-obal" style="margin-bottom:24px">
+      <table class="id-tabulka">
+        <thead>
+          <tr><th>Cookie</th><th>Účel</th><th>Platnost</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>_ga</td>
+            <td>rozlišení návštěvníků (Google Analytics)</td>
+            <td>2 roky</td>
+          </tr>
+          <tr>
+            <td>_ga_*</td>
+            <td>stav relace měření (Google Analytics)</td>
+            <td>2 roky</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--text-tlum)">
+      Vaši volbu si web pamatuje ve vašem prohlížeči (localStorage, položka
+      <span class="cislo">ga-souhlas</span>). Souhlas lze kdykoliv změnit
+      tlačítkem „Nastavení cookies" v patičce — odvoláním se měření vypne
+      a měřicí cookies se smažou. Odmítnutí nijak neomezuje používání webu.
     </p>
 
     <h2 style="margin-top:40px">8. Změny těchto zásad</h2>
@@ -241,7 +279,9 @@
       právní úprava. Aktuální verze je vždy dostupná na této stránce.
     </p>
     <p style="color:var(--text-tlum)">
-      <b>Účinné od:</b> 26. srpna 2026
+      <b>Účinné od:</b> 30. srpna 2026. Toto znění nahrazuje verzi účinnou
+      od 26. srpna 2026 — doplňuje odesílání formulářů serverem a měření
+      návštěvnosti.
     </p>
 
    </div>
@@ -285,12 +325,13 @@
     </div>
     <div class="id-paticka">
       <span>iDispečink.cz s.r.o. · Příčná 1892/4, 110 00 Praha 1 · IČO 23359765 · DIČ CZ23359765</span>
-      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a></span>
+      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a> <button type="button" class="cookies-nastaveni" hidden>Nastavení cookies</button></span>
       <span>© <span data-rok>2026</span> iDispečink.cz s.r.o.</span>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/mereni.js"></script>
 </body>
 </html>

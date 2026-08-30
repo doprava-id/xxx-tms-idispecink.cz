@@ -249,7 +249,24 @@ z kapitoly 6 — samé faktické opravy:
 
 | Hotovo | Čeká na rozhodnutí |
 |---|---|
-| 4 (částečně), 6–11, 12 (částečně), 13, 14, 16, 17, 18, 19, 24, 25, 26, 27, 28, 29, 30, 31 | 1, 3, 5, 20, 21, 22 |
+| 1, 3, 4, 6–14, 16–19, 24–31 | 5, 20, 21, 22 |
+
+**Rozhodnutí 1 (formulář):** zvoleno PHP na VAS Hostingu — `odeslani.php`
+posílá oba formuláře e-mailem, s honeypotem a přesměrováním na
+`odeslano.html`. **Rozhodnutí 3 (měření):** zvoleno Google Analytics 4 se
+souhlasovou lištou; skript se bez souhlasu nenačte. **Rozhodnutí 4
+uzavřeno:** nonstop u placeného dispečinku platí a zůstává. **Bod 12
+uzavřen:** jen vnitrostátní ČR — CMR zmizelo i z požadavků na dopravce.
+Zásady zpracování údajů jsou přepsané ve stejné dávce (účinnost
+30. srpna 2026).
+
+**Před nasazením zbývá (provozní kroky, ne rozhodnutí):**
+
+1. vyplnit měřicí ID GA4 do `GA_MERENI` v `assets/js/mereni.js`,
+2. v administraci GA nastavit uchování dat na 14 měsíců,
+3. do SPF záznamu domény přidat servery VAS Hostingu (pošta z formulářů
+   jde z webserveru, zatímco pošta domény běží na Microsoft 365),
+4. ověřit, že na hostingu funguje PHP `mail()` — první poptávku otestovat.
 
 Rozhodnutí 15 a 23 nevyžadovala zásah — web ani dřív nezveřejňoval seznam
 vyloučených přeprav ani obchodní dokumenty.
@@ -260,13 +277,10 @@ iterace nad hotovým stavem, ne předpoklad. Otázka 6.7 byla vyřešena podle
 navrženého výchozího řešení: externí dispečink bydlí celý na stránce
 Pro dopravce, na Službách zůstal krátký blok s odkazem.
 
-**Bod 12 je hotový v hlavní nabídce:** perex a karty úvodní stránky
-i podnadpis spedice uvádějí celovozové přepravy po České republice
-a JSON-LD nese `areaServed: CZ`. Zmínky CMR v popisech dokladů jsou
-nahrazené obecným „přepravní a dodací listy" — platí pro vnitrostátní
-i případnou mezinárodní přepravu. Jediná zbývající zmínka CMR je
-v požadavcích na dopravce („CMR pro mezinárodní přepravu, vnitrostátní
-pojištění pro ČR") a čeká na odpověď 6.5.
+**Bod 12 je uzavřený:** celovozové přepravy po České republice v perexu,
+kartách i JSON-LD (`areaServed: CZ`); CMR z webu zmizelo úplně — doklady
+uvádějí přepravní a dodací listy, požadavek na dopravce zní „pojištění
+odpovědnosti dopravce pro vnitrostátní přepravu po ČR".
 
 **Bod 4 je hotový jen zčásti.** Opravená jsou tvrzení směrem k poptávajícím
 (úvodní panel, kontaktní tabulka, perex kontaktu) a ze strukturovaných dat
@@ -337,7 +351,7 @@ na odpověď v bodu 6.4.
 **Toto je blokující seznam.** Sedm rozhodnutí a jedna nezodpovězená otázka
 z revize.
 
-### 6.1 Čím odeslat formulář
+### 6.1 Čím odeslat formulář — ✅ rozhodnuto: PHP na VAS Hostingu
 
 Hosting je běžné FTP (VAS Hosting). Dvě cesty:
 
@@ -346,7 +360,7 @@ Hosting je běžné FTP (VAS Hosting). Dvě cesty:
 - **Externí služba** (Formspree, Web3Forms) — rychlejší nasazení, ale přibude
   do zásad jako další zpracovatel, u některých i přenos mimo EU.
 
-### 6.2 Čím měřit návštěvnost
+### 6.2 Čím měřit návštěvnost — ✅ rozhodnuto: Google Analytics 4 s lištou
 
 - **Google Analytics 4** → cookies + přenos do USA + **povinná lišta se
   souhlasem**.
@@ -360,7 +374,7 @@ Chybí **jméno, příjmení a označení role** (společník? provozní ředite
 prokurista?). V rejstříku je zapsaný jen Jakub Pěsta a ten na stránce „O nás"
 zůstat musí. Bez doplnění by si stránka odporovala sama se sebou.
 
-### 6.4 Platí nonstop i u placeného dispečinku?
+### 6.4 Platí nonstop i u placeného dispečinku? — ✅ platí, tvrzení zůstává
 
 Nová formulace „Provozní pohotovost 24/7 pro probíhající přepravy" opravuje
 tvrzení směrem k poptávajícím. Ale u **placené služby externího dispečinku**
@@ -368,7 +382,7 @@ web dnes slibuje „komunikace s řidiči nonstop, 24 hodin denně" a „služba
 i o víkendech, svátcích a v noci". To je jiný závazek — vůči platícímu
 dopravci. Změkčit i tam, nebo to tak skutečně platí?
 
-### 6.5 Mezinárodní přepravy — vůbec, nebo po dohodě?
+### 6.5 Mezinárodní přepravy — ✅ rozhodnuto: jen vnitrostátní, CMR odstraněno
 
 Rozhodnutí #12 říká „pouze vnitrostátně". Pokud se mezinárodní přeprava občas
 dělá a jen se nemá stavět do výlohy, formulace bude *„standardně vnitrostátně
@@ -406,7 +420,7 @@ kompletaci dokladů.
 Rozhodnutí z revize vypadají jako textové úpravy, ale některá mají následky
 jinde na webu. Kdyby se zapracovala izolovaně, web by si začal odporovat.
 
-### 7.1 Formuláře s backendem + měření → přepis zásad ve stejném nasazení
+### 7.1 Formuláře s backendem + měření → přepis zásad ve stejném nasazení — ✅ hotovo
 
 Dnes web neodesílá nic, neukládá nic, nemá cookies — a zásady zpracování to
 **na třech místech výslovně tvrdí**:
