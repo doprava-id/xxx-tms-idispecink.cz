@@ -135,6 +135,13 @@ p:last-child { margin-bottom: 0; }
   background-image: var(--brouseny), var(--kov-vyssi);
   border-bottom: 1px solid var(--linka);
   box-shadow: inset 0 1px 0 var(--odlesk-silny);
+  transition: transform .22s ease;
+}
+/* Schovávání při rolování dolů zapíná JavaScript třídou .schovana.
+   Bez skriptů třída nikdy nepřibude a hlavička prostě drží nahoře. */
+.hlavicka.schovana { transform: translateY(-100%); }
+@media (prefers-reduced-motion: reduce) {
+  .hlavicka { transition: none; }
 }
 .hlavicka .obal {
   display: flex; align-items: center; justify-content: space-between;
@@ -142,6 +149,16 @@ p:last-child { margin-bottom: 0; }
 }
 .logo { display: flex; align-items: center; }
 .logo img { height: 38px; width: auto; }
+
+/* Telefon a přepínač menu drží pohromadě vpravo. Telefon je na širokém
+   displeji celé číslo, na úzkém tlačítko „Zavolat" — viz media dole. */
+.hlavicka-akce { display: flex; align-items: center; gap: 12px; }
+.telefon {
+  font-weight: 700; font-size: .95rem; white-space: nowrap;
+  color: var(--text);
+}
+.telefon:hover { color: var(--zluta); text-decoration: none; }
+.telefon .telefon-kratky { display: none; }
 
 .menu { display: flex; align-items: center; gap: 4px; }
 .menu a {
@@ -154,6 +171,20 @@ p:last-child { margin-bottom: 0; }
 .menu a:hover { color: var(--zluta); text-decoration: none; }
 .menu a[aria-current="page"] { color: var(--zluta); border-bottom-color: var(--zluta); }
 
+/* Dvě hlavní akce v menu — Pro dopravce a Poptat přepravu. Záměrně mají
+   stejnou vizuální váhu: žádná služba nestojí nad druhou. */
+.menu a.tlacitko.obrys {
+  border: 1px solid var(--zluta);
+  color: var(--zluta);
+  padding: 8px 14px;
+  font-size: .9rem;
+  margin-left: 6px;
+}
+.menu a.tlacitko.obrys:hover { border-color: var(--krem); color: var(--krem); background: none; }
+.menu a.tlacitko.obrys[aria-current="page"] {
+  background: var(--zluta); color: var(--antracit); border-bottom-color: var(--zluta);
+}
+
 .menu-prepinac {
   display: none;
   background: none; border: 1px solid var(--linka); color: var(--text);
@@ -161,8 +192,14 @@ p:last-child { margin-bottom: 0; }
 }
 .menu-prepinac:hover { border-color: var(--zluta); color: var(--zluta); }
 
-@media (max-width: 880px) {
+/* Předěl je na 1080 px — menu se dvěma akčními tlačítky a telefonem se
+   do užší hlavičky nevejde a přeteklo by do vodorovného scrollu. */
+@media (max-width: 1080px) {
   .menu-prepinac { display: block; }
+  .telefon { border: 1px solid var(--zluta); color: var(--zluta); padding: 8px 12px; font-size: .9rem; }
+  .telefon:hover { border-color: var(--krem); color: var(--krem); }
+  .telefon .telefon-cislo { display: none; }
+  .telefon .telefon-kratky { display: inline; }
   .menu {
     display: none;
     position: absolute; left: 0; right: 0; top: 100%;
@@ -177,6 +214,21 @@ p:last-child { margin-bottom: 0; }
   .menu.otevreno { display: flex; }
   .menu a { padding: 12px 0; border-bottom: 1px solid var(--linka-slaba); }
   .menu a[aria-current="page"] { border-bottom-color: var(--zluta); }
+  .menu a.tlacitko.obrys {
+    margin: 12px 0 0; padding: 12px;
+    text-align: center;
+    border: 1px solid var(--zluta);
+  }
+  .menu a.tlacitko.obrys[aria-current="page"] { border-bottom: 1px solid var(--zluta); }
+}
+
+/* Na nejužších displejích se zmenší logo i tlačítka, jinak se řádek
+   hlavičky nevejde do šířky. */
+@media (max-width: 470px) {
+  .hlavicka .obal { gap: 8px; }
+  .hlavicka .logo img { height: 28px; }
+  .telefon { padding: 7px 10px; }
+  .menu-prepinac { padding: 7px 10px; }
 }
 
 /* --- Tlačítka ----------------------------------------------------------- */
@@ -226,6 +278,12 @@ p:last-child { margin-bottom: 0; }
 .hero-panel li:last-child { border-bottom: 0; }
 .hero-panel li span:first-child { color: var(--text-tlum); }
 .hero-panel li span:last-child { font-weight: 700; text-align: right; }
+
+/* Dvě karty služeb na první obrazovce — stejně velké, stejně výrazné.
+   Žádná z nich není hlavní. */
+.hero-karty { display: grid; gap: 18px; }
+.hero-karty .karta h2 { font-size: 1.25rem; margin-bottom: .35em; }
+.hero-karty .karta .tlacitko { margin-top: 14px; padding: 11px 18px; font-size: .93rem; }
 
 .hero.jednoduchy { padding: 64px 0; }
 .hero.jednoduchy .obal { grid-template-columns: 1fr; gap: 0; }

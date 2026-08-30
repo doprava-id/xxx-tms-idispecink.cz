@@ -28,16 +28,17 @@ stanoven.
 ```
 index.html                   Úvodní stránka
 sluzby.html                  Spedice a externí dispečink
-pro-dopravce.html            Podmínky spolupráce + registrační formulář
+pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
-kontakt.html                 Kontaktní údaje + poptávkový formulář
+poptat-prepravu.html         Jediný poptávkový formulář
+kontakt.html                 Kontaktní údaje — na formulář jen navádí
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml      Pro vyhledávače
 assets/css/firemni-styl.css  Jediná definice barev a komponent
-assets/js/main.js            Mobilní menu a odesílání formulářů
+assets/js/main.js            Mobilní menu, schovávání hlavičky, odesílání formulářů
 assets/img/                  Logo, favicon, náhledový obrázek
 README.md                    Podrobná dokumentace webu — čti ji taky
 PREDANI-WEBU.md              Předávací soubor pro revizi — čti před obsahovými změnami
@@ -49,7 +50,7 @@ s formulářem, CMR versus vnitrostátní rozsah, tvrzení o 24/7 na pěti míst
 jsou v `PREDANI-WEBU.md`. Než začneš měnit obsah, přečti si ho.
 
 Hlavička, patička a `<head>` jsou v každé stránce zvlášť. **Když měníš navigaci,
-patičku nebo meta značky, uprav všech sedm stránek.** Neexistuje šablonovací vrstva,
+patičku nebo meta značky, uprav všech osm stránek.** Neexistuje šablonovací vrstva,
 která by to udělala za tebe.
 
 ## Spuštění a ověření
@@ -62,7 +63,7 @@ Testy nejsou. Změny se ověřují vykreslením v prohlížeči — v prostřed�
 a Playwright (`/opt/node22/lib/node_modules/playwright`, `PLAYWRIGHT_BROWSERS_PATH`
 je nastavená, `playwright install` nespouštěj). Po každé netriviální změně projeď:
 
-- všech sedm stránek: stav 200, žádné chyby v konzoli,
+- všech osm stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: skládají korektní `mailto:` a povinná pole nejdou obejít,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
@@ -86,8 +87,8 @@ Světlost putuje jen o pár procent — má to číst jako kov, ne jako lesklý 
 se odvozují z firemních barev, samotné firemní barvy se nemění.
 
 Jedinou výjimkou je `<meta name="theme-color" content="#262F32">` — meta značka na CSS
-proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech sedmi
-stránek. **Když se změní odstín hlavičky, změň i těch sedm meta značek**, jinak lišta
+proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech osmi
+stránek. **Když se změní odstín hlavičky, změň i těch osm meta značek**, jinak lišta
 prohlížeče na mobilu zůstane ve staré barvě.
 
 Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
@@ -106,8 +107,8 @@ je to smlouva, kterou nic nehlídá, takže se tiše rozbije:
 | `data-popisek` | pole | popisek řádku v těle e-mailu; bez něj se použije `name` |
 | `.formular-stav` | prvek ve formuláři | sem se vypíše hláška po odeslání |
 
-Pole bez `name` a prázdná pole se do e-mailu nedávají. Formuláře jsou na
-`kontakt.html` a `pro-dopravce.html`. Web proto nesbírá žádná data, nepoužívá cookies ani měření
+Pole bez `name` a prázdná pole se do e-mailu nedávají. Poptávkový formulář je na
+`poptat-prepravu.html`, registrační na `pro-dopravce.html`. Web proto nesbírá žádná data, nepoužívá cookies ani měření
 návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pokud formuláře
 přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
 upravit i `zasady-osobnich-udaju.html`.

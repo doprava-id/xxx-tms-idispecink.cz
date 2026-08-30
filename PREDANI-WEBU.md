@@ -2,8 +2,9 @@
 
 **Datum:** 30. 8. 2026
 **Verze webu:** větev `main`
-**Stav:** web je hotový a funkční. Proběhla obsahová revize (27. 8. 2026), jejíž
-závěry **zatím nejsou zapracované**. Tento soubor je zadání pro ně.
+**Stav:** web je hotový a funkční. Obsahová revize (27. 8. 2026) je zapracovaná
+s výjimkou bodů závislých na otevřených otázkách z kapitoly 6 — přehled je
+v kapitole 5 pod „Stav zapracování".
 
 Soubor je samostatný — kdo ho čte, nemusí znát nic dalšího. Slouží pro předání
 do ChatGPT, Claude Design nebo Claude Cowork.
@@ -108,16 +109,17 @@ na běžný FTP hosting (VAS Hosting).
 ```
 index.html                   Úvodní stránka
 sluzby.html                  Spedice a externí dispečink
-pro-dopravce.html            Podmínky spolupráce + registrační formulář
+pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
-kontakt.html                 Kontaktní údaje + poptávkový formulář
+poptat-prepravu.html         Jediný poptávkový formulář
+kontakt.html                 Kontaktní údaje — na formulář jen navádí
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Musí zůstat v kořeni
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml
 assets/css/firemni-styl.css  Jediná definice barev a komponent
-assets/js/main.js            Mobilní menu a odesílání formulářů
+assets/js/main.js            Mobilní menu, schovávání hlavičky, formuláře
 assets/img/                  Logo, favicon, náhledový obrázek
 .gitignore                   Nekomitovat: přihlašovací údaje, provozní data
 ```
@@ -127,8 +129,9 @@ assets/img/                  Logo, favicon, náhledový obrázek
 
 ### Vlastnosti, které se nesmí ztratit
 
-- **Web funguje bez JavaScriptu.** Skript obsluhuje jen rozbalovací menu
-  a formuláře. Bez něj se menu zobrazí rovnou rozbalené (`<noscript>` blok
+- **Web funguje bez JavaScriptu.** Skript obsluhuje rozbalovací menu,
+  schovávání hlavičky při rolování a formuláře. Bez něj hlavička zůstává
+  přilepená nahoře a menu se zobrazí rozbalené (`<noscript>` blok
   v hlavičce každé stránky).
 - **Tiskový styl** převádí tmavý motiv na černobílý. Barvy tmavého motivu
   jsou místy zapsané přímo v atributu `style`, proto je tiskový blok přebíjí
@@ -145,7 +148,7 @@ python3 -m http.server 8000     # pak http://localhost:8000
 
 Testy neexistují. Změny se ověřují vykreslením v prohlížeči — v prostředí je
 Chromium a Playwright (`PLAYWRIGHT_BROWSERS_PATH` je nastavená,
-`playwright install` nespouštět). Po netriviální změně projít: všech sedm
+`playwright install` nespouštět). Po netriviální změně projít: všech osm
 stránek (stav 200, žádné chyby v konzoli), tři šířky, oba formuláře, vypnutý
 JavaScript, tiskový režim.
 
@@ -184,8 +187,8 @@ kontrast aspoň 3 : 1 proti vnitřku pole i proti ploše formuláře (WCAG 1.4.1
 Dekorativní `--linka` ten práh splňovat nemusí.
 
 Barva hlavičky je navíc natvrdo v `<meta name="theme-color" content="#262F32">`
-**ve všech sedmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
-se odstín hlavičky, musí se změnit i těch sedm značek, jinak lišta prohlížeče
+**ve všech osmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
+se odstín hlavičky, musí se změnit i těch osm značek, jinak lišta prohlížeče
 na mobilu zůstane ve staré barvě.
 
 ### Pravidla
@@ -244,12 +247,26 @@ původnímu revizním zápisu.
 Zapracovaná je ta část revize, která nezávisí na otevřených otázkách
 z kapitoly 6 — samé faktické opravy:
 
-| Hotovo | Čeká na rozhodnutí | Čeká na vizuální návrh |
-|---|---|---|
-| 4 (částečně), 13, 14, 17, 24, 25, 29, 30, 31 | 1, 3, 5, 12, 20, 21, 22 | 6, 7, 8, 9, 10, 11, 16, 18, 19, 26, 27, 28 |
+| Hotovo | Čeká na rozhodnutí |
+|---|---|
+| 4 (částečně), 6–11, 12 (částečně), 13, 14, 16, 17, 18, 19, 24, 25, 26, 27, 28, 29, 30, 31 | 1, 3, 5, 20, 21, 22 |
 
 Rozhodnutí 15 a 23 nevyžadovala zásah — web ani dřív nezveřejňoval seznam
 vyloučených přeprav ani obchodní dokumenty.
+
+**Strukturální rozhodnutí (6–11, 16, 18, 19, 26–28) jsou zapracovaná
+přímo v kódu.** Vizuální návrh v Claude Design je tím pádem volitelná
+iterace nad hotovým stavem, ne předpoklad. Otázka 6.7 byla vyřešena podle
+navrženého výchozího řešení: externí dispečink bydlí celý na stránce
+Pro dopravce, na Službách zůstal krátký blok s odkazem.
+
+**Bod 12 je hotový v hlavní nabídce:** perex a karty úvodní stránky
+i podnadpis spedice uvádějí celovozové přepravy po České republice
+a JSON-LD nese `areaServed: CZ`. Zmínky CMR v popisech dokladů jsou
+nahrazené obecným „přepravní a dodací listy" — platí pro vnitrostátní
+i případnou mezinárodní přepravu. Jediná zbývající zmínka CMR je
+v požadavcích na dopravce („CMR pro mezinárodní přepravu, vnitrostátní
+pojištění pro ČR") a čeká na odpověď 6.5.
 
 **Bod 4 je hotový jen zčásti.** Opravená jsou tvrzení směrem k poptávajícím
 (úvodní panel, kontaktní tabulka, perex kontaktu) a ze strukturovaných dat
@@ -439,28 +456,32 @@ nahrazena. Skutečná doba, kdy firma vyřizuje **nové poptávky**, není znám
 a raději žádný údaj než nepravdivý. Až bude známá, patří zpět jako
 `hoursAvailable` u `contactPoint`.
 
-### 7.4 Mizející menu musí fungovat bez JavaScriptu
+### 7.4 Mizející menu musí fungovat bez JavaScriptu — ✅ hotovo
 
-Rozhodnutí #10 vyžaduje skript. Web dnes funguje i s vypnutými skripty.
-Skrývání menu se proto smí implementovat **jen jako nadstavba**: bez
-JavaScriptu zůstane menu normálně viditelné. Nikdy ne naopak.
+Implementováno jako nadstavba: JavaScript přidává hlavičce třídu
+`.schovana` při rolování dolů a odebírá ji při rolování nahoru, u
+otevřeného menu a při zaostření klávesnicí. Bez skriptů třída nikdy
+nepřibude a přilepená hlavička zůstává vidět. Předěl mobilního menu se
+posunul na 1080 px — širší menu se dvěma akcemi a telefonem by se jinak
+nevešlo.
 
-### 7.5 Karta „Rychlý kontakt" mizí → kontakty musí zůstat dosažitelné
+### 7.5 Karta „Rychlý kontakt" mizí → kontakty musí zůstat dosažitelné — ✅ hotovo
 
-Rozhodnutí #27 nahrazuje kartu s telefonem, e-mailem a IČO dvěma kartami
-služeb. Telefon se přesouvá do menu (#11), ale je nutné ověřit, že se
-kontakt z první obrazovky nevytratí úplně — zejména na mobilu.
+Kartu nahradily dvě karty služeb. Telefon je trvale v hlavičce: na
+širokém displeji celé číslo, na úzkém tlačítko „Zavolat". E-mail zůstává
+v patičce každé stránky a na stránkách Kontakt a Poptat přepravu.
 
-### 7.6 Nová stránka „Poptat přepravu"
+### 7.6 Nová stránka „Poptat přepravu" — ✅ hotovo
 
-Rozhodnutí #18 zakládá osmou stránku. S ní: záznam v `sitemap.xml`, odkaz
-v navigaci i patičce **všech** stránek, vlastní `<head>` s canonical a OG,
-`<noscript>` blok, a přesměrování starého kotvícího odkazu
-`kontakt.html#poptavka`.
+Stránka `poptat-prepravu.html` existuje: jediný poptávkový formulář,
+záznam v `sitemap.xml`, odkaz v navigaci i patičce všech stránek, vlastní
+`<head>` s canonical a OG, `<noscript>` blok. Všechny odkazy na starou
+kotvu `kontakt.html#poptavka` jsou přesměrované; stránka Kontakt formulář
+nemá a na novou stránku navádí.
 
 ---
 
-## 8. Cílová struktura po revizi
+## 8. Cílová struktura po revizi — ✅ zavedená (kromě přepisu zásad)
 
 ```
 index.html            Úvod — dvě rovnocenné služby, dvě karty, dvě akce
@@ -635,6 +656,6 @@ až s funkčním certifikátem na doméně — dřív by web znepřístupnilo.
 4. Zapracovat obsahová rozhodnutí (kapitola 5) do všech stránek najednou.
 5. Přepsat zásady zpracování osobních údajů — **ve stejném nasazení** jako
    formulář a měření.
-6. Ověřit v prohlížeči: sedm (osm) stránek, tři šířky, oba formuláře,
+6. Ověřit v prohlížeči: všech osm stránek, tři šířky, oba formuláře,
    bez JavaScriptu, tiskový režim.
 7. Nasadit na FTP, zapnout HTTPS, teprve pak odkomentovat přesměrování.

@@ -64,6 +64,33 @@
     });
   });
 
+  /* --- Schovávání hlavičky při rolování --------------------------------- */
+  /* Vylepšení nad základ: bez JavaScriptu třída .schovana nikdy nepřibude
+     a přilepená hlavička prostě zůstává vidět. Při rolování dolů se
+     schová, při rolování nahoru, u otevřeného menu nebo při zaostření
+     klávesnicí se vrací. */
+  var hlavicka = document.querySelector(".hlavicka");
+
+  if (hlavicka) {
+    var posledniY = window.scrollY || 0;
+
+    window.addEventListener("scroll", function () {
+      var y = window.scrollY || 0;
+      var otevrene = menu && menu.classList.contains("otevreno");
+
+      if (!otevrene && y > posledniY && y > 140) {
+        hlavicka.classList.add("schovana");
+      } else if (y < posledniY || y <= 140) {
+        hlavicka.classList.remove("schovana");
+      }
+      posledniY = y;
+    }, { passive: true });
+
+    hlavicka.addEventListener("focusin", function () {
+      hlavicka.classList.remove("schovana");
+    });
+  }
+
   /* --- Rok v patičce ---------------------------------------------------- */
   var roky = document.querySelectorAll("[data-rok]");
   Array.prototype.forEach.call(roky, function (prvek) {

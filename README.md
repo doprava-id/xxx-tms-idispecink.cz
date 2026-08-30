@@ -9,9 +9,10 @@ na obyčejném FTP i kdekoliv jinde.
 ```
 index.html                   Úvodní stránka
 sluzby.html                  Spedice a externí dispečink
-pro-dopravce.html            Podmínky spolupráce + registrační formulář
+pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
-kontakt.html                 Kontaktní údaje + poptávkový formulář
+poptat-prepravu.html         Jediný poptávkový formulář
+kontakt.html                 Kontaktní údaje — na formulář jen navádí
 zasady-osobnich-udaju.html   Informace o zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
@@ -19,7 +20,7 @@ favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v k
 robots.txt                   Pravidla pro roboty
 sitemap.xml                  Mapa webu
 assets/css/                  firemni-styl.css — jediná definice barev a komponent
-assets/js/                   main.js — mobilní menu a odesílání formulářů
+assets/js/                   main.js — menu, schovávání hlavičky, formuláře
 assets/img/                  Logo, favicon a náhledový obrázek
 PREDANI-WEBU.md              Předávací soubor — stav, rozhodnutí revize, otevřené otázky
 ```
@@ -95,7 +96,7 @@ piktogramu by v původním poměru působil drobně.
 
 ## Formuláře
 
-Statický web nemá backend. Formuláře na stránkách *Kontakt* a *Pro dopravce*
+Statický web nemá backend. Formuláře na stránkách *Poptat přepravu* a *Pro dopravce*
 poskládají text zprávy a otevřou poštovního klienta návštěvníka (`mailto:`) —
 odeslání provede sám návštěvník. Web tedy sám nesbírá a neukládá žádná data,
 nepoužívá cookies ani měření návštěvnosti.
@@ -142,8 +143,9 @@ provozem stojí za to ho nechat projít.
 
 ## Chování bez JavaScriptu a při tisku
 
-Web funguje i s vypnutým JavaScriptem. Skript obsluhuje jen rozbalovací menu
-na úzkých displejích a odesílání formulářů; bez něj se menu zobrazí rovnou
+Web funguje i s vypnutým JavaScriptem. Skript obsluhuje rozbalovací menu
+na úzkých displejích, schovávání hlavičky při rolování a odesílání
+formulářů; bez něj hlavička prostě zůstává přilepená nahoře, menu se zobrazí
 rozbalené (`<noscript>` blok v hlavičce každé stránky) a formuláře zůstanou
 vyplnitelné, jen se neodešlou — proto je u nich vždy uvedená i e-mailová
 adresa.
