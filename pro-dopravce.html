@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pro dopravce — iDispečink.cz</title>
-<meta name="description" content="Podmínky spolupráce pro dopravce, požadované doklady a registrační formulář. iDispečink.cz s.r.o.">
+<meta name="description" content="Dvě cesty spolupráce pro dopravce: nabídka vozidel a externí dispečink. Podmínky, doklady a registrace. iDispečink.cz s.r.o.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://idispecink.cz/pro-dopravce.html">
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="iDispečink.cz">
 <meta property="og:locale" content="cs_CZ">
 <meta property="og:title" content="Pro dopravce — iDispečink.cz">
-<meta property="og:description" content="Podmínky spolupráce pro dopravce, požadované doklady a registrační formulář. iDispečink.cz s.r.o.">
+<meta property="og:description" content="Dvě cesty spolupráce pro dopravce: nabídka vozidel a externí dispečink. Podmínky, doklady a registrace. iDispečink.cz s.r.o.">
 <meta property="og:url" content="https://idispecink.cz/pro-dopravce.html">
 <meta property="og:image" content="https://idispecink.cz/assets/img/og-idispecink.png">
 <meta property="og:image:width" content="1200">
@@ -26,7 +26,7 @@
   <!-- Bez JavaScriptu tlačítko Menu nefunguje. Rozbalovací menu proto
        na úzkých displejích zobrazíme rovnou a tlačítko schováme. -->
   <style>
-    @media (max-width: 880px) {
+    @media (max-width: 1080px) {
       .menu-prepinac { display: none; }
       .hlavicka .obal { flex-wrap: wrap; }
       #hlavni-menu {
@@ -41,6 +41,7 @@
       }
       #hlavni-menu a { padding: 6px 0; border-bottom: 2px solid transparent; }
       #hlavni-menu a[aria-current="page"] { border-bottom-color: var(--zluta); }
+      #hlavni-menu a.tlacitko { border: 1px solid var(--zluta); padding: 6px 12px; margin: 4px 0 0; }
     }
   </style>
 </noscript>
@@ -53,16 +54,23 @@
     <a class="logo" href="index.html">
       <img src="assets/img/logo-idispecink.svg" alt="iDispečink.cz" width="240" height="38">
     </a>
-    <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="hlavni-menu">
-      Menu
-    </button>
     <nav class="menu" id="hlavni-menu" aria-label="Hlavní navigace">
       <a href="index.html">Úvod</a>
       <a href="sluzby.html">Služby</a>
-      <a href="pro-dopravce.html" aria-current="page">Pro dopravce</a>
       <a href="o-nas.html">O nás</a>
       <a href="kontakt.html">Kontakt</a>
+      <a class="tlacitko obrys" href="pro-dopravce.html" aria-current="page">Pro dopravce</a>
+      <a class="tlacitko obrys" href="poptat-prepravu.html">Poptat přepravu</a>
     </nav>
+    <div class="hlavicka-akce">
+      <a class="telefon" href="tel:+420734580243">
+        <span class="telefon-cislo cislo">+420 734 580 243</span>
+        <span class="telefon-kratky">Zavolat</span>
+      </a>
+      <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="hlavni-menu">
+        Menu
+      </button>
+    </div>
   </div>
 </header>
 
@@ -72,69 +80,58 @@
     <span class="nadpis-stitek">Pro dopravce</span>
     <h1>Spolupráce s dopravci</h1>
     <p class="uvod">
-      Spolupracujeme krátkodobě i dlouhodobě, podle toho, co dopravci vyhovuje.
-      Vytížení sháníme po celý rok — od ledna do prosince, i v měsících,
-      kdy je logistiky méně.
+      Dopravcům nabízíme dvě cesty: vytížíme vaše volná vozidla zakázkami
+      našich zákazníků, nebo za vás převezmeme dispečink jako službu.
+      Krátkodobě i dlouhodobě, podle toho, co vám vyhovuje.
     </p>
-    <div class="tlacitka">
-      <a class="tlacitko" href="#registrace">Registrovat se</a>
-    </div>
   </div>
 </section>
 
 <section class="sekce">
   <div class="obal">
-    <div class="sekce-hlava">
-      <span class="nadpis-stitek">Pro koho to je</span>
-      <h2>Je to váš případ?</h2>
-      <p>Většina dopravců, se kterými spolupracujeme, se poznává v některé z těchto situací.</p>
-    </div>
-
-    <div class="mrizka tri">
+    <div class="mrizka dva">
       <article class="karta akcent">
-        <h3>Nemáte dispečera — trvale nebo dočasně</h3>
+        <h2 style="font-size:1.35rem">Chci nabízet svá vozidla</h2>
         <p>
-          Vlastní dispečer se vám nevyplatí a čas raději trávíte v kamionu nebo
-          u jiné části svého podnikání. Nebo vám dispečer vypadl a vozy nemá kdo
-          vytěžovat. Dispečink od nás berete jako službu — krátkodobě na
-          překlenutí i natrvalo.
+          Vytížení po celý rok, jednoznačné objednávky a cena sjednaná předem.
         </p>
+        <div class="tlacitka" style="margin-top:18px">
+          <a class="tlacitko obrys" href="#nabizim-vozidla">Podmínky a registrace</a>
+        </div>
       </article>
-
       <article class="karta akcent">
-        <h3>Chcete zakázky z velkých tendrů</h3>
+        <h2 style="font-size:1.35rem">Chci externí dispečink</h2>
         <p>
-          K zakázkám z velkých tendrů máme přístup přes zprostředkovatele.
-          Dostanete se k nim, aniž byste kvůli nim musel jezdit pro velké
-          dopravce za podmínek, které vám nevyhovují.
+          Vytěžování vozů, denní plánování a komunikace s řidiči — bez
+          obsazování další stálé pozice.
         </p>
-      </article>
-
-      <article class="karta akcent">
-        <h3>Chcete využít naši síť zákazníků</h3>
-        <p>
-          Máme širokou síť zákazníků. Přes ni se dostanete k nákladům, ke kterým
-          byste se sám nemusel dostat.
-        </p>
+        <div class="tlacitka" style="margin-top:18px">
+          <a class="tlacitko obrys" href="#externi-dispecink">Jak služba funguje</a>
+        </div>
       </article>
     </div>
   </div>
 </section>
 
-<section class="sekce plocha">
+<section class="sekce plocha" id="nabizim-vozidla">
   <div class="obal">
     <div class="sekce-hlava">
-      <span class="nadpis-stitek">Nabízíme</span>
-      <h2>Co nabízíme</h2>
+      <span class="nadpis-stitek">Cesta 01</span>
+      <h2>Nabízím svá vozidla</h2>
+      <p>Vytěžujeme vozy dopravců zakázkami od našich zákazníků. Co tím získáte:</p>
     </div>
-    <div class="mrizka tri">
+    <div class="mrizka dva">
       <article class="karta akcent">
         <h3>Vytížení po celý rok</h3>
         <p>Náklady sháníme od ledna do prosince, i v logisticky slabších měsících. Při bezproblémové spolupráci zadáváme zakázky opakovaně.</p>
       </article>
       <article class="karta akcent">
-        <h3>Flexibilní využití vozů</h3>
-        <p>Přizpůsobíme se individuálním potřebám. Spolupráce může být krátkodobá i dlouhodobá — podle toho, co vám vyhovuje.</p>
+        <h3>Zakázky z velkých tendrů</h3>
+        <p>K zakázkám z velkých tendrů máme přístup přes zprostředkovatele. Dostanete se k nim, aniž byste kvůli nim museli jezdit pro velké dopravce za podmínek, které vám nevyhovují.</p>
+      </article>
+      <article class="karta akcent">
+        <h3>Široká síť zákazníků</h3>
+        <p>Přes naši síť zákazníků se dostanete k nákladům, ke kterým byste se sami nemuseli dostat.</p>
       </article>
       <article class="karta akcent">
         <h3>Lidský přístup</h3>
@@ -156,7 +153,7 @@
         </p>
         <ul class="seznam" style="margin-top:20px">
           <li><b>Koncesní listina</b> na silniční nákladní dopravu (u vozidel do 3,5 t postačí živnostenské oprávnění)</li>
-          <li><b>Pojištění odpovědnosti dopravce</b> — CMR pro mezinárodní přepravu, vnitrostátní pojištění pro ČR</li>
+          <li><b>Pojištění odpovědnosti dopravce</b> pro vnitrostátní přepravu po ČR</li>
           <li><b>Výpis z obchodního rejstříku</b> nebo živnostenského rejstříku</li>
           <li><b>Bankovní spojení</b> zveřejněné u správce daně</li>
           <li><b>Spolehlivost plátce DPH</b> — ověřujeme automaticky u každé objednávky</li>
@@ -167,11 +164,13 @@
         <div class="karta">
           <h3>Vozový park, který využíváme</h3>
           <ul class="seznam">
-            <li><b>Plachtové kamiony</b> — převažující typ našich poptávek</li>
-            <li><b>Jiné typy vozidel</b> — k jednání</li>
+            <li><b>Plachtový návěs 13,6 m</b> — převažující typ našich poptávek</li>
+            <li><b>Mega a lowdeck</b> — pro zásilky s větší ložnou výškou</li>
+            <li><b>Jiné typy vozidel</b> — podle dohody</li>
           </ul>
           <p style="margin-top:16px">
-            Disponujete jiným typem vozidla? Uveďte jej v registraci a domluvíme se.
+            Poptáváme převážně celovozové přepravy. Disponujete jiným typem
+            vozidla? Uveďte jej v registraci a domluvíme se.
           </p>
         </div>
 
@@ -216,45 +215,50 @@
         </p>
       </div>
 
-      <form class="formular" data-mailto data-prijemce="doprava@idispecink.cz"
-            data-predmet="Registrace dopravce z webu">
+      <form class="formular" action="odeslani.php" method="post">
+        <input type="hidden" name="formular" value="registrace">
+        <div class="pole nevyplnovat" aria-hidden="true">
+          <label for="d-www">Web</label>
+          <input type="text" id="d-www" name="www" tabindex="-1" autocomplete="off">
+        </div>
         <div class="pole-radek">
           <div class="pole">
             <label for="d-firma">Firma <span class="napoveda">*</span></label>
-            <input type="text" id="d-firma" name="firma" data-popisek="Firma" required autocomplete="organization">
+            <input type="text" id="d-firma" name="firma" required autocomplete="organization">
           </div>
           <div class="pole">
             <label for="d-ico">IČO <span class="napoveda">*</span></label>
-            <input type="text" id="d-ico" name="ico" data-popisek="IČO" required inputmode="numeric">
+            <input type="text" id="d-ico" name="ico" required inputmode="numeric">
           </div>
         </div>
 
         <div class="pole-radek">
           <div class="pole">
             <label for="d-osoba">Kontaktní osoba <span class="napoveda">*</span></label>
-            <input type="text" id="d-osoba" name="osoba" data-popisek="Kontaktní osoba" required autocomplete="name">
+            <input type="text" id="d-osoba" name="osoba" required autocomplete="name">
           </div>
           <div class="pole">
             <label for="d-telefon">Telefon <span class="napoveda">*</span></label>
-            <input type="tel" id="d-telefon" name="telefon" data-popisek="Telefon" required autocomplete="tel">
+            <input type="tel" id="d-telefon" name="telefon" required autocomplete="tel">
           </div>
         </div>
 
         <div class="pole">
           <label for="d-email">E-mail <span class="napoveda">*</span></label>
-          <input type="email" id="d-email" name="email" data-popisek="E-mail" required autocomplete="email">
+          <input type="email" id="d-email" name="email" required autocomplete="email">
         </div>
 
         <div class="pole-radek">
           <div class="pole">
             <label for="d-vozy">Počet vozidel</label>
-            <input type="number" id="d-vozy" name="vozy" data-popisek="Počet vozidel" min="1" step="1">
+            <input type="number" id="d-vozy" name="vozy" min="1" step="1">
           </div>
           <div class="pole">
             <label for="d-typ">Převažující typ vozidla</label>
-            <select id="d-typ" name="typ" data-popisek="Typ vozidla">
+            <select id="d-typ" name="typ">
               <option value="">— vyberte —</option>
-              <option>Souprava / návěs plachta</option>
+              <option>Plachtový návěs 13,6 m</option>
+              <option>Mega / lowdeck</option>
               <option>Solo 7,5–12 t</option>
               <option>Dodávka do 3,5 t</option>
               <option>Vozidlo s čelem nebo rukou</option>
@@ -265,21 +269,64 @@
 
         <div class="pole">
           <label for="d-oblast">Oblast působení</label>
-          <input type="text" id="d-oblast" name="oblast" data-popisek="Oblast působení"
+          <input type="text" id="d-oblast" name="oblast"
                  placeholder="např. Morava, celá ČR, ČR + SK + DE">
         </div>
 
         <div class="pole">
           <label for="d-zprava">Poznámka</label>
-          <textarea id="d-zprava" name="zprava" data-popisek="Poznámka"
+          <textarea id="d-zprava" name="zprava"
                     placeholder="Jaké komodity přepravujete, jaké máte vybavení, případné dotazy."></textarea>
         </div>
 
         <button class="tlacitko" type="submit">Odeslat registraci</button>
         <p class="formular-poznamka formular-stav" role="status" aria-live="polite">
-          Formulář otevře váš poštovní klient s předvyplněnou zprávou. Odeslání pak potvrdíte v něm.
+          Po odeslání vás přesměrujeme na potvrzení. Kdyby formulář nefungoval,
+          napište přímo na <a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a>.
         </p>
       </form>
+    </div>
+  </div>
+</section>
+
+<section class="sekce plocha" id="externi-dispecink">
+  <div class="obal">
+    <div class="sekce-hlava">
+      <span class="nadpis-stitek">Cesta 02</span>
+      <h2>Chci externí dispečink</h2>
+      <p>
+        Vlastní dispečer se vám nevyplatí a čas raději trávíte v kamionu nebo
+        u jiné části svého podnikání? Nebo vám dispečer vypadl a vozy nemá kdo
+        vytěžovat? Dispečink od nás berete jako službu — krátkodobě na
+        překlenutí i natrvalo.
+      </p>
+    </div>
+
+    <div class="mrizka dva" style="gap:32px">
+      <div class="karta akcent">
+        <h3>Rozsah služby</h3>
+        <ul class="seznam">
+          <li><b>Vytěžování vozů</b> — vyhledávání nákladů a zpětných jízd</li>
+          <li><b>Denní plánování</b> jízd a rozpisy pro řidiče</li>
+          <li><b>Komunikace s řidiči</b> nonstop, 24 hodin denně</li>
+          <li><b>Jednání se zákazníky</b> a potvrzování objednávek</li>
+          <li><b>Sledování vozidel</b> přes GPS po celou dobu jízdy</li>
+          <li><b>Evidence jízd</b> a podklady k fakturaci</li>
+          <li><b>Reporting</b> — přehled odjetých kilometrů a tržeb</li>
+        </ul>
+      </div>
+      <div class="karta">
+        <h3>Přínos pro dopravce</h3>
+        <ul class="seznam">
+          <li>Vyšší využití vozového parku</li>
+          <li>Náklad ve formě služby namísto dalšího stálého úvazku</li>
+          <li>Dostupnost nonstop — služba běží i o víkendech, svátcích a v noci</li>
+          <li>Vyhodnocení výnosnosti jednotlivých jízd</li>
+        </ul>
+        <div class="tlacitka">
+          <a class="tlacitko" href="poptat-prepravu.html">Poptat dispečink</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -287,10 +334,10 @@
   <div class="obal">
     <div>
       <h2>Máte volnou přepravní kapacitu?</h2>
-      <p>Sdělte nám polohu vozidla a požadovaný směr. Prověříme aktuální poptávky.</p>
+      <p>Zaregistrujte se a sdělte nám polohu vozidla a požadovaný směr. Prověříme aktuální poptávky.</p>
     </div>
     <div class="tlacitka" style="margin-top:0">
-      <a class="tlacitko" href="kontakt.html#poptavka">Napsat nám</a>
+      <a class="tlacitko" href="#registrace">Registrovat se</a>
     </div>
   </div>
 </section>
@@ -311,14 +358,15 @@
           <li><a href="index.html">Úvod</a></li>
           <li><a href="sluzby.html">Služby</a></li>
           <li><a href="o-nas.html">O nás</a></li>
+          <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
       </div>
       <div>
         <h2>Spolupráce</h2>
         <ul>
           <li><a href="pro-dopravce.html">Pro dopravce</a></li>
-          <li><a href="kontakt.html#poptavka">Poptat přepravu</a></li>
-          <li><a href="kontakt.html">Kontakt</a></li>
+          <li><a href="pro-dopravce.html#externi-dispecink">Externí dispečink</a></li>
+          <li><a href="poptat-prepravu.html">Poptat přepravu</a></li>
         </ul>
       </div>
       <div>
@@ -331,12 +379,13 @@
     </div>
     <div class="id-paticka">
       <span>iDispečink.cz s.r.o. · Příčná 1892/4, 110 00 Praha 1 · IČO 23359765 · DIČ CZ23359765</span>
-      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a></span>
+      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a> <button type="button" class="cookies-nastaveni" hidden>Nastavení cookies</button></span>
       <span>© <span data-rok>2026</span> iDispečink.cz s.r.o.</span>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/mereni.js"></script>
 </body>
 </html>

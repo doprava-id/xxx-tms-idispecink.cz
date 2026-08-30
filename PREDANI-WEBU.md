@@ -2,8 +2,9 @@
 
 **Datum:** 30. 8. 2026
 **Verze webu:** větev `main`
-**Stav:** web je hotový a funkční. Proběhla obsahová revize (27. 8. 2026), jejíž
-závěry **zatím nejsou zapracované**. Tento soubor je zadání pro ně.
+**Stav:** web je hotový a funkční. Obsahová revize (27. 8. 2026) je zapracovaná
+s výjimkou bodů závislých na otevřených otázkách z kapitoly 6 — přehled je
+v kapitole 5 pod „Stav zapracování".
 
 Soubor je samostatný — kdo ho čte, nemusí znát nic dalšího. Slouží pro předání
 do ChatGPT, Claude Design nebo Claude Cowork.
@@ -108,16 +109,17 @@ na běžný FTP hosting (VAS Hosting).
 ```
 index.html                   Úvodní stránka
 sluzby.html                  Spedice a externí dispečink
-pro-dopravce.html            Podmínky spolupráce + registrační formulář
+pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
-kontakt.html                 Kontaktní údaje + poptávkový formulář
+poptat-prepravu.html         Jediný poptávkový formulář
+kontakt.html                 Kontaktní údaje — na formulář jen navádí
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Musí zůstat v kořeni
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml
 assets/css/firemni-styl.css  Jediná definice barev a komponent
-assets/js/main.js            Mobilní menu a odesílání formulářů
+assets/js/main.js            Mobilní menu, schovávání hlavičky, formuláře
 assets/img/                  Logo, favicon, náhledový obrázek
 .gitignore                   Nekomitovat: přihlašovací údaje, provozní data
 ```
@@ -127,8 +129,9 @@ assets/img/                  Logo, favicon, náhledový obrázek
 
 ### Vlastnosti, které se nesmí ztratit
 
-- **Web funguje bez JavaScriptu.** Skript obsluhuje jen rozbalovací menu
-  a formuláře. Bez něj se menu zobrazí rovnou rozbalené (`<noscript>` blok
+- **Web funguje bez JavaScriptu.** Skript obsluhuje rozbalovací menu,
+  schovávání hlavičky při rolování a formuláře. Bez něj hlavička zůstává
+  přilepená nahoře a menu se zobrazí rozbalené (`<noscript>` blok
   v hlavičce každé stránky).
 - **Tiskový styl** převádí tmavý motiv na černobílý. Barvy tmavého motivu
   jsou místy zapsané přímo v atributu `style`, proto je tiskový blok přebíjí
@@ -145,7 +148,7 @@ python3 -m http.server 8000     # pak http://localhost:8000
 
 Testy neexistují. Změny se ověřují vykreslením v prohlížeči — v prostředí je
 Chromium a Playwright (`PLAYWRIGHT_BROWSERS_PATH` je nastavená,
-`playwright install` nespouštět). Po netriviální změně projít: všech sedm
+`playwright install` nespouštět). Po netriviální změně projít: všech osm
 stránek (stav 200, žádné chyby v konzoli), tři šířky, oba formuláře, vypnutý
 JavaScript, tiskový režim.
 
@@ -184,8 +187,8 @@ kontrast aspoň 3 : 1 proti vnitřku pole i proti ploše formuláře (WCAG 1.4.1
 Dekorativní `--linka` ten práh splňovat nemusí.
 
 Barva hlavičky je navíc natvrdo v `<meta name="theme-color" content="#262F32">`
-**ve všech sedmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
-se odstín hlavičky, musí se změnit i těch sedm značek, jinak lišta prohlížeče
+**ve všech osmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
+se odstín hlavičky, musí se změnit i těch osm značek, jinak lišta prohlížeče
 na mobilu zůstane ve staré barvě.
 
 ### Pravidla
@@ -238,6 +241,52 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 
 Následující rozhodnutí padla a **mají se zapracovat**. Číslování odpovídá
 původnímu revizním zápisu.
+
+### Stav zapracování
+
+Zapracovaná je ta část revize, která nezávisí na otevřených otázkách
+z kapitoly 6 — samé faktické opravy:
+
+| Hotovo | Čeká na rozhodnutí |
+|---|---|
+| 1, 3, 4, 6–14, 16–19, 24–31 | 5, 20, 21, 22 |
+
+**Rozhodnutí 1 (formulář):** zvoleno PHP na VAS Hostingu — `odeslani.php`
+posílá oba formuláře e-mailem, s honeypotem a přesměrováním na
+`odeslano.html`. **Rozhodnutí 3 (měření):** zvoleno Google Analytics 4 se
+souhlasovou lištou; skript se bez souhlasu nenačte. **Rozhodnutí 4
+uzavřeno:** nonstop u placeného dispečinku platí a zůstává. **Bod 12
+uzavřen:** jen vnitrostátní ČR — CMR zmizelo i z požadavků na dopravce.
+Zásady zpracování údajů jsou přepsané ve stejné dávce (účinnost
+30. srpna 2026).
+
+**Před nasazením zbývá (provozní kroky, ne rozhodnutí):**
+
+1. vyplnit měřicí ID GA4 do `GA_MERENI` v `assets/js/mereni.js`,
+2. v administraci GA nastavit uchování dat na 14 měsíců,
+3. do SPF záznamu domény přidat servery VAS Hostingu (pošta z formulářů
+   jde z webserveru, zatímco pošta domény běží na Microsoft 365),
+4. ověřit, že na hostingu funguje PHP `mail()` — první poptávku otestovat.
+
+Rozhodnutí 15 a 23 nevyžadovala zásah — web ani dřív nezveřejňoval seznam
+vyloučených přeprav ani obchodní dokumenty.
+
+**Strukturální rozhodnutí (6–11, 16, 18, 19, 26–28) jsou zapracovaná
+přímo v kódu.** Vizuální návrh v Claude Design je tím pádem volitelná
+iterace nad hotovým stavem, ne předpoklad. Otázka 6.7 byla vyřešena podle
+navrženého výchozího řešení: externí dispečink bydlí celý na stránce
+Pro dopravce, na Službách zůstal krátký blok s odkazem.
+
+**Bod 12 je uzavřený:** celovozové přepravy po České republice v perexu,
+kartách i JSON-LD (`areaServed: CZ`); CMR z webu zmizelo úplně — doklady
+uvádějí přepravní a dodací listy, požadavek na dopravce zní „pojištění
+odpovědnosti dopravce pro vnitrostátní přepravu po ČR".
+
+**Bod 4 je hotový jen zčásti.** Opravená jsou tvrzení směrem k poptávajícím
+(úvodní panel, kontaktní tabulka, perex kontaktu) a ze strukturovaných dat
+zmizela nepravdivá nepřetržitá provozní doba. Slib nonstopu u **placené
+služby externího dispečinku** na stránce Služby zůstává beze změny — čeká
+na odpověď v bodu 6.4.
 
 ### Technika a provoz
 
@@ -302,7 +351,7 @@ původnímu revizním zápisu.
 **Toto je blokující seznam.** Sedm rozhodnutí a jedna nezodpovězená otázka
 z revize.
 
-### 6.1 Čím odeslat formulář
+### 6.1 Čím odeslat formulář — ✅ rozhodnuto: PHP na VAS Hostingu
 
 Hosting je běžné FTP (VAS Hosting). Dvě cesty:
 
@@ -311,7 +360,7 @@ Hosting je běžné FTP (VAS Hosting). Dvě cesty:
 - **Externí služba** (Formspree, Web3Forms) — rychlejší nasazení, ale přibude
   do zásad jako další zpracovatel, u některých i přenos mimo EU.
 
-### 6.2 Čím měřit návštěvnost
+### 6.2 Čím měřit návštěvnost — ✅ rozhodnuto: Google Analytics 4 s lištou
 
 - **Google Analytics 4** → cookies + přenos do USA + **povinná lišta se
   souhlasem**.
@@ -325,7 +374,7 @@ Chybí **jméno, příjmení a označení role** (společník? provozní ředite
 prokurista?). V rejstříku je zapsaný jen Jakub Pěsta a ten na stránce „O nás"
 zůstat musí. Bez doplnění by si stránka odporovala sama se sebou.
 
-### 6.4 Platí nonstop i u placeného dispečinku?
+### 6.4 Platí nonstop i u placeného dispečinku? — ✅ platí, tvrzení zůstává
 
 Nová formulace „Provozní pohotovost 24/7 pro probíhající přepravy" opravuje
 tvrzení směrem k poptávajícím. Ale u **placené služby externího dispečinku**
@@ -333,7 +382,7 @@ web dnes slibuje „komunikace s řidiči nonstop, 24 hodin denně" a „služba
 i o víkendech, svátcích a v noci". To je jiný závazek — vůči platícímu
 dopravci. Změkčit i tam, nebo to tak skutečně platí?
 
-### 6.5 Mezinárodní přepravy — vůbec, nebo po dohodě?
+### 6.5 Mezinárodní přepravy — ✅ rozhodnuto: jen vnitrostátní, CMR odstraněno
 
 Rozhodnutí #12 říká „pouze vnitrostátně". Pokud se mezinárodní přeprava občas
 dělá a jen se nemá stavět do výlohy, formulace bude *„standardně vnitrostátně
@@ -371,7 +420,7 @@ kompletaci dokladů.
 Rozhodnutí z revize vypadají jako textové úpravy, ale některá mají následky
 jinde na webu. Kdyby se zapracovala izolovaně, web by si začal odporovat.
 
-### 7.1 Formuláře s backendem + měření → přepis zásad ve stejném nasazení
+### 7.1 Formuláře s backendem + měření → přepis zásad ve stejném nasazení — ✅ hotovo
 
 Dnes web neodesílá nic, neukládá nic, nemá cookies — a zásady zpracování to
 **na třech místech výslovně tvrdí**:
@@ -403,41 +452,50 @@ CMR je *mezinárodní* úmluva. U čistě vnitrostátní přepravy po ČR se odp
 | Pro dopravce, požadavky | „**CMR** pro mezinárodní přepravu, vnitrostátní pojištění pro ČR" | jen pojištění odpovědnosti pro vnitrostátní přepravu |
 | Registrační formulář | nápověda „např. Morava, celá ČR, **ČR + SK + DE**" | bez zahraničí |
 
-### 7.3 Tvrzení o 24/7 je na pěti místech ve třech významech
+### 7.3 Tvrzení o 24/7 bylo na pěti místech ve třech významech
 
-| Kde | Co tam dnes stojí |
+| Kde | Stav |
 |---|---|
-| Úvod, panel kontaktu | Dostupnost — Nonstop 24/7 |
-| Kontakt, tabulka | Provozní doba — Nonstop 24/7 |
-| Kontakt, perex | Jsme k zastižení nonstop, 24 hodin denně |
-| Služby, dispečink | Komunikace s řidiči nonstop, 24 hodin denně / služba běží i o víkendech, svátcích a v noci |
-| `index.html`, JSON-LD | `hoursAvailable` 00:00–23:59, sedm dní v týdnu |
+| Úvod, panel kontaktu | ✅ „Pohotovost — 24/7 pro probíhající přepravy" |
+| Kontakt, tabulka | ✅ „Provozní pohotovost — 24/7 pro probíhající přepravy" |
+| Kontakt, perex | ✅ přepsáno, pohotovost oddělena od vyřizování poptávek |
+| `index.html`, JSON-LD | ✅ `hoursAvailable` odstraněno |
+| Služby, dispečink | ⏳ „Komunikace s řidiči nonstop, 24 hodin denně" / „služba běží i o víkendech, svátcích a v noci" |
 
-První tři opraví nová formulace. Čtvrtý je jiný závazek — viz otázka 6.4.
-Pátý (strukturovaná data pro Google) se musí upravit tak jako tak.
+Poslední řádek je **jiný závazek** — vůči dopravci, který si dispečink platí,
+ne vůči náhodnému poptávajícímu. Zůstává beze změny do odpovědi na 6.4.
 
-### 7.4 Mizející menu musí fungovat bez JavaScriptu
+Ze strukturovaných dat byla nepřetržitá provozní doba odstraněna úplně, ne
+nahrazena. Skutečná doba, kdy firma vyřizuje **nové poptávky**, není známá —
+a raději žádný údaj než nepravdivý. Až bude známá, patří zpět jako
+`hoursAvailable` u `contactPoint`.
 
-Rozhodnutí #10 vyžaduje skript. Web dnes funguje i s vypnutými skripty.
-Skrývání menu se proto smí implementovat **jen jako nadstavba**: bez
-JavaScriptu zůstane menu normálně viditelné. Nikdy ne naopak.
+### 7.4 Mizející menu musí fungovat bez JavaScriptu — ✅ hotovo
 
-### 7.5 Karta „Rychlý kontakt" mizí → kontakty musí zůstat dosažitelné
+Implementováno jako nadstavba: JavaScript přidává hlavičce třídu
+`.schovana` při rolování dolů a odebírá ji při rolování nahoru, u
+otevřeného menu a při zaostření klávesnicí. Bez skriptů třída nikdy
+nepřibude a přilepená hlavička zůstává vidět. Předěl mobilního menu se
+posunul na 1080 px — širší menu se dvěma akcemi a telefonem by se jinak
+nevešlo.
 
-Rozhodnutí #27 nahrazuje kartu s telefonem, e-mailem a IČO dvěma kartami
-služeb. Telefon se přesouvá do menu (#11), ale je nutné ověřit, že se
-kontakt z první obrazovky nevytratí úplně — zejména na mobilu.
+### 7.5 Karta „Rychlý kontakt" mizí → kontakty musí zůstat dosažitelné — ✅ hotovo
 
-### 7.6 Nová stránka „Poptat přepravu"
+Kartu nahradily dvě karty služeb. Telefon je trvale v hlavičce: na
+širokém displeji celé číslo, na úzkém tlačítko „Zavolat". E-mail zůstává
+v patičce každé stránky a na stránkách Kontakt a Poptat přepravu.
 
-Rozhodnutí #18 zakládá osmou stránku. S ní: záznam v `sitemap.xml`, odkaz
-v navigaci i patičce **všech** stránek, vlastní `<head>` s canonical a OG,
-`<noscript>` blok, a přesměrování starého kotvícího odkazu
-`kontakt.html#poptavka`.
+### 7.6 Nová stránka „Poptat přepravu" — ✅ hotovo
+
+Stránka `poptat-prepravu.html` existuje: jediný poptávkový formulář,
+záznam v `sitemap.xml`, odkaz v navigaci i patičce všech stránek, vlastní
+`<head>` s canonical a OG, `<noscript>` blok. Všechny odkazy na starou
+kotvu `kontakt.html#poptavka` jsou přesměrované; stránka Kontakt formulář
+nemá a na novou stránku navádí.
 
 ---
 
-## 8. Cílová struktura po revizi
+## 8. Cílová struktura po revizi — ✅ zavedená (kromě přepisu zásad)
 
 ```
 index.html            Úvod — dvě rovnocenné služby, dvě karty, dvě akce
@@ -612,6 +670,6 @@ až s funkčním certifikátem na doméně — dřív by web znepřístupnilo.
 4. Zapracovat obsahová rozhodnutí (kapitola 5) do všech stránek najednou.
 5. Přepsat zásady zpracování osobních údajů — **ve stejném nasazení** jako
    formulář a měření.
-6. Ověřit v prohlížeči: sedm (osm) stránek, tři šířky, oba formuláře,
+6. Ověřit v prohlížeči: všech osm stránek, tři šířky, oba formuláře,
    bez JavaScriptu, tiskový režim.
 7. Nasadit na FTP, zapnout HTTPS, teprve pak odkomentovat přesměrování.

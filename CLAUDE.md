@@ -28,16 +28,20 @@ stanoven.
 ```
 index.html                   Úvodní stránka
 sluzby.html                  Spedice a externí dispečink
-pro-dopravce.html            Podmínky spolupráce + registrační formulář
+pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
-kontakt.html                 Kontaktní údaje + poptávkový formulář
+poptat-prepravu.html         Jediný poptávkový formulář
+kontakt.html                 Kontaktní údaje — na formulář jen navádí
+odeslani.php                 Server: odeslání obou formulářů e-mailem
+odeslano.html                Potvrzení po odeslání (noindex)
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Ikona pro starší prohlížeče (musí zůstat v kořeni)
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml      Pro vyhledávače
 assets/css/firemni-styl.css  Jediná definice barev a komponent
-assets/js/main.js            Mobilní menu a odesílání formulářů
+assets/js/main.js            Mobilní menu, schovávání hlavičky, stav formulářů
+assets/js/mereni.js          Google Analytics + lišta souhlasu (ID je PLACEHOLDER)
 assets/img/                  Logo, favicon, náhledový obrázek
 README.md                    Podrobná dokumentace webu — čti ji taky
 PREDANI-WEBU.md              Předávací soubor pro revizi — čti před obsahovými změnami
@@ -49,7 +53,7 @@ s formulářem, CMR versus vnitrostátní rozsah, tvrzení o 24/7 na pěti míst
 jsou v `PREDANI-WEBU.md`. Než začneš měnit obsah, přečti si ho.
 
 Hlavička, patička a `<head>` jsou v každé stránce zvlášť. **Když měníš navigaci,
-patičku nebo meta značky, uprav všech sedm stránek.** Neexistuje šablonovací vrstva,
+patičku nebo meta značky, uprav všech devět stránek.** Neexistuje šablonovací vrstva,
 která by to udělala za tebe.
 
 ## Spuštění a ověření
@@ -62,9 +66,9 @@ Testy nejsou. Změny se ověřují vykreslením v prohlížeči — v prostřed�
 a Playwright (`/opt/node22/lib/node_modules/playwright`, `PLAYWRIGHT_BROWSERS_PATH`
 je nastavená, `playwright install` nespouštěj). Po každé netriviální změně projeď:
 
-- všech sedm stránek: stav 200, žádné chyby v konzoli,
+- všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
-- oba formuláře: skládají korektní `mailto:` a povinná pole nejdou obejít,
+- oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -86,31 +90,37 @@ Světlost putuje jen o pár procent — má to číst jako kov, ne jako lesklý 
 se odvozují z firemních barev, samotné firemní barvy se nemění.
 
 Jedinou výjimkou je `<meta name="theme-color" content="#262F32">` — meta značka na CSS
-proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech sedmi
-stránek. **Když se změní odstín hlavičky, změň i těch sedm meta značek**, jinak lišta
+proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech devíti
+stránek. **Když se změní odstín hlavičky, změň i těch devět meta značek**, jinak lišta
 prohlížeče na mobilu zůstane ve staré barvě.
 
 Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
 firemní barvy na web nepatří. Kovové odlesky tmavých ploch jsou jediná povolená výjimka
 a jsou celé v proměnných výše — nepřidávej gradienty ad hoc do jednotlivých pravidel.
 
-**Formuláře nemají backend.** Poskládají text a otevřou poštovního klienta
-návštěvníka (`mailto:`). Chování řídí `assets/js/main.js` přes data-atributy v HTML —
-je to smlouva, kterou nic nehlídá, takže se tiše rozbije:
+**Formuláře odesílá server.** Oba formuláře (poptávka na `poptat-prepravu.html`,
+registrace na `pro-dopravce.html`) posílají běžný POST na `odeslani.php` — fungují
+proto i bez JavaScriptu; skript jen po odeslání zablokuje tlačítko. Smlouva mezi
+HTML a PHP:
 
-| Atribut | Kde | Co dělá |
+| Co | Kde | Pravidlo |
 |---|---|---|
-| `data-mailto` | `<form>` | bez něj se formulář vůbec neodchytí a odešle se naprázdno |
-| `data-prijemce` | `<form>` | adresát; výchozí `doprava@idispecink.cz` |
-| `data-predmet` | `<form>` | předmět; výchozí „Poptávka z webu" |
-| `data-popisek` | pole | popisek řádku v těle e-mailu; bez něj se použije `name` |
-| `.formular-stav` | prvek ve formuláři | sem se vypíše hláška po odeslání |
+| `name="formular"` | skryté pole | `poptavka` nebo `registrace` — vybírá sadu polí v PHP |
+| `name` polí | HTML i PHP | popisky řádků e-mailu drží pole `$FORMULARE` v PHP; pole, které tam není, se do e-mailu nedostane |
+| `name="www"` | skryté pole `.nevyplnovat` | honeypot — vyplněné znamená robota, zpráva se zahodí |
+| povinná pole | HTML `required` i PHP `povinna` | musí se shodovat, jinak server odmítne, co prohlížeč pustil |
 
-Pole bez `name` a prázdná pole se do e-mailu nedávají. Formuláře jsou na
-`kontakt.html` a `pro-dopravce.html`. Web proto nesbírá žádná data, nepoužívá cookies ani měření
-návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pokud formuláře
-přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
-upravit i `zasady-osobnich-udaju.html`.
+Po úspěchu server přesměruje na `odeslano.html` (POST–redirect–GET). Hlavička
+`From` je `web@idispecink.cz` — aby pošta nekončila ve spamu, musí SPF záznam
+domény zahrnovat servery VAS Hostingu (viz README).
+
+**Měření návštěvnosti** řídí `assets/js/mereni.js`: Google Analytics se načte
+až po souhlasu v liště, volba se drží v localStorage (`ga-souhlas`), tlačítko
+„Nastavení cookies" v patičce ji kdykoliv změní. Konstanta `GA_MERENI` je
+**prázdný PLACEHOLDER** — měřicí ID vydá administrace GA a nelze si ho
+vymyslet; dokud je prázdné, nic se neměří a lišta se nezobrazuje. Formuláře
+i měření jsou popsané v `zasady-osobnich-udaju.html` — každá změna jednoho
+znamená úpravu druhého ve stejném commitu.
 
 **Placeholdery.** V současném obsahu žádné nejsou — všechny firemní údaje jsou
 doplněné. Když ale narazíš na údaj, který ti chybí, **nevymýšlej ho**: označ místo

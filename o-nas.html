@@ -26,7 +26,7 @@
   <!-- Bez JavaScriptu tlačítko Menu nefunguje. Rozbalovací menu proto
        na úzkých displejích zobrazíme rovnou a tlačítko schováme. -->
   <style>
-    @media (max-width: 880px) {
+    @media (max-width: 1080px) {
       .menu-prepinac { display: none; }
       .hlavicka .obal { flex-wrap: wrap; }
       #hlavni-menu {
@@ -41,6 +41,7 @@
       }
       #hlavni-menu a { padding: 6px 0; border-bottom: 2px solid transparent; }
       #hlavni-menu a[aria-current="page"] { border-bottom-color: var(--zluta); }
+      #hlavni-menu a.tlacitko { border: 1px solid var(--zluta); padding: 6px 12px; margin: 4px 0 0; }
     }
   </style>
 </noscript>
@@ -53,16 +54,23 @@
     <a class="logo" href="index.html">
       <img src="assets/img/logo-idispecink.svg" alt="iDispečink.cz" width="240" height="38">
     </a>
-    <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="hlavni-menu">
-      Menu
-    </button>
     <nav class="menu" id="hlavni-menu" aria-label="Hlavní navigace">
       <a href="index.html">Úvod</a>
       <a href="sluzby.html">Služby</a>
-      <a href="pro-dopravce.html">Pro dopravce</a>
       <a href="o-nas.html" aria-current="page">O nás</a>
       <a href="kontakt.html">Kontakt</a>
+      <a class="tlacitko obrys" href="pro-dopravce.html">Pro dopravce</a>
+      <a class="tlacitko obrys" href="poptat-prepravu.html">Poptat přepravu</a>
     </nav>
+    <div class="hlavicka-akce">
+      <a class="telefon" href="tel:+420734580243">
+        <span class="telefon-cislo cislo">+420 734 580 243</span>
+        <span class="telefon-kratky">Zavolat</span>
+      </a>
+      <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="hlavni-menu">
+        Menu
+      </button>
+    </div>
   </div>
 </header>
 
@@ -73,7 +81,7 @@
     <h1>O společnosti</h1>
     <p class="uvod">
       iDispečink.cz s.r.o. se zabývá organizací přeprav a poskytováním
-      dispečerských služeb. Pracujeme v malém týmu s vlastním informačním
+      dispečerských služeb. Pracujeme v malém týmu s vlastním provozním
       systémem, který zajišťuje přehled o všech zakázkách.
     </p>
   </div>
@@ -114,7 +122,7 @@
   <div class="obal">
     <div class="sekce-hlava">
       <span class="nadpis-stitek">Technologie</span>
-      <h2>Vlastní TMS</h2>
+      <h2>Vlastní provozní systém</h2>
       <p>Namísto krabicového řešení provozujeme vlastní systém, postavený podle skutečného průběhu naší práce.</p>
     </div>
     <div class="mrizka tri">
@@ -145,7 +153,7 @@
           <li><span class="klic">IČO</span><span class="hodnota cislo">23359765</span></li>
           <li><span class="klic">DIČ</span><span class="hodnota cislo">CZ23359765</span></li>
           <li><span class="klic">Sídlo</span><span class="hodnota">Příčná 1892/4<br>110 00 Praha 1 – Nové Město</span></li>
-          <li><span class="klic">Zápis v OR</span><span class="hodnota">C 425222 vedená u Městského soudu v Praze</span></li>
+          <li><span class="klic">Spisová značka</span><span class="hodnota">C 425222 vedená u Městského soudu v Praze</span></li>
           <li><span class="klic">Datum vzniku</span><span class="hodnota">5. června 2025</span></li>
           <li><span class="klic">Jednatel</span><span class="hodnota">Jakub Pěsta</span></li>
           <li><span class="klic">Telefon</span><span class="hodnota"><a href="tel:+420734580243">+420 734 580 243</a></span></li>
@@ -155,7 +163,7 @@
 
       <div>
         <div class="karta">
-          <h3>Kde nás najdete</h3>
+          <h3>Sídlo společnosti</h3>
           <p>
             <b>iDispečink.cz s.r.o.</b><br>
             Příčná 1892/4<br>
@@ -164,6 +172,10 @@
           <p style="margin-top:14px">
             Telefon: <a href="tel:+420734580243">+420 734 580 243</a><br>
             E-mail: <a href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a>
+          </p>
+          <p style="margin-top:14px;color:var(--text-tlum);font-size:.9rem">
+            Jde o zapsané sídlo společnosti, nikoliv o provozovnu s odbavením
+            zásilek. Zakázky vyřizujeme telefonicky a e-mailem.
           </p>
         </div>
       </div>
@@ -177,7 +189,7 @@
       <p>Kontaktujte nás. Rádi vše vysvětlíme podrobněji.</p>
     </div>
     <div class="tlacitka" style="margin-top:0">
-      <a class="tlacitko" href="kontakt.html#poptavka">Napsat nám</a>
+      <a class="tlacitko" href="poptat-prepravu.html">Napsat nám</a>
     </div>
   </div>
 </section>
@@ -198,14 +210,15 @@
           <li><a href="index.html">Úvod</a></li>
           <li><a href="sluzby.html">Služby</a></li>
           <li><a href="o-nas.html">O nás</a></li>
+          <li><a href="kontakt.html">Kontakt</a></li>
         </ul>
       </div>
       <div>
         <h2>Spolupráce</h2>
         <ul>
           <li><a href="pro-dopravce.html">Pro dopravce</a></li>
-          <li><a href="kontakt.html#poptavka">Poptat přepravu</a></li>
-          <li><a href="kontakt.html">Kontakt</a></li>
+          <li><a href="pro-dopravce.html#externi-dispecink">Externí dispečink</a></li>
+          <li><a href="poptat-prepravu.html">Poptat přepravu</a></li>
         </ul>
       </div>
       <div>
@@ -218,12 +231,13 @@
     </div>
     <div class="id-paticka">
       <span>iDispečink.cz s.r.o. · Příčná 1892/4, 110 00 Praha 1 · IČO 23359765 · DIČ CZ23359765</span>
-      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a></span>
+      <span><a href="zasady-osobnich-udaju.html">Zásady zpracování osobních údajů</a> <button type="button" class="cookies-nastaveni" hidden>Nastavení cookies</button></span>
       <span>© <span data-rok>2026</span> iDispečink.cz s.r.o.</span>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/mereni.js"></script>
 </body>
 </html>
