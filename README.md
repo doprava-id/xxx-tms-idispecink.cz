@@ -40,7 +40,8 @@ antracitových tvarů na krémovou.
 | `logo-idispecink-tmavy.svg` | vodorovné, na světlé pozadí — dokumenty, faktury |
 | `logo-idispecink-ctverec.svg` | svislé (původní sazba), na světlé pozadí |
 | `logo-idispecink-ctverec-tmave-pozadi.svg` | svislé, na tmavé pozadí |
-| `znacka.svg`, `znacka-tmava.svg` | samotný piktogram bez nápisu |
+| `znacka.svg` | samotný piktogram bez nápisu, na světlé pozadí |
+| `znacka-tmava.svg` | samotný piktogram bez nápisu, na tmavé pozadí |
 | `favicon.svg` | ikona v záložce — čtvercový výřez s vozem |
 | `favicon.ico` | tatáž ikona pro starší prohlížeče; leží v kořeni, protože prohlížeče i některé nástroje si ji vyžádají z `/favicon.ico` bez ohledu na odkazy v HTML |
 | `apple-touch-icon.png` | ikona po přidání webu na plochu mobilu |
@@ -62,6 +63,13 @@ linka: antracitová cesta má `stroke="#F0EDE6"` o tloušťce **6,5** jednotky
 souřadnic původního PDF, s `paint-order="stroke fill"`, takže linka vede vně
 tvaru a nesnídá výplň. Nápis je na tmavém pozadí plnou krémovou — obrysové
 písmo se špatně čte.
+
+Poznat variantu pro tmavé pozadí jde spolehlivě jen podle obsahu, ne podle názvu:
+krémovou linku (`stroke="#F0EDE6"` s `paint-order`) mají právě `logo-idispecink.svg`,
+`logo-idispecink-ctverec-tmave-pozadi.svg` a `znacka-tmava.svg`. **Přípony `-tmavy`
+a `-tmava` přitom znamenají opak:** `logo-idispecink-tmavy.svg` je tmavě zbarvené logo
+na světlé pozadí, kdežto `znacka-tmava.svg` je varianta pro tmavé pozadí. Než soubor
+někam vložíte, ověřte si `stroke`.
 
 Tloušťka je kompromis ověřený vykreslením: pod 3 jednotky oddělení mizí
 ve velikosti hlavičky (38 px) i ve faviconu, nad 8 začne linka požírat okna
@@ -148,8 +156,8 @@ tiskový blok přebíjí přes `!important` — při úpravách stránek na to p
 ## Nasazení
 
 Soubory nakopírujte do kořene webu — celý obsah repozitáře kromě `README.md`,
-`CLAUDE.md`, `PREDANI-WEBU.md` a `LICENSE`. Web nic nekompiluje, takže funguje
-hned po nahrání.
+`CLAUDE.md`, `PREDANI-WEBU.md`, `LICENSE` a `.gitignore`; ty na hosting
+nepatří. Web nic nekompiluje, takže funguje hned po nahrání.
 
 `.htaccess` nastaví chybovou stránku, kompresi, cache a bezpečnostní
 hlavičky. Na hostingu bez Apache se ignoruje a nic nerozbije; tytéž věci

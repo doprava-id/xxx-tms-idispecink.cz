@@ -1,7 +1,7 @@
 # Předávací soubor — web iDispečink.cz
 
 **Datum:** 30. 8. 2026
-**Verze webu:** větev `claude/vytvor-webovou-stranku-2h1skc`, poslední commit `48ce056`
+**Verze webu:** větev `main`
 **Stav:** web je hotový a funkční. Proběhla obsahová revize (27. 8. 2026), jejíž
 závěry **zatím nejsou zapracované**. Tento soubor je zadání pro ně.
 
@@ -119,6 +119,7 @@ robots.txt, sitemap.xml
 assets/css/firemni-styl.css  Jediná definice barev a komponent
 assets/js/main.js            Mobilní menu a odesílání formulářů
 assets/img/                  Logo, favicon, náhledový obrázek
+.gitignore                   Nekomitovat: přihlašovací údaje, provozní data
 ```
 
 **Hlavička, patička a `<head>` jsou v každé stránce zvlášť.** Neexistuje
@@ -166,24 +167,49 @@ stránky si vlastní barvy nedefinují a nesmí začít.
 | `--zluta-svetla` | `#FFF3DA` | světlé zvýraznění |
 | `--antracit` | `#343F41` | firemní tmavá |
 | `--krem` | `#F0EDE6` | firemní světlá, barva textu |
-| `--pozadi` | `#23292B` | pozadí stránky |
-| `--povrch` | `#2A3133` | karty, mobilní menu |
-| `--povrch-2` | `#343F41` | druhotné plochy |
-| `--linka` | `#414D50` | ohraničení |
-| `--linka-slaba` | `#333C3E` | jemné předěly sekcí |
+| `--pozadi` | `#14191B` | pozadí stránky |
+| `--povrch` | `#1C2325` | karty, mobilní menu |
+| `--povrch-2` | `#262F32` | druhotné plochy |
+| `--linka` | `#3A4649` | dekorativní ohraničení |
+| `--linka-slaba` | `#262E30` | jemné předěly sekcí |
+| `--linka-pole` | `#5E7276` | ohraničení formulářových polí — **nesnižovat** |
 | `--text` | `#F0EDE6` | text |
 | `--text-tlum` | `#A5AEB0` | tlumený text |
 
 Stavové barvy: OK `#7BD69A` / `#16301F`, pozor `#F0C55E` / `#33290F`,
 chyba `#F0868F` / `#35171A`.
 
+`--linka-pole` je světlejší schválně: ohraničení ovládacího prvku musí mít
+kontrast aspoň 3 : 1 proti vnitřku pole i proti ploše formuláře (WCAG 1.4.11).
+Dekorativní `--linka` ten práh splňovat nemusí.
+
+Barva hlavičky je navíc natvrdo v `<meta name="theme-color" content="#262F32">`
+**ve všech sedmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
+se odstín hlavičky, musí se změnit i těch sedm značek, jinak lišta prohlížeče
+na mobilu zůstane ve staré barvě.
+
 ### Pravidla
 
-> **Bez gradientů, stínů a dekorací. Plocha, linka, text.**
+> **Plocha, linka, text.**
 
-Toto je závazné. Žádné `box-shadow`, žádné `linear-gradient`, žádné dekorativní
-tvary, žádné ikonové sady. Rozlišení prvků se dělá **plochou** (`--povrch`
-proti `--pozadi`), **linkou** (1 px `--linka`) a **typografií**.
+Rozlišení prvků se dělá **plochou** (`--povrch` proti `--pozadi`), **linkou**
+(1 px `--linka`) a **typografií**. Žádné vržené stíny, žádná záře, žádné
+dekorativní tvary, žádné ikonové sady, žádné barevné přechody přes firemní
+barvy.
+
+**Jedinou povolenou dekorací jsou kovové odlesky tmavých ploch.** Jsou celé
+v proměnných a nesmí se přidávat ad hoc do jednotlivých pravidel:
+
+| Proměnná | Co je |
+|---|---|
+| `--kov-pozadi` | přechod pod pozadím stránky |
+| `--kov-povrch` | přechod pod plochami sekcí a karet |
+| `--kov-vyssi` | přechod pod vyvýšenými plochami |
+| `--brouseny` | broušená textura (jemné svislé linky) |
+| `--odlesk`, `--odlesk-silny` | světlá hrana nahoře (`inset` box-shadow) |
+
+Světlost putuje jen o pár procent — má to číst jako **kov, ne jako lesklý
+plast**. Plochy se odvozují z firemních barev; samotné firemní barvy se nemění.
 
 Písmo: `"Segoe UI", Inter, system-ui, -apple-system, "Helvetica Neue", Arial,
 sans-serif`. Čísla: monospace s `tabular-nums`. Základ 17 px, řádkování 1,65.
@@ -494,7 +520,8 @@ denními Trello nástěnkami a exporty do Excelu. **Nic z té automatizace v tom
 repozitáři není** a nepatří sem — běží v samostatné lokální pipeline
 a v Claude skillech.
 
-Do repozitáře **nekopírovat**:
+**Repozitář je veřejný.** Cokoliv se do něj commitne, je čitelné komukoliv —
+i po pozdějším smazání zůstane v historii. Do repozitáře **nekopírovat**:
 
 - identifikátory Airtable bází a tabulek,
 - přihlašovací údaje k Blue Yonderu,
@@ -558,7 +585,8 @@ a 390 px.
 
 | Co | Kde |
 |---|---|
-| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub, soukromý) |
+| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub) |
+| Viditelnost | **veřejný** — cokoliv se sem commitne, je čitelné komukoliv |
 | Výchozí větev | `main` |
 | Pracovní větev | `claude/vytvor-webovou-stranku-2h1skc` |
 | Podrobná dokumentace webu | `README.md` |
@@ -568,8 +596,8 @@ a 390 px.
 | Licence | Apache 2.0 (`LICENSE`) |
 
 Na hosting se nahrává obsah repozitáře **kromě** `README.md`, `CLAUDE.md`,
-`PREDANI-WEBU.md` a `LICENSE`. Soubor `.htaccess` začíná tečkou — většina FTP
-klientů ho ve výchozím nastavení nezobrazí ani nenahraje.
+`PREDANI-WEBU.md`, `LICENSE` a `.gitignore`. Soubor `.htaccess` začíná tečkou —
+většina FTP klientů ho ve výchozím nastavení nezobrazí ani nenahraje.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat
 až s funkčním certifikátem na doméně — dřív by web znepřístupnilo.

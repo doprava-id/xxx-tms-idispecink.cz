@@ -12,7 +12,8 @@ Ověřená fakta o repozitáři:
 
 | | |
 |---|---|
-| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub, soukromý) |
+| Repozitář | `doprava-id/xxx-tms-idispecink.cz` (GitHub) |
+| Viditelnost | **veřejný** — cokoliv se sem commitne, je čitelné komukoliv |
 | Výchozí větev | `main` |
 | Licence | Apache License 2.0 |
 | Runtime | žádný — statické soubory |
@@ -72,16 +73,41 @@ Netvrď, že něco funguje, dokud jsi to nevykreslil a neviděl.
 ## Konvence
 
 **Jazyk.** Obsah, názvy tříd, identifikátory v JavaScriptu, komentáře i commit
-messages jsou česky (`.id-tabulka`, `.doplnit`, `sestav_mailto`, `prepinac`). Drž se
-toho — nemíchej angličtinu do existujícího kódu.
+messages jsou česky (`.id-tabulka`, `.doplnit`, `prepinac`, `formulare`, `prijemce`,
+`radky`, `spousteci`). Drž se toho — nemíchej angličtinu do existujícího kódu.
 
 **Barvy jsou na jednom místě.** Žlutá `#F0B41E`, antracit `#343F41`, krém `#F0EDE6`.
 Jsou definované jako CSS proměnné v `assets/css/firemni-styl.css`. Jednotlivé stránky
-si vlastní barvy nedefinují a nesmí začít. Firemní styl zakazuje gradienty, stíny
-a dekorace: „Plocha, linka, text."
+si vlastní barvy nedefinují a nesmí začít.
+
+Tmavé plochy pod nimi jsou **kovové**: `--kov-pozadi`, `--kov-povrch` a `--kov-vyssi`
+jsou jemné přechody, `--brouseny` je broušená textura a `--odlesk` světlá hrana nahoře.
+Světlost putuje jen o pár procent — má to číst jako kov, ne jako lesklý plast. Plochy
+se odvozují z firemních barev, samotné firemní barvy se nemění.
+
+Jedinou výjimkou je `<meta name="theme-color" content="#262F32">` — meta značka na CSS
+proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech sedmi
+stránek. **Když se změní odstín hlavičky, změň i těch sedm meta značek**, jinak lišta
+prohlížeče na mobilu zůstane ve staré barvě.
+
+Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
+firemní barvy na web nepatří. Kovové odlesky tmavých ploch jsou jediná povolená výjimka
+a jsou celé v proměnných výše — nepřidávej gradienty ad hoc do jednotlivých pravidel.
 
 **Formuláře nemají backend.** Poskládají text a otevřou poštovního klienta
-návštěvníka (`mailto:`). Web proto nesbírá žádná data, nepoužívá cookies ani měření
+návštěvníka (`mailto:`). Chování řídí `assets/js/main.js` přes data-atributy v HTML —
+je to smlouva, kterou nic nehlídá, takže se tiše rozbije:
+
+| Atribut | Kde | Co dělá |
+|---|---|---|
+| `data-mailto` | `<form>` | bez něj se formulář vůbec neodchytí a odešle se naprázdno |
+| `data-prijemce` | `<form>` | adresát; výchozí `doprava@idispecink.cz` |
+| `data-predmet` | `<form>` | předmět; výchozí „Poptávka z webu" |
+| `data-popisek` | pole | popisek řádku v těle e-mailu; bez něj se použije `name` |
+| `.formular-stav` | prvek ve formuláři | sem se vypíše hláška po odeslání |
+
+Pole bez `name` a prázdná pole se do e-mailu nedávají. Formuláře jsou na
+`kontakt.html` a `pro-dopravce.html`. Web proto nesbírá žádná data, nepoužívá cookies ani měření
 návštěvnosti — a zásady zpracování údajů to výslovně uvádějí. Pokud formuláře
 přepojíš na službu typu Formspree, začne docházet ke zpracování údajů a je nutné
 upravit i `zasady-osobnich-udaju.html`.
@@ -111,8 +137,9 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 
 ## Nasazení
 
-Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `PREDANI-WEBU.md` a `LICENSE`
-se nahraje do kořene webu. `.htaccess` začíná tečkou — většina FTP klientů ho ve výchozím nastavení
+Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `PREDANI-WEBU.md`, `LICENSE`
+a `.gitignore` se nahraje do kořene webu; ty na hosting nepatří. `.htaccess`
+začíná tečkou — většina FTP klientů ho ve výchozím nastavení
 nezobrazí ani nenahraje.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat až
@@ -128,6 +155,11 @@ v samostatné lokální pipeline a v Claude skillech.
 Do repozitáře nekopíruj identifikátory Airtable bází a tabulek, přihlašovací údaje
 k Blue Yonderu, kódy Trello nástěnek ani cesty na pracovní stanici. Zmínit systém
 jménem je v pořádku, kopírovat jeho konfiguraci ne.
+
+**Repozitář je veřejný.** Commit je publikace: obsah zůstane v historii i poté, co ho
+další commit smaže, takže uniklý klíč se musí zneplatnit, ne jen odstranit. U webu
+samotného to nevadí — je stejně veřejný —, ale provozní data a přístupy sem nesmí
+ani na okamžik.
 
 ## Práce s Gitem
 
