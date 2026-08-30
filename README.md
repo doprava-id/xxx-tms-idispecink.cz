@@ -129,7 +129,7 @@ grep -rn "doplnit\|PLACEHOLDER" *.html
 | Jednatel | Jakub Pěsta |
 | Telefon | +420 734 580 243 |
 | E-mail | doprava@idispecink.cz |
-| Provozní doba | nonstop 24/7 |
+| Provozní pohotovost | 24/7 pro probíhající přepravy |
 
 Objevují se na stránkách *Kontakt*, *O nás*, v zásadách zpracování údajů,
 v patičce všech stránek a ve strukturovaných datech (JSON-LD) na úvodní stránce.

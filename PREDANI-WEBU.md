@@ -239,6 +239,24 @@ ve všech stránkách, jinak stránka při načítání poskočí.
 Následující rozhodnutí padla a **mají se zapracovat**. Číslování odpovídá
 původnímu revizním zápisu.
 
+### Stav zapracování
+
+Zapracovaná je ta část revize, která nezávisí na otevřených otázkách
+z kapitoly 6 — samé faktické opravy:
+
+| Hotovo | Čeká na rozhodnutí | Čeká na vizuální návrh |
+|---|---|---|
+| 4 (částečně), 13, 14, 17, 24, 25, 29, 30, 31 | 1, 3, 5, 12, 20, 21, 22 | 6, 7, 8, 9, 10, 11, 16, 18, 19, 26, 27, 28 |
+
+Rozhodnutí 15 a 23 nevyžadovala zásah — web ani dřív nezveřejňoval seznam
+vyloučených přeprav ani obchodní dokumenty.
+
+**Bod 4 je hotový jen zčásti.** Opravená jsou tvrzení směrem k poptávajícím
+(úvodní panel, kontaktní tabulka, perex kontaktu) a ze strukturovaných dat
+zmizela nepravdivá nepřetržitá provozní doba. Slib nonstopu u **placené
+služby externího dispečinku** na stránce Služby zůstává beze změny — čeká
+na odpověď v bodu 6.4.
+
 ### Technika a provoz
 
 | # | Rozhodnutí |
@@ -403,18 +421,23 @@ CMR je *mezinárodní* úmluva. U čistě vnitrostátní přepravy po ČR se odp
 | Pro dopravce, požadavky | „**CMR** pro mezinárodní přepravu, vnitrostátní pojištění pro ČR" | jen pojištění odpovědnosti pro vnitrostátní přepravu |
 | Registrační formulář | nápověda „např. Morava, celá ČR, **ČR + SK + DE**" | bez zahraničí |
 
-### 7.3 Tvrzení o 24/7 je na pěti místech ve třech významech
+### 7.3 Tvrzení o 24/7 bylo na pěti místech ve třech významech
 
-| Kde | Co tam dnes stojí |
+| Kde | Stav |
 |---|---|
-| Úvod, panel kontaktu | Dostupnost — Nonstop 24/7 |
-| Kontakt, tabulka | Provozní doba — Nonstop 24/7 |
-| Kontakt, perex | Jsme k zastižení nonstop, 24 hodin denně |
-| Služby, dispečink | Komunikace s řidiči nonstop, 24 hodin denně / služba běží i o víkendech, svátcích a v noci |
-| `index.html`, JSON-LD | `hoursAvailable` 00:00–23:59, sedm dní v týdnu |
+| Úvod, panel kontaktu | ✅ „Pohotovost — 24/7 pro probíhající přepravy" |
+| Kontakt, tabulka | ✅ „Provozní pohotovost — 24/7 pro probíhající přepravy" |
+| Kontakt, perex | ✅ přepsáno, pohotovost oddělena od vyřizování poptávek |
+| `index.html`, JSON-LD | ✅ `hoursAvailable` odstraněno |
+| Služby, dispečink | ⏳ „Komunikace s řidiči nonstop, 24 hodin denně" / „služba běží i o víkendech, svátcích a v noci" |
 
-První tři opraví nová formulace. Čtvrtý je jiný závazek — viz otázka 6.4.
-Pátý (strukturovaná data pro Google) se musí upravit tak jako tak.
+Poslední řádek je **jiný závazek** — vůči dopravci, který si dispečink platí,
+ne vůči náhodnému poptávajícímu. Zůstává beze změny do odpovědi na 6.4.
+
+Ze strukturovaných dat byla nepřetržitá provozní doba odstraněna úplně, ne
+nahrazena. Skutečná doba, kdy firma vyřizuje **nové poptávky**, není známá —
+a raději žádný údaj než nepravdivý. Až bude známá, patří zpět jako
+`hoursAvailable` u `contactPoint`.
 
 ### 7.4 Mizející menu musí fungovat bez JavaScriptu
 
