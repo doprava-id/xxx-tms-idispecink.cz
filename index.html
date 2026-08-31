@@ -80,6 +80,14 @@
 <body>
 <a class="preskocit" href="#obsah">Přeskočit na obsah</a>
 
+<div class="horni-pruh">
+  <div class="obal">
+    <span class="pohotovost">Pohotovost <b>24/7</b> u probíhajících přeprav</span>
+    <span class="jen-siroke">Vnitrostátní přepravy po ČR</span>
+    <a class="jen-siroke" href="mailto:doprava@idispecink.cz">doprava@idispecink.cz</a>
+  </div>
+</div>
+
 <header class="hlavicka">
   <div class="obal">
     <a class="logo" href="index.html">
@@ -118,100 +126,188 @@
       </p>
     </div>
 
-    <div class="hero-karty">
-      <article class="karta akcent">
-        <h2>Přeprava a spedice</h2>
-        <p>Celovozové přepravy po České republice — od výběru dopravce po předání dokladů.</p>
-        <a class="tlacitko" href="poptat-prepravu.html">Poptat přepravu</a>
-      </article>
-      <article class="karta akcent">
-        <h2>Externí dispečink</h2>
-        <p>Vytěžování vozů, plánování jízd a komunikace s řidiči — jako služba pro dopravce.</p>
-        <a class="tlacitko" href="pro-dopravce.html#externi-dispecink">Chci externí dispečink</a>
-      </article>
-    </div>
+    <aside class="hero-panel" aria-label="Základní údaje">
+      <div class="panel-hlava">Ve zkratce</div>
+      <ul>
+        <li><span>Přepravy</span><span>Celovozové po ČR</span></li>
+        <li><span>Pohotovost</span><span>24/7 u probíhajících přeprav</span></li>
+        <li><span>Evidence</span><span>Vlastní provozní systém</span></li>
+        <li><span>Sídlo</span><span>Praha</span></li>
+      </ul>
+    </aside>
   </div>
 </section>
 
 <section class="sekce">
   <div class="obal">
     <div class="sekce-hlava">
-      <span class="nadpis-stitek">Služby</span>
-      <h2>Dvě služby, jedno kontaktní místo</h2>
-      <p>Přepravní agendu přebíráme v celém rozsahu — od výběru dopravce přes plánování až po zpracování dokladů.</p>
+      <span class="nadpis-stitek">Nabídka</span>
+      <h2>Co u nás hledáte?</h2>
+      <p>Nabídku máme rozdělenou podle toho, jestli přepravu poptáváte, nebo ji vozíte.</p>
     </div>
 
-    <div class="mrizka dva">
-      <article class="karta akcent">
-        <h3>Spedice a organizace přeprav</h3>
-        <p>
-          Zajistíme prověřeného dopravce, naplánujeme trasu a termíny, dohlédneme
-          na nakládku i vykládku a zpracujeme doklady. Komunikujete s jedním
-          kontaktním místem namísto s několika dopravci.
-        </p>
-        <ul class="seznam" style="margin-top:16px">
-          <li>Výběr a prověření dopravce</li>
-          <li>Plánování tras a termínů</li>
-          <li>Dohled nad zásilkou až do vykládky</li>
-          <li>Kompletace a předání dokladů</li>
-        </ul>
-      </article>
+    <fieldset class="prepinac-oken">
+      <legend class="jen-pro-ctecky">Vyberte, která nabídka se má zobrazit</legend>
+      <input type="radio" name="okno" id="okno-zakaznik" checked>
+      <input type="radio" name="okno" id="okno-dopravce">
 
-      <article class="karta akcent">
-        <h3>Externí dispečink pro dopravce</h3>
-        <p>
-          Převezmeme vytěžování vozů, denní komunikaci s řidiči a plánování jízd.
-          Dispečink poskytujeme formou služby — bez nutnosti obsazovat další
-          stálou pozici.
-        </p>
-        <ul class="seznam" style="margin-top:16px">
-          <li>Vytěžování vozů a hledání nákladů</li>
-          <li>Denní plánování jízd</li>
-          <li>Komunikace s řidiči</li>
-          <li>Přehled a podklady k fakturaci</li>
-        </ul>
-      </article>
-    </div>
+      <div class="zalozky">
+        <label for="okno-zakaznik">
+          <b>Potřebuji přepravit zboží</b>
+          <span>Celovozové přepravy po České republice</span>
+        </label>
+        <label for="okno-dopravce">
+          <b>Jsem dopravce</b>
+          <span>Vytížení vozů nebo externí dispečink</span>
+        </label>
+      </div>
 
-    <div class="tlacitka">
-      <a class="tlacitko obrys" href="sluzby.html">Podrobnosti o službách</a>
-    </div>
+      <div class="okna">
+
+        <!-- Okno pro zákazníky -->
+        <div class="okno okno-zakaznik">
+          <div class="okno-hlava">
+            <h3>Přeprava a spedice</h3>
+            <p>
+              Přepravní agendu přebíráme v celém rozsahu — od výběru dopravce
+              přes plánování až po předání dokladů. Komunikujete s jedním
+              kontaktním místem namísto s několika dopravci.
+            </p>
+          </div>
+
+          <div class="mrizka dva" style="gap:32px">
+            <div class="karta akcent">
+              <h4>Co pro vás zajistíme</h4>
+              <ul class="seznam">
+                <li><b>Výběr dopravce</b> — z prověřené sítě smluvních dopravců</li>
+                <li><b>Cena předem</b> — sjednaná před zahájením nakládky</li>
+                <li><b>Plánování trasy a termínů</b> včetně návazností a časových oken</li>
+                <li><b>Dohled nad zásilkou</b> — potvrzení nakládky i vykládky a průběžná komunikace s řidičem</li>
+                <li><b>Řešení odchylek</b> — zdržení, změna adresy, porucha vozidla; o průběhu informujeme</li>
+                <li><b>Doklady</b> — přepravní a dodací listy, podklady k vyúčtování</li>
+              </ul>
+            </div>
+            <div class="karta">
+              <h4>Pro koho je to vhodné</h4>
+              <ul class="seznam">
+                <li>Přepravujete pravidelně, ale nemáte kapacitu na vlastní dispečink</li>
+                <li>Řešíte sezónní špičky, které vlastní kapacity nepokryjí</li>
+                <li>Preferujete jedno kontaktní místo namísto jednání s více dopravci</li>
+                <li>Potřebujete průběžný a doložitelný přehled o stavu zásilek</li>
+              </ul>
+              <p style="margin-top:16px;color:var(--text-tlum);font-size:.94rem">
+                Vozíme převážně celovozové zásilky po České republice, menší
+                zásilky po dohodě.
+              </p>
+            </div>
+          </div>
+
+          <h4 style="margin-top:36px">Od poptávky k dokladům ve čtyřech krocích</h4>
+          <div class="mrizka ctyri">
+            <article class="karta">
+              <span class="cislo-kroku">01</span>
+              <h5>Poptávka</h5>
+              <p>Sdělíte nám místo nakládky a vykládky, druh zásilky a termín. Postačí e-mail nebo formulář.</p>
+            </article>
+            <article class="karta">
+              <span class="cislo-kroku">02</span>
+              <h5>Nabídka</h5>
+              <p>Zašleme cenovou nabídku s termínem realizace. Na případná rizika upozorníme předem.</p>
+            </article>
+            <article class="karta">
+              <span class="cislo-kroku">03</span>
+              <h5>Realizace</h5>
+              <p>Objednáme dopravce a dohlížíme na nakládku, průběh přepravy i vykládku. O změnách informujeme neprodleně.</p>
+            </article>
+            <article class="karta">
+              <span class="cislo-kroku">04</span>
+              <h5>Doklady</h5>
+              <p>Přepravní a dodací listy i podklady k vyúčtování předáváme kompletní a ve sjednaném termínu.</p>
+            </article>
+          </div>
+
+          <div class="tlacitka">
+            <a class="tlacitko" href="poptat-prepravu.html">Poptat přepravu</a>
+            <a class="tlacitko obrys" href="sluzby.html#spedice">Podrobnosti o službě</a>
+          </div>
+        </div>
+
+        <!-- Okno pro dopravce -->
+        <div class="okno okno-dopravce">
+          <div class="okno-hlava">
+            <h3>Spolupráce s dopravci</h3>
+            <p>
+              Dopravcům nabízíme dvě cesty: vytížíme vaše volná vozidla zakázkami
+              našich zákazníků, nebo za vás převezmeme dispečink jako službu.
+              Krátkodobě i dlouhodobě, podle toho, co vám vyhovuje.
+            </p>
+          </div>
+
+          <div class="mrizka dva" style="gap:32px">
+            <div class="karta akcent">
+              <h4>Nabízím svá vozidla</h4>
+              <ul class="seznam">
+                <li><b>Vytížení po celý rok</b> — od ledna do prosince, i v logisticky slabších měsících</li>
+                <li><b>Zakázky z velkých tendrů</b> — máme k nim přístup přes zprostředkovatele</li>
+                <li><b>Široká síť zákazníků</b> — náklady, ke kterým byste se sami nemuseli dostat</li>
+                <li><b>Lidský přístup</b> — nepokutujeme, pokud to není nezbytné; komplikace řešíme dohodou</li>
+              </ul>
+              <div class="tlacitka">
+                <a class="tlacitko" href="pro-dopravce.html#nabizim-vozidla">Podmínky a registrace</a>
+              </div>
+            </div>
+
+            <div class="karta akcent">
+              <h4>Chci externí dispečink</h4>
+              <ul class="seznam">
+                <li><b>Vytěžování vozů</b> — vyhledávání nákladů a zpětných jízd</li>
+                <li><b>Denní plánování</b> jízd a rozpisy pro řidiče</li>
+                <li><b>Komunikace s řidiči</b> nonstop, 24 hodin denně</li>
+                <li><b>Sledování vozidel</b> přes GPS po celou dobu jízdy</li>
+                <li><b>Evidence a reporting</b> — podklady k fakturaci, přehled kilometrů a tržeb</li>
+              </ul>
+              <div class="tlacitka">
+                <a class="tlacitko" href="pro-dopravce.html#externi-dispecink">Jak služba funguje</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="mrizka dva" style="gap:32px;margin-top:20px">
+            <div class="karta">
+              <h4>Podmínky spolupráce</h4>
+              <ul class="seznam">
+                <li><b>Týdenní fakturace</b> — po zajetí vozu, jehož délku dohodneme individuálně</li>
+                <li><b>Doklady elektronicky</b> — po domluvě si je můžeme i vyzvednout</li>
+                <li><b>Jednoznačná objednávka</b> — adresy, časová okna, kontakty i cena jsou v ní předem</li>
+                <li><b>Krátkodobě i dlouhodobě</b> — spolupráci nastavíme podle vás</li>
+              </ul>
+            </div>
+            <div class="karta">
+              <h4>Vozový park, který využíváme</h4>
+              <ul class="seznam">
+                <li><b>Plachtový návěs 13,6 m</b> — převažující typ našich poptávek</li>
+                <li><b>Mega a lowdeck</b> — pro zásilky s větší ložnou výškou</li>
+                <li><b>Jiné typy vozidel</b> — podle dohody</li>
+              </ul>
+              <p style="margin-top:16px;color:var(--text-tlum);font-size:.94rem">
+                Před první objednávkou ověřujeme koncesi, pojištění odpovědnosti
+                dopravce a zápis v rejstřících.
+              </p>
+            </div>
+          </div>
+
+          <div class="tlacitka">
+            <a class="tlacitko" href="pro-dopravce.html#registrace">Registrovat se</a>
+            <a class="tlacitko obrys" href="pro-dopravce.html">Vše pro dopravce</a>
+          </div>
+        </div>
+
+      </div>
+    </fieldset>
   </div>
 </section>
 
 <section class="sekce plocha">
-  <div class="obal">
-    <div class="sekce-hlava">
-      <span class="nadpis-stitek">Průběh</span>
-      <h2>Od poptávky k dokladům ve čtyřech krocích</h2>
-    </div>
-
-    <div class="mrizka ctyri">
-      <article class="karta">
-        <span class="cislo-kroku">01</span>
-        <h3>Poptávka</h3>
-        <p>Sdělíte nám místo nakládky a vykládky, druh zásilky a termín. Postačí e-mail nebo formulář.</p>
-      </article>
-      <article class="karta">
-        <span class="cislo-kroku">02</span>
-        <h3>Nabídka</h3>
-        <p>Zašleme cenovou nabídku s termínem realizace. Na případná rizika upozorníme předem.</p>
-      </article>
-      <article class="karta">
-        <span class="cislo-kroku">03</span>
-        <h3>Realizace</h3>
-        <p>Objednáme dopravce a dohlížíme na nakládku, průběh přepravy i vykládku. O změnách informujeme neprodleně.</p>
-      </article>
-      <article class="karta">
-        <span class="cislo-kroku">04</span>
-        <h3>Doklady</h3>
-        <p>Přepravní a dodací listy i podklady k vyúčtování předáváme kompletní a ve sjednaném termínu.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="sekce">
   <div class="obal">
     <div class="sekce-hlava">
       <span class="nadpis-stitek">Náš přístup</span>
@@ -242,34 +338,6 @@
           od poptávky až po vyúčtování.
         </p>
       </article>
-    </div>
-  </div>
-</section>
-
-<section class="sekce plocha">
-  <div class="obal">
-    <div class="mrizka dva" style="gap:40px;align-items:center">
-      <div>
-        <span class="nadpis-stitek">Pro dopravce</span>
-        <h2>Spolupráce s dopravci</h2>
-        <p style="color:var(--text-tlum)">
-          Hledáme spolehlivé dopravce pro dlouhodobou spolupráci. Nabízíme
-          pravidelné nakládky a jednoznačně zadané objednávky se sjednanou cenou —
-          nebo převezmeme dispečink vašich vozů jako službu.
-        </p>
-        <div class="tlacitka">
-          <a class="tlacitko obrys" href="pro-dopravce.html#nabizim-vozidla">Nabízím vozidla</a>
-          <a class="tlacitko obrys" href="pro-dopravce.html#externi-dispecink">Chci dispečink</a>
-        </div>
-      </div>
-      <div class="karta">
-        <h3>Požadované doklady</h3>
-        <ul class="seznam">
-          <li>Koncesní listina na silniční nákladní dopravu</li>
-          <li>Pojištění odpovědnosti dopravce</li>
-          <li>Výpis z obchodního nebo živnostenského rejstříku</li>
-        </ul>
-      </div>
     </div>
   </div>
 </section>
