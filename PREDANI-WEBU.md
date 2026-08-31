@@ -113,13 +113,16 @@ pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
 poptat-prepravu.html         Jediný poptávkový formulář
 kontakt.html                 Kontaktní údaje — na formulář jen navádí
+odeslani.php                 Server: odeslání obou formulářů e-mailem
+odeslano.html                Potvrzení po odeslání (noindex)
 zasady-osobnich-udaju.html   Zpracování osobních údajů
 404.html                     Chybová stránka
 favicon.ico                  Musí zůstat v kořeni
 .htaccess                    Apache: 404, komprese, cache, bezpečnostní hlavičky
 robots.txt, sitemap.xml
 assets/css/firemni-styl.css  Jediná definice barev a komponent
-assets/js/main.js            Mobilní menu, schovávání hlavičky, formuláře
+assets/js/main.js            Mobilní menu, schovávání hlavičky, stav formulářů
+assets/js/mereni.js          Google Analytics + lišta souhlasu (ID je PLACEHOLDER)
 assets/img/                  Logo, favicon, náhledový obrázek
 .gitignore                   Nekomitovat: přihlašovací údaje, provozní data
 ```
@@ -148,7 +151,7 @@ python3 -m http.server 8000     # pak http://localhost:8000
 
 Testy neexistují. Změny se ověřují vykreslením v prohlížeči — v prostředí je
 Chromium a Playwright (`PLAYWRIGHT_BROWSERS_PATH` je nastavená,
-`playwright install` nespouštět). Po netriviální změně projít: všech osm
+`playwright install` nespouštět). Po netriviální změně projít: všech devět
 stránek (stav 200, žádné chyby v konzoli), tři šířky, oba formuláře, vypnutý
 JavaScript, tiskový režim.
 
@@ -187,8 +190,8 @@ kontrast aspoň 3 : 1 proti vnitřku pole i proti ploše formuláře (WCAG 1.4.1
 Dekorativní `--linka` ten práh splňovat nemusí.
 
 Barva hlavičky je navíc natvrdo v `<meta name="theme-color" content="#262F32">`
-**ve všech osmi stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
-se odstín hlavičky, musí se změnit i těch osm značek, jinak lišta prohlížeče
+**ve všech devíti stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
+se odstín hlavičky, musí se změnit i těch devět značek, jinak lišta prohlížeče
 na mobilu zůstane ve staré barvě.
 
 ### Pravidla
@@ -628,10 +631,8 @@ a 390 px.
 
 ### Claude Cowork — rozhodnutí a obsah
 
-1. Zodpovědět **osm otevřených bodů z kapitoly 6** — bez nich se nedá
-   pokračovat.
-2. Rozhodnout o **hostingových předpokladech** (běží na VAS Hostingu PHP?)
-   a o zřízení schránky `info@`.
+1. Zodpovědět **zbylé otevřené body 6.3, 6.6 a 6.8** — ostatní jsou uzavřené.
+2. Rozhodnout o zřízení schránky `info@` a čísla na WhatsAppu (bod 6.6).
 3. Připravit podklad pro **přepis zásad zpracování osobních údajů** podle
    skutečně zvoleného formuláře a měřicího nástroje.
 4. Zvážit **právní kontrolu zásad** — obsah odpovídá skutečnosti, ale znění
@@ -664,12 +665,17 @@ až s funkčním certifikátem na doméně — dřív by web znepřístupnilo.
 
 ## 13. Pořadí prací
 
-1. Zodpovědět otevřené otázky (kapitola 6). **Blokující.**
-2. Vybrat řešení formuláře a měření, ověřit hosting.
-3. Vizuální návrh úvodní stránky a stránky Pro dopravce.
-4. Zapracovat obsahová rozhodnutí (kapitola 5) do všech stránek najednou.
-5. Přepsat zásady zpracování osobních údajů — **ve stejném nasazení** jako
-   formulář a měření.
-6. Ověřit v prohlížeči: všech osm stránek, tři šířky, oba formuláře,
-   bez JavaScriptu, tiskový režim.
-7. Nasadit na FTP, zapnout HTTPS, teprve pak odkomentovat přesměrování.
+1. ✅ Otevřené otázky zodpovězeny (kromě 6.3, 6.6 a 6.8 — viz kapitola 6).
+2. ✅ Formulář: PHP na hostingu (`odeslani.php`); měření: GA4 s lištou.
+3. Vizuální návrh je volitelná iterace — struktura je zavedená v kódu.
+4. ✅ Obsahová rozhodnutí zapracovaná.
+5. ✅ Zásady přepsané ve stejné dávce jako formulář a měření.
+6. ✅ Ověřeno: devět stránek, čtyři šířky, oba formuláře s JS i bez,
+   tiskový režim, přísné parsování HTML bez chyb, lišta souhlasu.
+7. Zbývá (zadavatel): doplnit GA měřicí ID, SPF záznam, nastavit
+   uchování dat v GA na 14 měsíců, otestovat `mail()` první poptávkou,
+   nasadit na FTP, zapnout HTTPS, pak odkomentovat přesměrování
+   v `.htaccess`.
+8. Po odpovědích na 6.3, 6.6 a 6.8: doplnit vedení provozu na O nás,
+   případně info@ + WhatsApp do kontaktů (a Meta do zásad), a vyjasnit
+   fakturaci v kroku Doklady.
