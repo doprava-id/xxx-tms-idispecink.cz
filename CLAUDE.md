@@ -26,7 +26,7 @@ stanoven.
 ## Struktura
 
 ```
-index.html                   Úvodní stránka
+index.html                   Úvod — přepínač oken pro zákazníky a dopravce
 sluzby.html                  Spedice a externí dispečink
 pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
@@ -53,8 +53,16 @@ s formulářem, CMR versus vnitrostátní rozsah, tvrzení o 24/7 na pěti míst
 jsou v `PREDANI-WEBU.md`. Než začneš měnit obsah, přečti si ho.
 
 Hlavička, patička a `<head>` jsou v každé stránce zvlášť. **Když měníš navigaci,
-patičku nebo meta značky, uprav všech devět stránek.** Neexistuje šablonovací vrstva,
-která by to udělala za tebe.
+patičku, kontaktní pruh nad hlavičkou nebo meta značky, uprav všech devět stránek.**
+Neexistuje šablonovací vrstva, která by to udělala za tebe.
+
+**Nabídka na úvodní stránce je rozdělená do dvou oken** — zákazník na první pohled
+nevidí, co nabízíme dopravcům. Přepínají se dvěma `<input type="radio">` uvnitř
+`fieldset.prepinac-oken`, takže to funguje i **bez JavaScriptu** a klávesnice v nich
+jezdí šipkami. Pravidla jsou v CSS u `.prepinac-oken` a stojí na pořadí sourozenců
+(`input:checked + input + .zalozky`) — **když do fieldsetu přidáš další prvek mezi
+radia a `.zalozky`, přepínač se tiše rozbije.** Na tisku se záložky skryjí a vytisknou
+se obě okna pod sebou.
 
 ## Spuštění a ověření
 

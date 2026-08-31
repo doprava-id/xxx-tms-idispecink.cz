@@ -86,10 +86,12 @@ img { max-width: 100%; height: auto; display: block; }
 a { color: var(--zluta); text-decoration: none; }
 a:hover { color: var(--zluta-tmava); text-decoration: underline; }
 
-h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .5em; font-weight: 700; letter-spacing: -0.01em; }
+h1, h2, h3, h4, h5 { line-height: 1.2; margin: 0 0 .5em; font-weight: 700; letter-spacing: -0.01em; }
 h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); }
 h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
-h3 { font-size: 1.2rem; }
+h3 { font-size: 1.35rem; }
+h4 { font-size: 1.2rem; }
+h5 { font-size: 1.05rem; }
 p  { margin: 0 0 1em; }
 p:last-child { margin-bottom: 0; }
 
@@ -132,13 +134,42 @@ p:last-child { margin-bottom: 0; }
   .sekce { padding: 52px 0; }
 }
 
+/* --- Horní lišta -------------------------------------------------------- */
+
+/* Kontaktní pruh nad hlavičkou. Není přilepený — odroluje pryč a nechá
+   sticky hlavičku samotnou, aby na malém displeji nezabíral dva řádky. */
+.horni-pruh {
+  background-color: var(--pozadi);
+  background-image: var(--kov-pozadi);
+  border-bottom: 1px solid var(--linka-slaba);
+  font-size: .86rem;
+}
+.horni-pruh .obal {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 8px 26px; flex-wrap: wrap;
+  padding-top: 8px; padding-bottom: 8px;
+}
+.horni-pruh span, .horni-pruh a { color: var(--text-tlum); }
+.horni-pruh a:hover { color: var(--zluta); }
+.horni-pruh b { color: var(--text); font-weight: 700; }
+.horni-pruh .pohotovost b { color: var(--zluta); }
+
+@media (max-width: 700px) {
+  /* Telefon i e-mail jsou dostupné v hlavičce a patičce — nahoře zůstane
+     jen dostupnost, kvůli které lidé v dopravě volají nejčastěji. */
+  .horni-pruh .obal { justify-content: center; text-align: center; }
+  .horni-pruh .jen-siroke { display: none; }
+}
+
 /* --- Hlavička ----------------------------------------------------------- */
 
 .hlavicka {
   position: sticky; top: 0; z-index: 50;
   background-color: var(--povrch-2);
   background-image: var(--brouseny), var(--kov-vyssi);
-  border-bottom: 1px solid var(--linka);
+  /* Silná žlutá hrana místo tenké linky — hlavička má držet pohromadě
+     jako pruh, ne splývat s obsahem pod sebou. */
+  border-bottom: 3px solid var(--zluta);
   box-shadow: inset 0 1px 0 var(--odlesk-silny);
   transition: transform .22s ease;
 }
@@ -150,10 +181,10 @@ p:last-child { margin-bottom: 0; }
 }
 .hlavicka .obal {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; min-height: 74px;
+  gap: 16px; min-height: 88px;
 }
 .logo { display: flex; align-items: center; }
-.logo img { height: 38px; width: auto; }
+.logo img { height: 44px; width: auto; }
 
 /* Telefon a přepínač menu drží pohromadě vpravo. Telefon je na širokém
    displeji celé číslo, na úzkém tlačítko „Zavolat" — viz media dole. */
@@ -299,6 +330,65 @@ p:last-child { margin-bottom: 0; }
   .hero .obal { grid-template-columns: 1fr; gap: 32px; }
 }
 
+/* --- Přepínač oken ------------------------------------------------------ */
+
+/* Nabídka pro zákazníky a pro dopravce ve dvou oddělených oknech: zákazník
+   nemusí na první pohled číst, co nabízíme dopravcům. Přepíná se radio
+   přepínači, takže to funguje i bez JavaScriptu a klávesnice v nich jezdí
+   šipkami jako v běžné skupině voleb. */
+.prepinac-oken { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+.prepinac-oken > input {
+  position: absolute; width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+}
+
+.zalozky { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.zalozky label {
+  display: block; cursor: pointer;
+  padding: 22px 24px;
+  border: 1px solid var(--linka);
+  border-left: 3px solid var(--linka);
+  background-color: var(--povrch);
+  background-image: var(--kov-povrch);
+  box-shadow: inset 0 1px 0 var(--odlesk);
+}
+.zalozky label b {
+  display: block; font-size: 1.15rem; font-weight: 700;
+  color: var(--text); margin-bottom: 4px;
+}
+.zalozky label span { color: var(--text-tlum); font-size: .94rem; }
+.zalozky label:hover { border-color: var(--zluta); }
+
+.prepinac-oken > input:checked + input + .zalozky label[for="okno-zakaznik"],
+.prepinac-oken > input + input:checked ~ .zalozky label[for="okno-dopravce"] {
+  border-color: var(--zluta);
+  background-image: var(--brouseny), var(--kov-vyssi);
+  box-shadow: inset 0 1px 0 var(--odlesk-silny);
+}
+.prepinac-oken > input:focus-visible + input + .zalozky label[for="okno-zakaznik"],
+.prepinac-oken > input + input:focus-visible ~ .zalozky label[for="okno-dopravce"] {
+  outline: 3px solid var(--zluta); outline-offset: 2px;
+}
+
+.okno { display: none; margin-top: 36px; }
+.prepinac-oken > input:checked + input ~ .okna > .okno-zakaznik,
+.prepinac-oken > input + input:checked ~ .okna > .okno-dopravce { display: block; }
+
+.okno-hlava { max-width: 720px; margin-bottom: 28px; }
+.okno-hlava p { color: var(--text-tlum); margin-bottom: 0; }
+
+@media (max-width: 700px) {
+  .zalozky { grid-template-columns: 1fr; }
+  .zalozky label { padding: 18px 20px; }
+}
+
+/* Jen pro odečítače obrazovky — legenda skupiny voleb. */
+.jen-pro-ctecky {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
 /* --- Karty -------------------------------------------------------------- */
 
 .karta {
@@ -309,7 +399,7 @@ p:last-child { margin-bottom: 0; }
   padding: 26px;
 }
 .karta.akcent { border-left: 3px solid var(--zluta); }
-.karta h3 { margin-bottom: .4em; }
+.karta h3, .karta h4, .karta h5 { margin-bottom: .4em; }
 .karta p { color: var(--text-tlum); font-size: .96rem; }
 .karta .cislo-kroku {
   font-family: var(--pismo-cislo);
@@ -474,7 +564,13 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 @media print {
   /* Navigace, výzvy a tlačítka na papíře nedávají smysl. */
   .hlavicka, .paticka, .vyzva, .tlacitka, .preskocit, .menu-prepinac,
-  .cookies-lista { display: none; }
+  .cookies-lista, .horni-pruh { display: none; }
+
+  /* Na papíře se přepínat nedá — záložky zmizí a obě okna se vytisknou
+     pod sebou; každé má vlastní nadpis, takže se nemají o co opřít. */
+  .zalozky { display: none; }
+  .okno { display: block !important; margin-top: 0; }
+  .okno + .okno { margin-top: 24pt; }
 
   body { background: #fff; color: #000; font-size: 11pt; }
   .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel {

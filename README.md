@@ -7,7 +7,7 @@ na obyčejném FTP i kdekoliv jinde.
 ## Struktura
 
 ```
-index.html                   Úvodní stránka
+index.html                   Úvod — přepínač oken pro zákazníky a dopravce
 sluzby.html                  Spedice a externí dispečink
 pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
@@ -159,6 +159,18 @@ Při změně je potřeba je upravit na všech těchto místech.
 odpovídá skutečnosti — zpracovatelé, doby uchování i účely jsou dodané
 zadavatelem — ale znění nikdo s právním vzděláním neviděl. Před delším
 provozem stojí za to ho nechat projít.
+
+## Dvě okna na úvodní stránce
+
+Nabídka pro zákazníky a pro dopravce je na úvodní stránce ve dvou oddělených
+oknech — zákazník nemusí na první pohled číst, co nabízíme dopravcům.
+Přepínají se dvěma skrytými radio přepínači, takže to **funguje i s vypnutým
+JavaScriptem** a klávesnicí se mezi okny přechází šipkami jako v běžné
+skupině voleb.
+
+Obsah obou oken je v HTML vždy přítomný (jen skrytý přes `display`), takže ho
+vyhledávače najdou. Na papíře se záložky netisknou a vytisknou se obě okna
+pod sebou.
 
 ## Chování bez JavaScriptu a při tisku
 
