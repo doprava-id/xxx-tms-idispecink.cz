@@ -7,6 +7,9 @@
    ========================================================================== */
 
 :root {
+  /* Tmavé schéma i pro vestavěné části prvků (ikona kalendáře, šipky selectů). */
+  color-scheme: dark;
+
   /* Firemní barvy — neměnit */
   --zluta:        #F0B41E;
   --zluta-tmava:  #C79212;
@@ -55,7 +58,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* Kotvy a skip-link musí doskočit pod lepivou hlavičku (74 px + rezerva). */
+html { scroll-padding-top: 90px; }
+/* Plynulé rolování jen pro uživatele, kteří si nevypnuli animace. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 body {
   margin: 0;
@@ -94,7 +102,7 @@ p:last-child { margin-bottom: 0; }
 .obal { width: 100%; max-width: var(--sirka); margin: 0 auto; padding: 0 var(--mezera); }
 
 .sekce { padding: 72px 0; border-top: 1px solid var(--linka-slaba); }
-.sekce:first-of-type { border-top: 0; }
+.hero + .sekce, main > .sekce:first-child { border-top: 0; }
 .sekce.uzka { padding: 48px 0; }
 .sekce.plocha { background-color: var(--povrch); background-image: var(--kov-povrch);
                 box-shadow: inset 0 1px 0 var(--odlesk); }
@@ -270,7 +278,7 @@ p:last-child { margin-bottom: 0; }
 }
 .seznam li b, .seznam li strong { color: var(--text); }
 
-/* --- KPI pás ------------------------------------------------------------ */
+/* --- KPI pás — připravená komponenta, v HTML zatím nepoužitá ------------ */
 
 .kpi-radek { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--linka); border: 1px solid var(--linka); }
 .kpi { background-color: var(--povrch); background-image: var(--kov-povrch);
@@ -294,7 +302,7 @@ table.id-tabulka td { padding: 11px 16px; border-top: 1px solid var(--linka-slab
 table.id-tabulka td:first-child { color: var(--text); font-weight: 600; }
 table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; font-variant-numeric: tabular-nums; }
 
-/* --- Štítky ------------------------------------------------------------- */
+/* --- Štítky — připravená komponenta, v HTML zatím nepoužitá ------------- */
 
 .id-stitek {
   display: inline-block;
@@ -344,7 +352,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   padding: 11px 13px;
 }
 .pole input:focus, .pole select:focus, .pole textarea:focus {
-  outline: none; border-color: var(--zluta);
+  border-color: var(--zluta);
 }
 .pole textarea { min-height: 130px; resize: vertical; }
 .pole-radek { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -406,8 +414,9 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
 
 @media print {
   /* Navigace, výzvy a tlačítka na papíře nedávají smysl. */
-  .hlavicka, .paticka, .vyzva, .tlacitka, .preskocit, .menu-prepinac { display: none; }
+  .hlavicka, .paticka, .vyzva, .tlacitka, .formular .tlacitko, .preskocit, .menu-prepinac { display: none; }
 
+  :root { color-scheme: light; }  /* :root kvůli specificitě — přebíjí dark z obrazovky */
   body { background: #fff; color: #000; font-size: 11pt; }
   .sekce, .sekce.plocha, .hero, .karta, .formular, .hero-panel, .kpi {
     background: #fff !important;
@@ -424,7 +433,6 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   table.id-tabulka td, .hero p.uvod, .formular-poznamka {
     color: #222 !important;
   }
-  .hodnota[style*="--pozor-text"], [style*="--pozor-text"] { color: #000 !important; }
   .pole .napoveda { color: #444 !important; }
   /* Tučné uvození položek seznamu má barvu textu tmavého motivu — na bílé
      by bylo neviditelné. */
