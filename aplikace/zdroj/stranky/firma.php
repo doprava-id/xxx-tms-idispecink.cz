@@ -7,6 +7,8 @@
 
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
+require_once APLIKACE_CESTA . "/zdroj/ares.php";
+
 $id = vstup("id");
 $nova = ($id === "nova" || $id === "");
 $firma = null;
@@ -23,6 +25,9 @@ if (!$nova) {
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $akce = vstup("akce");
+  /* Tlačítko „Načíst z ARES" stojí uvnitř formuláře pro uložení — má
+     vlastní jméno, aby se s akcí ukládání nepralo. */
+  if (isset($_POST["ares"])) $akce = "ares";
 
   if ($akce === "ulozit") {
     $data = [
@@ -63,6 +68,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       vzkaz("ok", "Změny uloženy.");
       presmeruj(odkaz("firma", ["id" => $firma["id"]]));
     }
+
+  } elseif ($akce === "ares") {
+    /* Rozepsaný formulář se nesmí ztratit — schová se celý a údaje
+       z rejstříku ho jen přebijí tam, kde je rejstřík zná. */
+    $rozepsane = [];
+    foreach ($_POST as $klic => $hodnota) {
+      if (is_string($hodnota) && !in_array($klic, ["token", "akce", "ares"], true)) {
+        $rozepsane[$klic] = trim($hodnota);
+      }
+    }
+
+    $nalezeno = ares_najdi(vstup("ico"), $chyba_ares);
+    if ($nalezeno) {
+      /* Údaje se jen předvyplní, neuloží — ať je vidíte dřív, než je
+         potvrdíte. Držíme je v sezení, aby obnovení stránky formulář
+         neodeslalo podruhé. */
+      $_SESSION["ares"] = array_merge($rozepsane, array_filter($nalezeno, "strlen"));
+      vzkaz("ok", "Načteno z ARES: " . $nalezeno["nazev"] . " — zkontrolujte a uložte.");
+    } else {
+      $_SESSION["ares"] = $rozepsane;
+      vzkaz("pozor", (string)$chyba_ares);
+    }
+    presmeruj(odkaz("firma", ["id" => $nova ? "nova" : $firma["id"]]));
 
   } elseif ($akce === "vozidlo" && $firma) {
     $spz = vstup("spz");
@@ -108,7 +136,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 /* --- Výpis -------------------------------------------------------------- */
 
-$h = function (string $klic, string $vychozi = "") use ($firma) {
+/* Co přišlo z ARESu, přebíjí uložený stav — dokud se formulář neuloží. */
+$ares = $_SESSION["ares"] ?? [];
+unset($_SESSION["ares"]);
+
+$h = function (string $klic, string $vychozi = "") use ($firma, $ares) {
+  if (isset($ares[$klic]) && $ares[$klic] !== "") return (string)$ares[$klic];
   return (string)($firma[$klic] ?? $vychozi);
 };
 
@@ -148,7 +181,11 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma"),
         <div class="pole-radek tri">
           <div class="pole">
             <label for="ico">IČO</label>
-            <input type="text" id="ico" name="ico" value="<?= chran($h("ico")) ?>" inputmode="numeric">
+            <div class="pole-s-tlacitkem">
+              <input type="text" id="ico" name="ico" value="<?= chran($h("ico")) ?>" inputmode="numeric" maxlength="8">
+              <button type="submit" name="ares" value="1" class="tlacitko obrys"
+                      title="Doplní název, adresu a DIČ z veřejného rejstříku">Z ARES</button>
+            </div>
           </div>
           <div class="pole">
             <label for="dic">DIČ</label>

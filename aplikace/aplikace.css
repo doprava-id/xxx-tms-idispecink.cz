@@ -169,6 +169,11 @@
 @media (max-width: 900px) { .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) { .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: 1fr; } }
 
+/* Pole a tlačítko na jednom řádku — IČO a načtení z rejstříku. */
+.pole-s-tlacitkem { display: flex; gap: 8px; }
+.pole-s-tlacitkem input { flex: 1 1 auto; min-width: 0; }
+.pole-s-tlacitkem .tlacitko { flex: 0 0 auto; padding: 11px 14px; font-size: .9rem; white-space: nowrap; }
+
 .skupina { margin-bottom: 26px; }
 .skupina > h2 {
   font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta);
