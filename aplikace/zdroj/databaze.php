@@ -128,6 +128,17 @@ $SCHEMA = [
     "vytvoril"  => "cele",
   ],
 
+  "prilohy" => [
+    "id"          => "id",
+    "preprava_id" => "cele",
+    "nazev"       => "text",       /* jak se soubor jmenoval u odesílatele */
+    "soubor"      => "text",       /* jak se jmenuje v data/prilohy */
+    "typ"         => "text",
+    "velikost"    => "cele",
+    "uzivatel_id" => "cele",
+    "kdy"         => "cas_zapisu",
+  ],
+
   "udalosti" => [
     "id"          => "id",
     "preprava_id" => "cele",
@@ -157,6 +168,7 @@ $INDEXY = [
   "idx_prepravy_dopravce"  => ["prepravy", "dopravce_id"],
   "idx_prepravy_zakaznik"  => ["prepravy", "zakaznik_id"],
   "idx_udalosti_preprava"  => ["udalosti", "preprava_id"],
+  "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
   "idx_vozidla_firma"      => ["vozidla", "firma_id"],
   "idx_ridici_firma"       => ["ridici", "firma_id"],
   "idx_nastaveni_klic"     => ["nastaveni", "klic"],
