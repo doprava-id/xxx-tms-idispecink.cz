@@ -53,9 +53,17 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 Dnešní model umí **jedna nakládka → jedna vykládka**. Rozvoz ze skladu na
 pět míst ani sběr od tří dodavatelů zadat nejdou.
 
-Trasa se stane **seznamem bodů**. Každý bod má: pořadí, druh (nakládka /
-vykládka), místo, adresu, časové okno, zboží, hmotnost, palety, kontakt
-a poznámku.
+Trasa se stane **seznamem bodů**. Bod má: pořadí, druh (nakládka /
+vykládka), místo, adresu, časové okno, kontakt a poznámku.
+
+- **Zboží, hmotnost a palety jsou u bodu, ale nepovinně.** U celovozu se
+  nechají prázdné a vyplní se souhrn u přepravy; u rozvozu se vyplní po
+  bodech. Pozor: čísla pak mohou být na dvou místech a nemusí si odpovídat —
+  systém na rozpor upozorní, ale nebude ho zakazovat.
+- **Stav se sleduje u každého bodu zvlášť** — splněno a čas. Stav celé
+  jízdy se z toho dopočítá. Na tabuli i na odkazu pro zákazníka je pak vidět
+  „dvě ze tří vykládek hotové"; řidič si na svém odkazu odklikává zastávky,
+  jak jede.
 
 **Přizpůsobit se tomu musí všechno, co dnes čte `nakladka_*` a `vykladka_*`:**
 seznam přeprav, dispečerská tabule, objednávka přepravy, pokyny řidiči,
@@ -66,50 +74,80 @@ Stávající data se převedou: z každé přepravy vzniknou dva body.
 
 ### 3.2 Pomoc při zadávání
 
-- **Adresář míst** — místo jako číselník: adresa, brána, kontakt, otevírací
-  doba, poznámka („ohlásit se na vrátnici"). Vyberete místo, zbytek se doplní.
-- **Návrh ceny podle historie trasy** — při zakládání ukáže, za kolik se
-  stejná nebo podobná trasa vozila naposled a jaká na ní byla marže.
-  Žádný automatický ceník, jen paměť.
-- **Šablony opakovaných přeprav** — stálá linka, ze které se založí celý
-  týden dopředu.
+- **Adresář míst** — **společný číselník**, u místa se dá (ale nemusí)
+  uvést, čí je. Odpovídá tomu, že do jednoho skladu vozíte pro víc
+  zákazníků a překladiště není nikoho. Místo nese adresu, bránu, kontakt,
+  otevírací dobu a poznámku („ohlásit se na vrátnici").
+- **Návrh ceny podle historie trasy** — ukáže, za kolik se stejná nebo
+  podobná trasa vozila naposled a jaká na ní byla marže.
+- **Šablony a stálé linky** — u linky se zaškrtnou dny v týdnu.
+  **Generuje se na kliknutí, ne samo na pozadí:** v pátek kliknete
+  a systém připraví příští týden, který si projdete. **Státní svátky
+  přeskočí** a upozorní na to (svátky se počítají v kódu, žádná služba
+  zvenku). Má-li linka stálého dopravce, vznikne přeprava rovnou
+  objednaná — **odeslání objednávky ale zůstává na vás.**
 - **Kilometry a čas trasy** — vzdálenost mezi body a cena za kilometr.
   **Vyžaduje mapovou službu zvenku** — viz otevřené otázky.
 
 ### 3.3 Okolí zakázky
 
-- **Nabídky a poptávky** — stupeň před zakázkou. Poptávka přijde, nacení se,
-  čeká na odpověď. Vidět, kolik nabídek visí a kolik jich prochází.
-  Z nabídky se jedním kliknutím stane přeprava.
-- **Ceníky zákazníků a stálé linky** — dohodnuté ceny na opakované trasy,
-  nabídnou se samy.
+- **Nabídky a poptávky** — stupeň před zakázkou; z nabídky se jedním
+  kliknutím stane přeprava. Sleduje se **důvod, proč nabídka neprošla**
+  (drahé, pozdě, neměli jsme vůz, zákazník zrušil) a **úspěšnost v číslech** —
+  kolik nabídek jde ven, kolik prochází a v jaké hodnotě, celkově i po
+  zákaznících. Nabídka jde **vytisknout a poslat zákazníkovi** ve firemním
+  stylu, jako dnes objednávka pro dopravce.
+  Platnost nabídky se nesleduje.
+- **Ceníky zákazníků a stálé linky** — systém umí tři podoby a u zákazníka,
+  se kterým se domlouvá po jedné, se nevyplní žádná:
+  pevná cena za trasu · pásma podle vzdálenosti · sazba za kilometr.
+  **Když platí víc pravidel, vyhrává nejkonkrétnější:** pevná cena → pásmo →
+  sazba za km → cena z historie trasy. Systém vždycky napíše, podle čeho
+  cenu spočítal.
 - **Smlouvy a pojistky dopravců** — platnost pojištění odpovědnosti
-  a oprávnění u každého dopravce. Systém upozorní na blížící se konec
-  a varuje před vystavením objednávky dopravci s prošlou pojistkou.
-- **Reklamace, škody a pokuty** — navedené na konkrétní přepravu a dopravce.
+  a oprávnění; upozornění na blížící se konec. **Při vystavení objednávky
+  dopravci s propadlou pojistkou systém varuje, ale pustí dál** — rozhodnutí
+  zůstává na dispečerovi.
+
+**Reklamace, škody a pokuty se neřeší.** Zadavatel je z rozsahu vyřadil;
+zůstávají u mailu a v hlavě.
 
 ### 3.4 Peníze
 
 - **Pohledávky** — které vydané faktury jsou po splatnosti a jak dlouho.
+  **Informace o zaplacení se tahá z Fakturoidu přes API**; přístup leží
+  v `config.php` mimo git.
 - **Závazky vůči dopravcům** — co komu dlužíme a kdy je to splatné,
   podle týdenní fakturace po zajetí vozu.
-- **Ziskovost zakázky do detailu** — marže po odečtení stání, víceprací,
-  storna a pokut, ne jen hrubý rozdíl cen.
 - **Export do Fakturoidu** — faktury se vystavují ve Fakturoidu, systém
   předá podklad ve tvaru, který se naimportuje.
+
+**Marže zůstává hrubým rozdílem cen.** Příplatky a srážky za stání,
+vícepráce, storno a pokuty se neevidují — zadavatel je z rozsahu vyřadil.
 
 ### 3.5 Vyhodnocení
 
 Obraty a marže po zákaznících · vytíženost a spolehlivost dopravců (počet
-jízd, zpoždění, rychlost vracení dokladů) · výkonnost řidičů · **ekonomika
-jednotlivého vozu** (co vydělá za období, kolik dní stál naprázdno) — ta je
-jádrem toho, co se ukazuje klientovi externího dispečinku.
+jízd, zpoždění, rychlost vracení dokladů) · výkonnost řidičů · **obrat
+jednotlivého vozu za období**.
 
-### 3.6 Externí dispečink — plný modul
+**Prostoje vozů se nesledují** — zadavatel je z rozsahu vyřadil. Systém
+tedy neřekne, kolik dní auto stálo naprázdno, jen kolik vydělalo.
+
+### 3.6 Externí dispečink
+
+Zadavatel nechal rozhodnutí na mně. **Volím: je to obyčejná přeprava.**
+Zákazníkem je ten, kdo zboží posílá, dopravcem klient dispečinku; jízda
+nese příznak „pod externím dispečinkem" a odkaz na klienta. Modul pak není
+druhý systém vedle prvního, jen jiný pohled na tatáž data — a všechno, co
+už umí přepravy (objednávka, doklady, tabule, veřejné odkazy), platí i tady.
+Kdyby se ukázalo, že to nestačí, dá se to rozdělit později; opačně to jde hůř.
+
+Modul obsahuje:
 
 - **Klienti dispečinku** s vlastním vozovým parkem a řidiči.
 - **Denní plán na každý vůz** — tabule řazená po vozidlech, ne po dnech.
-- **Zakázky, které vozu sháníme** — evidence vytěžení: co, za kolik, pro koho.
+- **Zakázky, které vozu sháníme** — přehled vytěžení: co, za kolik, pro koho.
 - **Podklad k fakturaci služby** — **způsob účtování a sazba jsou údaj
   u každého klienta zvlášť** (paušál za vůz, procento z obratu, částka za
   jízdu — s každým jinak). Sazby dodá zadavatel, nedomýšlejí se.
@@ -123,20 +161,25 @@ věc** — proto do něj nesmí přijít nic, co adresát nemá vědět.
 |---|---|---|
 | **Zákazník** | stav a termíny, místa a časová okna, cena přepravy | nic |
 | **Dopravce** | svou objednávku | potvrdit ji, nahrát doklady, doplnit SPZ a řidiče, nahlásit zpoždění |
-| **Řidič** | pokyny k jízdě | — |
+| **Řidič** | pokyny k jízdě | odklikat splněné body trasy |
 
 **Cena dopravce a marže se ven nedostanou nikdy.** Cena zákazníka jde jen
 zákazníkovi.
 
+**Odkaz přestane fungovat měsíc po vykládce.** Dopravce stihne dohrát
+doklady, zákazník si stihne dohledat, co potřebuje, a staré odkazy neleží
+živé v cizích e-mailech navěky. Odvolat jde i dřív.
+
 ### 3.8 Doklady a komunikace
 
 - **Přílohy k přepravě** — skeny a fotky dokladů (základ hotový, zapojit).
-- **E-mail z aplikace** — objednávky, odkazy, souhrny.
+- **E-mail z aplikace.** Objednávka dopravci chodí tak, že **celá je v těle
+  e-mailu a pod ní je odkaz** na potvrzení a nahrání dokladů. Aplikace neumí
+  vyrobit PDF — nemá žádné knihovny — takže příloha by stejně nebyla.
 - **WhatsApp jedním kliknutím** — tlačítko sestaví odkaz s předvyplněnou
   zprávou; odeslání potvrdíte v telefonu. Nestojí nic a nepotřebuje API.
 - **SMS řidičům** — potřebuje placenou bránu, viz otevřené otázky.
-- **Historie komunikace u přepravy** — kdo komu volal a co bylo dohodnuto,
-  aby to druhý dispečer nemusel lovit z hlavy.
+- **Historie komunikace u přepravy** — kdo komu volal a co bylo dohodnuto.
 
 ### 3.9 Hlídání
 
@@ -155,7 +198,24 @@ z Nastavení.
   zapnout přijaté doklady nebo je označit za vyfakturované.
 - **Pořádné ovládání z mobilu** u klíčových obrazovek.
 
-### 3.11 Provoz
+### 3.11 Role a přístupy
+
+Dnešní dvě role nestačí. Systém má počítat se čtyřmi:
+
+| Role | Vidí | Nesmí |
+|---|---|---|
+| **Správce** | všechno | — |
+| **Dispečer** | přepravy, dopravce, ceny dopravce; ceny zákazníka podle práva | správu uživatelů a nastavení |
+| **Účetní** | podklady, faktury, doklady, pohledávky | zasahovat do dispečinku |
+| **Brigádník** | zásilky a doklady k přepisu | **jakoukoliv cenu, i cenu dopravce** |
+
+Brigádnická role vyžaduje změnu: dnešní právo řeší jen ceny zákazníka
+a marže, cena dopravce je vidět vždycky.
+
+Se třetím dispečerem přibude **vlastník přepravy** (kdo ji má na starosti)
+a ochrana proti tomu, aby dva lidé upravovali tutéž zásilku proti sobě.
+
+### 3.12 Provoz
 
 - **Automatické zálohy** — denní kopie databáze, starší než měsíc se mažou,
   plus tlačítko „stáhnout zálohu teď".
@@ -167,9 +227,11 @@ z Nastavení.
 Automatické mazání starých osobních údajů zadavatel **nechtěl**. Doba
 uchování zůstává otevřená (viz 6).
 
-### 3.12 Napojení na Airtable a Blue Yonder
+### 3.13 Napojení na Airtable, Blue Yonder a Fakturoid
 
 Zadavatel rozhodl **napojit systém přímo přes API**, ne jen přes soubor.
+Týká se to Airtable a Blue Yonderu i Fakturoidu, ze kterého se tahá,
+které faktury jsou uhrazené.
 
 > **Tohle mění dosavadní pravidlo.** `CLAUDE.md` dnes říká, že propojení
 > patří do samostatné pipeline mimo tento repozitář. Až se napojení bude
@@ -195,11 +257,11 @@ Nesmí nastat den, kdy není podle čeho odbavit.
 1. **Trasa jako seznam bodů + adresář míst, šablony, návrh ceny** (3.1, 3.2)
    — sahá do jádra, proto první.
 2. Doklady a komunikace ven — přílohy, odeslání objednávky, veřejné odkazy (3.7, 3.8)
-3. Peníze — Fakturoid, pohledávky, závazky, ziskovost (3.4)
+3. Peníze — Fakturoid, pohledávky, závazky (3.4)
 4. Externí dispečink (3.6)
-5. Okolí zakázky — nabídky, ceníky, smlouvy, reklamace (3.3)
-6. Vyhodnocení (3.5), hlídání (3.9), ovládání (3.10), provoz (3.11)
-7. Napojení přes API (3.12) — až úplně nakonec, po přepsání pravidla
+5. Okolí zakázky — nabídky, ceníky, pojistky dopravců (3.3)
+6. Vyhodnocení (3.5), hlídání (3.9), ovládání (3.10), role (3.11), provoz (3.12)
+7. Napojení přes API (3.13) — až nakonec, po přepsání pravidla v CLAUDE.md
 
 ---
 
@@ -213,8 +275,9 @@ Nic z toho si nelze domyslet.
 3. **Sazby externího dispečinku** — u každého klienta způsob účtování
    a částka.
 4. **Mapová služba** — který poskytovatel, kdo platí, pustí ho hosting ven?
+   Bez ní nebudou kilometry ani sazba za kilometr v ceníku.
 5. **SMS brána** — která a s jakými přístupy. Mají řidiči WhatsApp?
-6. **Fakturoid** — účet a zda stačí soubor k importu, nebo se má volat API.
+6. **Fakturoid** — účet a přístup k API.
 7. **Naplánovaná úloha na hostingu** — má tarif u VAS Hostingu cron?
    Bez něj se ranní souhrn spustí až při prvním otevření systému toho dne.
 8. **Doba uchování osobních údajů** — jak dlouho držet jména a telefony
