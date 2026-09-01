@@ -1,6 +1,6 @@
 # Předávací soubor — web iDispečink.cz
 
-**Datum:** 30. 8. 2026
+**Datum:** 31. 8. 2026
 **Verze webu:** větev `main`
 **Stav:** web je hotový a funkční. Obsahová revize (27. 8. 2026) je zapracovaná
 s výjimkou bodů závislých na otevřených otázkách z kapitoly 6 — přehled je
@@ -107,7 +107,7 @@ package manager, žádné CI, žádné testy.** Soubory se nahrávají tak, jak 
 na běžný FTP hosting (VAS Hosting).
 
 ```
-index.html                   Úvodní stránka
+index.html                   Úvod — přepínač oken pro zákazníky a dopravce
 sluzby.html                  Spedice a externí dispečink
 pro-dopravce.html            Dvě cesty: nabídka vozidel + externí dispečink
 o-nas.html                   O společnosti a identifikační údaje
@@ -133,9 +133,14 @@ assets/img/                  Logo, favicon, náhledový obrázek
 ### Vlastnosti, které se nesmí ztratit
 
 - **Web funguje bez JavaScriptu.** Skript obsluhuje rozbalovací menu,
-  schovávání hlavičky při rolování a formuláře. Bez něj hlavička zůstává
-  přilepená nahoře a menu se zobrazí rozbalené (`<noscript>` blok
-  v hlavičce každé stránky).
+  schovávání hlavičky při rolování a stav formulářů. Bez něj hlavička
+  zůstává přilepená nahoře, menu se zobrazí rozbalené (`<noscript>` blok
+  v hlavičce každé stránky) a formuláře odešlou běžný POST.
+- **Přepínač oken na úvodní stránce funguje bez JavaScriptu.** Stojí na
+  dvou `<input type="radio">` uvnitř `fieldset.prepinac-oken` a na pořadí
+  sourozenců (`input:checked + input + .zalozky`). **Vloží-li se do
+  fieldsetu další prvek mezi radia a `.zalozky`, přepínač se tiše
+  rozbije.** Na tisku se záložky skryjí a vytisknou se obě okna pod sebou.
 - **Tiskový styl** převádí tmavý motiv na černobílý. Barvy tmavého motivu
   jsou místy zapsané přímo v atributu `style`, proto je tiskový blok přebíjí
   přes `!important`.
@@ -189,10 +194,19 @@ chyba `#F0868F` / `#35171A`.
 kontrast aspoň 3 : 1 proti vnitřku pole i proti ploše formuláře (WCAG 1.4.11).
 Dekorativní `--linka` ten práh splňovat nemusí.
 
-Barva hlavičky je navíc natvrdo v `<meta name="theme-color" content="#262F32">`
-**ve všech devíti stránkách** — meta značka na CSS proměnnou nedosáhne. Změní-li
-se odstín hlavičky, musí se změnit i těch devět značek, jinak lišta prohlížeče
-na mobilu zůstane ve staré barvě.
+Barva je navíc natvrdo v `<meta name="theme-color" content="#14191B">`
+**ve všech devíti stránkách** — meta značka na CSS proměnnou nedosáhne.
+Odpovídá **hornímu pruhu a pozadí stránky**, ne hlavičce: nahoře stránky je
+pruh a při odrolování se schovanou hlavičkou je pod lištou prohlížeče rovnou
+pozadí. Změní-li se odstín horního pruhu, musí se změnit i těch devět značek.
+
+### Horní lišta
+
+Nad hlavičkou je **kontaktní pruh** (`.horni-pruh`) s provozní pohotovostí,
+rozsahem přeprav a e-mailem; pod 700 px z něj zůstane jen pohotovost. Pruh
+**není přilepený** — odroluje pryč a nechá sticky hlavičku samotnou, aby na
+mobilu nezabírala dva řádky. Hlavička má výšku 88 px, logo 44 px a spodní
+hranu drží **žlutá linka 3 px**.
 
 ### Pravidla
 
@@ -536,6 +550,33 @@ a **Poptat přepravu**.
 
 Obě karty **stejně velké**, stejný styl, žádná zvýrazněná. Formát karty je
 `.karta` z firemního stylu — plocha `--povrch`, linka `--linka`, žádný stín.
+
+---
+
+## 8b. Dvě okna na úvodní stránce
+
+Nabídka pro zákazníky a pro dopravce je na úvodní stránce ve dvou
+oddělených oknech — **zákazník na první pohled nevidí, co nabízíme
+dopravcům**. Otevřené je zákaznické okno, dopravcovo je jeden klik daleko.
+
+```
+Hero (nadpis, perex, panel „Ve zkratce")
+  ↓
+Sekce „Co u nás hledáte?"
+  ├── [ Potřebuji přepravit zboží ]  [ Jsem dopravce ]     ← záložky
+  └── otevřené okno
+        zákaznické: co je na nás · co potřebujeme od vás · průběh 4 kroky
+        dopravcovo: nabízím vozidla · chci dispečink · podmínky · vozový park
+  ↓
+Náš přístup (společné oběma)
+  ↓
+Výzva
+```
+
+**Okna shrnují vlastními slovy, neopisují podstránky.** Podrobnosti bydlí
+na `sluzby.html` a `pro-dopravce.html`; kdyby okna text odtud kopírovala,
+dvě adresy se stejným obsahem si kazí pozici ve vyhledávání. Při úpravách
+na to pozor — duplicitu odhalí porovnání vět napříč stránkami.
 
 ---
 

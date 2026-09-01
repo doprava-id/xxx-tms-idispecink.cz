@@ -97,9 +97,11 @@ jsou jemné přechody, `--brouseny` je broušená textura a `--odlesk` světlá 
 Světlost putuje jen o pár procent — má to číst jako kov, ne jako lesklý plast. Plochy
 se odvozují z firemních barev, samotné firemní barvy se nemění.
 
-Jedinou výjimkou je `<meta name="theme-color" content="#262F32">` — meta značka na CSS
-proměnnou dosáhnout nemůže, takže barva hlavičky je natvrdo v `<head>` všech devíti
-stránek. **Když se změní odstín hlavičky, změň i těch devět meta značek**, jinak lišta
+Jedinou výjimkou je `<meta name="theme-color" content="#14191B">` — meta značka na CSS
+proměnnou dosáhnout nemůže, takže je barva natvrdo v `<head>` všech devíti stránek.
+Odpovídá **hornímu pruhu a pozadí stránky** (`--pozadi`), ne hlavičce: nahoře stránky
+je pruh a při odrolování se schovanou hlavičkou je pod lištou prohlížeče rovnou pozadí.
+**Když se změní odstín horního pruhu, změň i těch devět meta značek**, jinak lišta
 prohlížeče na mobilu zůstane ve staré barvě.
 
 Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
