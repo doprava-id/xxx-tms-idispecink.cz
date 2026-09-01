@@ -1,8 +1,15 @@
-# iDispečink.cz — prezentační web
+# iDispečink.cz — web a provozní systém
 
-Statický web spedice **iDispečink.cz s.r.o.** Čisté HTML, CSS a JavaScript,
-žádný build ani závislosti. Soubory stačí nakopírovat na hosting — funguje
-na obyčejném FTP i kdekoliv jinde.
+Repozitář spedice **iDispečink.cz s.r.o.** Jsou v něm dvě věci:
+
+- **prezentační web** v kořeni — statické HTML, CSS a JavaScript,
+- **provozní systém** v `aplikace/` — vnitřní dispečerská aplikace za
+  přihlášením (PHP, bez frameworku).
+
+Čisté HTML, CSS, JavaScript a PHP, **žádný build ani závislosti**. Soubory stačí
+nakopírovat na hosting — funguje na obyčejném FTP i kdekoliv jinde. Aplikace
+navíc potřebuje PHP s `pdo_sqlite` a právo zápisu do `aplikace/data/`;
+podrobnosti jsou v kapitole [Provozní systém](#provozní-systém-aplikace).
 
 ## Struktura
 
@@ -25,6 +32,14 @@ assets/css/                  firemni-styl.css — jediná definice barev a kompo
 assets/js/                   main.js — menu a hlavička; mereni.js — analytika
 assets/img/                  Logo, favicon a náhledový obrázek
 PREDANI-WEBU.md              Předávací soubor — stav, rozhodnutí revize, otevřené otázky
+
+aplikace/                    Provozní systém — vnitřní aplikace za přihlášením
+  index.php                  Jediný vstupní bod a směrovač
+  config.vzor.php            Vzor konfigurace (config.php do repozitáře nepatří)
+  aplikace.css, aplikace.js  Nadstavba firemního stylu a obsluha rozhraní
+  data/                      Databáze — mimo repozitář, .htaccess vše zakazuje
+  zdroj/                     Databáze, přihlášení, šablona, pomocné funkce
+  zdroj/stranky/             Jedna obrazovka = jeden soubor
 ```
 
 Chystá se obsahová revize webu. Její závazná rozhodnutí, otevřené otázky
@@ -212,10 +227,97 @@ Po nasazení stojí za kontrolu: náhled odkazu při sdílení (og obrázek),
 funkčnost obou formulářů z běžného počítače a to, že `sitemap.xml`
 a `robots.txt` odpovídají skutečné doméně.
 
+## Provozní systém (`aplikace/`)
+
+Vnitřní dispečerská aplikace za přihlášením. S prezentačním webem sdílí jen
+firemní styl a hosting — na veřejných stránkách o ní není ani zmínka a odkaz
+na ni nikde nevede.
+
+### Co umí
+
+| Modul | Co dělá |
+|---|---|
+| **Přehled** | co se dnes a zítra nakládá, co nemá dopravce, kde chybí doklady, marže za měsíc |
+| **Přepravy** | evidence zásilek — nakládka, vykládka, náklad, dopravce, ceny, doklady, fakturace; filtry, stránkování, protokol změn |
+| **Dispečink** | týdenní tabule po dnech podle data nakládky; zásilky bez dopravce mají červenou hranu |
+| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference) |
+| **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky |
+| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání |
+| **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
+| **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
+
+### Co je potřeba na hostingu
+
+- **PHP 7.4 a novější** s rozšířením `pdo_sqlite` (nebo `pdo_mysql`).
+- **Právo zápisu do `aplikace/data/`** — práva 0770. Tam si aplikace založí
+  databázi.
+- Nahrát je nutné i skryté soubory `.htaccess` v `aplikace/`, `aplikace/data/`
+  a `aplikace/zdroj/`. **Bez nich by šla databáze stáhnout přímo z webu.**
+  Většina FTP klientů soubory začínající tečkou ve výchozím nastavení
+  nezobrazí — zapněte si zobrazení skrytých souborů.
+
+### První spuštění
+
+1. Otevřete `https://idispecink.cz/aplikace/`.
+2. Aplikace zjistí, že nemá žádného uživatele, a nabídne založení správce.
+   Heslo musí mít aspoň 10 znaků.
+3. V **Nastavení** doplňte:
+   - **číselnou řadu** — tvar a číslo, kterým se má pokračovat, aby řada
+     navázala na to, co vystavujete dnes,
+   - **podmínky objednávky přepravy** — text, který se tiskne dopravci.
+     Dokud je pole prázdné, objednávka to na sobě viditelně přizná.
+4. Další uživatele přidáte tamtéž. U každého se zvlášť přepíná právo
+   **vidět ceny zákazníka a marže**; cenu dopravce potřebuje ke své práci
+   každý dispečer, obchodní stranu ne. Správce vidí všechno.
+
+### Konfigurace
+
+Bez souboru `config.php` běží aplikace na SQLite v `aplikace/data/` a nic se
+nenastavuje. Chcete-li MySQL, delší nebo kratší odhlašování nebo vynucené
+HTTPS, zkopírujte vzor:
+
+```bash
+cp aplikace/config.vzor.php aplikace/config.php
+```
+
+`config.php` **není v repozitáři** (je v `.gitignore`) — repozitář je veřejný.
+Vynucené HTTPS zapněte až s funkčním certifikátem, stejně jako přesměrování
+zakomentované v kořenovém `.htaccess`.
+
+### Zálohování
+
+Celá databáze je jediný soubor `aplikace/data/idispecink.sqlite`. Stáhněte si
+ho po FTP; kopie souboru je plnohodnotná záloha. Pro archiv mimo systém slouží
+navíc export přeprav a firem do CSV v Nastavení.
+
+### Bezpečnost a osobní údaje
+
+Hesla se ukládají jen jako otisk (`password_hash`) a přečíst se nedají —
+zapomenuté heslo nastaví správce nové. Každý zápis je chráněný jednorázovým
+tokenem, po pěti neúspěšných přihlášeních se adresa na čtvrt hodiny zablokuje
+a sezení se po osmi hodinách nečinnosti samo ukončí. Aplikace posílá
+`X-Robots-Tag: noindex` a je vyloučená v `robots.txt`.
+
+Evidence obsahuje osobní údaje kontaktních osob a řidičů. **Nikdy ji
+necommitujte** a nenahrávejte exporty do repozitáře — `*.csv` a
+`aplikace/data/` jsou proto v `.gitignore`.
+
+Zásady zpracování osobních údajů na webu se tím **nemění**: popisují, co se děje
+s údaji návštěvníků webu, a ten do žádné databáze nic neukládá dál. Aplikace
+zpracovává údaje obchodních partnerů, ne návštěvníků.
+
 ## Lokální spuštění
 
 ```bash
-python3 -m http.server 8000
+php -S 127.0.0.1:8000        # web i aplikace
+python3 -m http.server 8000  # jen statický web, PHP neběží
 ```
 
-Pak otevřete <http://localhost:8000>.
+Pak otevřete <http://localhost:8000> — web —, nebo
+<http://localhost:8000/aplikace/> — provozní systém. Ten si při prvním otevření
+založí databázi a nabídne účet správce; smazáním souboru
+`aplikace/data/idispecink.sqlite` se instalace vrátí na začátek.
+
+Testy nejsou. Změny se ověřují vykreslením v prohlížeči — všechny stránky webu
+i aplikace, šířky 1280, 768 a 390 px, oba formuláře, vypnutý JavaScript
+a tiskový režim.

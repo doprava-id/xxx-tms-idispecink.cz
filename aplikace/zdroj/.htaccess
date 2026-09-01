@@ -1,0 +1,9 @@
+# Vkládané soubory aplikace. Přímo se neotevírají — každý začíná kontrolou
+# konstanty APLIKACE a bez ní skončí, tohle je druhá vrstva.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

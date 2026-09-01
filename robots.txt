@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# Provozní systém je vnitřní nástroj za přihlášením, ne obsah webu.
+# Kromě tohoto řádku ho drží mimo výsledky hlavička X-Robots-Tag,
+# kterou aplikace posílá u každé stránky.
+Disallow: /aplikace/
+
 Sitemap: https://idispecink.cz/sitemap.xml

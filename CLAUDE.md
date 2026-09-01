@@ -4,9 +4,16 @@ Pokyny pro Claude Code a další AI asistenty pracující v tomto repozitáři.
 
 ## Co tento repozitář je
 
-**Prezentační web spedice iDispečink.cz s.r.o.** — statické HTML, CSS a JavaScript.
-Žádný build, žádné závislosti, žádný package manager. Soubory se nahrávají tak, jak
-jsou, na běžný hosting.
+Repozitář drží **dvě věci**, které spolu sdílejí jen firemní styl a hosting:
+
+1. **Prezentační web spedice iDispečink.cz s.r.o.** — statické HTML, CSS a
+   JavaScript v kořeni. Formuláře odesílá `odeslani.php`.
+2. **Provozní systém v `aplikace/`** — vnitřní dispečerská aplikace za
+   přihlášením: přepravy, dispečerská tabule, firmy, objednávky přepravy,
+   podklady k fakturaci.
+
+**Žádný build, žádné závislosti, žádný package manager ani u jednoho.** Soubory se
+nahrávají tak, jak jsou, na běžný hosting.
 
 Ověřená fakta o repozitáři:
 
@@ -16,7 +23,7 @@ Ověřená fakta o repozitáři:
 | Viditelnost | **veřejný** — cokoliv se sem commitne, je čitelné komukoliv |
 | Výchozí větev | `main` |
 | Licence | Apache License 2.0 |
-| Runtime | žádný — statické soubory |
+| Runtime | web: žádný. `aplikace/`: PHP 7.4+ s PDO (SQLite, volitelně MySQL) |
 | Testy, CI | nejsou |
 | Jazyk obsahu | čeština |
 
@@ -45,6 +52,21 @@ assets/js/mereni.js          Google Analytics + lišta souhlasu (ID je PLACEHOLD
 assets/img/                  Logo, favicon, náhledový obrázek
 README.md                    Podrobná dokumentace webu — čti ji taky
 PREDANI-WEBU.md              Předávací soubor pro revizi — čti před obsahovými změnami
+
+aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihlášením
+  index.php                  Jediný vstupní bod, směrovač (index.php?s=…)
+  config.vzor.php            Vzor konfigurace; config.php je v .gitignore
+  aplikace.css               Nadstavba firemního stylu, vlastní barvy nedefinuje
+  aplikace.js                Nabídka, dvojí odeslání, náhled marže
+  .htaccess                  DirectoryIndex, zákaz výpisu, noindex, zákaz stažení dat
+  data/                      Databáze SQLite — v .gitignore, .htaccess vše zakazuje
+  zdroj/                     Vkládané soubory; přímo se neotevírají
+    zavaděč v index.php, databaze.php, pomocnici.php, ciselniky.php,
+    autentizace.php, sablona.php
+  zdroj/stranky/             Jedna stránka = jeden soubor
+    instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
+    dispecink, firmy, firma, objednavka, fakturace, nastaveni,
+    import, export
 ```
 
 **Chystá se obsahová revize webu.** Závazná rozhodnutí, osm otevřených otázek
@@ -67,8 +89,13 @@ se obě okna pod sebou.
 ## Spuštění a ověření
 
 ```bash
-python3 -m http.server 8000     # pak http://localhost:8000
+php -S 127.0.0.1:8000           # web i aplikace, pak http://localhost:8000
+python3 -m http.server 8000     # jen statický web, PHP neběží
 ```
+
+Aplikaci otevřeš na `http://localhost:8000/aplikace/`. Při prvním spuštění si
+sama založí databázi v `aplikace/data/` a nabídne založení správce; smazáním
+souboru `aplikace/data/idispecink.sqlite` se instalace vrátí na začátek.
 
 Testy nejsou. Změny se ověřují vykreslením v prohlížeči — v prostředí je Chromium
 a Playwright (`/opt/node22/lib/node_modules/playwright`, `PLAYWRIGHT_BROWSERS_PATH`
@@ -77,6 +104,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
+- u zásahu do aplikace i jejích **čtrnáct stránek**: instalace, přihlášení, obojí CRUD, tabule, objednávka, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -155,12 +183,56 @@ Dvě věci, které se snadno rozbijí:
 Poměry stran jsou v README. Když vyměníš logo, uprav i `width`/`height` u `<img>`
 ve všech stránkách, jinak stránka při načítání poskočí.
 
+## Provozní systém (`aplikace/`)
+
+Vnitřní nástroj pro dva dispečery. Stejná pravidla jako web — česky, bez buildu,
+bez závislostí, „plocha, linka, text" —, ale pár věcí navíc.
+
+**Jmenuje se „provozní systém", ne TMS.** Rozhodnutí 17 v `PREDANI-WEBU.md` říká
+označovat vnitřní systém výhradně takhle. Název složky a větve zkratku TMS nese,
+**text, který uvidí uživatel, ji nést nesmí.** Web o aplikaci nemluví vůbec a
+nemá začít — je to nástroj, ne nabídka.
+
+**Jeden vstupní bod.** Všechno jde přes `aplikace/index.php?s=<stránka>`; hosting
+tedy nemusí umět `mod_rewrite`. Seznam stránek v `index.php` je bílá listina —
+stránka, která v něm není, se nespustí, a u každé je zapsané, jestli vyžaduje
+přihlášení.
+
+**Věci, které se rozbijí tiše:**
+
+| Co | Pravidlo |
+|---|---|
+| soubory v `zdroj/` | každý začíná kontrolou `if (!defined("APLIKACE"))`; bez ní jde obsah ven při přímém otevření |
+| výstup | každý údaj z databáze i formuláře projde `chran()`; bez toho jde do stránky cizí kód |
+| zápis | každý POST ověřuje `over_token()`; směrovač to dělá plošně, `prihlaseni` a `instalace` si to řeší samy |
+| schéma | popisuje ho pole `$SCHEMA` v `databaze.php`, ne hotové SQL. **Nový sloupec přidej tam** — doplní se sám při dalším načtení, na SQLite i MySQL. Ručně psané `ALTER TABLE` do repozitáře nepatří |
+| ceny | cenu zákazníka a marži smí vidět jen `vidi_ceny()`. Kdo právo nemá, **nesmí ta pole ani přepsat** — jinak by je uložení formuláře smazalo (viz `preprava.php`) |
+| `.tabulka-obal` | musí zůstat `position: relative`. Skryté popisky uvnitř široké tabulky jsou absolutně umístěné a bez toho roztáhnou stránku do vodorovného scrollu |
+| číslování | tvar řady drží Nastavení, ne kód. `dalsi_cislo()` navíc přeskočí číslo, které už existuje |
+| podmínky objednávky | **PLACEHOLDER.** Text dodá zadavatel v Nastavení. Objednávka bez něj vytiskne viditelné upozornění — nedoplňuj ho za něj |
+
+**Do repozitáře nepatří** `aplikace/config.php` ani cokoliv z `aplikace/data/`.
+Obojí je v `.gitignore`, `data/` má navíc vlastní `.htaccess`, který zakazuje
+všechno. Repozitář je veřejný a evidence přeprav nese osobní údaje zákazníků,
+dopravců i řidičů.
+
+**Import z CSV je obecný**, ne konektor. Čte cizí soubor, hádá sloupce podle názvů
+a mapování se nikam neukládá. Konfigurace Airtable, Blue Yonderu ani Trella sem
+nepatří — platí kapitola „Provoz firmy" níže.
+
 ## Nasazení
 
 Obsah repozitáře kromě `README.md`, `CLAUDE.md`, `PREDANI-WEBU.md`, `LICENSE`
 a `.gitignore` se nahraje do kořene webu; ty na hosting nepatří. `.htaccess`
 začíná tečkou — většina FTP klientů ho ve výchozím nastavení
-nezobrazí ani nenahraje.
+nezobrazí ani nenahraje. **Adresář `aplikace/` má vlastní `.htaccess` a další
+ještě v `aplikace/data/` a `aplikace/zdroj/`** — bez nich by šla databáze
+stáhnout z webu.
+
+Aplikace potřebuje navíc: PHP s `pdo_sqlite` (nebo `pdo_mysql`) a **právo zápisu
+do `aplikace/data/`** (0770). Konfigurace je volitelná — bez `config.php` běží
+na SQLite v `data/`. První otevření `aplikace/` nabídne založení správce; dokud
+žádný uživatel neexistuje, jiná stránka se nespustí.
 
 **Přesměrování na HTTPS a bez www je v `.htaccess` zakomentované.** Odkomentovat až
 s funkčním certifikátem na doméně — dřív by web znepřístupnilo.
@@ -171,6 +243,11 @@ iDispečink.cz s.r.o. provozuje silniční dispečink nad Airtable (tabulka `Př
 Blue Yonder TMS (účty ESA a WELLPACK/Chep), denními Trello nástěnkami a exporty do
 Excelu. **Nic z té automatizace v tomto repozitáři není** a nepatří sem. Běží
 v samostatné lokální pipeline a v Claude skillech.
+
+Provozní systém v `aplikace/` na ni **nenavazuje** a navazovat nemá: je to
+samostatná evidence, do které se data zadávají ručně nebo se načtou obecným
+importem z CSV. Kdyby se někdy měly obě věci propojit, propojení patří do
+pipeline mimo tento repozitář, ne sem.
 
 Do repozitáře nekopíruj identifikátory Airtable bází a tabulek, přihlašovací údaje
 k Blue Yonderu, kódy Trello nástěnek ani cesty na pracovní stanici. Zmínit systém

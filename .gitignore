@@ -17,6 +17,13 @@ service-account*.json
 /exports/
 /logs/
 
+# Provozní systém (aplikace/) — konfigurace a databáze.
+# config.php nese přístup k databázi, data/ celou evidenci přeprav
+# s osobními údaji zákazníků, dopravců i řidičů. Repozitář je veřejný.
+/aplikace/config.php
+/aplikace/data/*
+!/aplikace/data/.htaccess
+
 # Pomocné soubory při práci na webu
 nahled-tmp.html
 /undefined/

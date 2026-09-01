@@ -1,0 +1,55 @@
+# ==========================================================================
+# iDispečink.cz — provozní systém: konfigurace adresáře pro Apache
+#
+# Kořenový .htaccess webu nastavuje DirectoryIndex na index.html. Aplikace
+# běží na PHP, takže si výchozí dokument přenastavuje zpátky.
+# ==========================================================================
+
+DirectoryIndex index.php
+
+# Bez tohohle by server u adresáře bez index souboru vypsal seznam souborů.
+Options -Indexes
+
+# Aplikace není pro vyhledávače. Kromě robots.txt to říká i hlavička,
+# která platí i pro adresy nalezené odjinud než z odkazu.
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+# --- Soubory, které se nesmí stáhnout -------------------------------------
+# config.php nese přístup k databázi, zdroj/ jsou vkládané soubory, které
+# samy o sobě nic nevypíšou, ale číst se nemají. Databáze v data/ má
+# vlastní .htaccess; tohle je druhá pojistka pro případ, že by se
+# adresářový .htaccess nenahrál.
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|log)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<Files "config.php">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>
+
+<Files "config.vzor.php">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>
