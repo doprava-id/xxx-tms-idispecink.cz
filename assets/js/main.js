@@ -41,10 +41,12 @@
 
       radky.push("", "— Odesláno z webu idispecink.cz");
 
+      /* Adresa zůstává v mailto: literálem (RFC 6068 — zavináč se nekóduje);
+         zalomení řádků v těle musí být CRLF, jinak je část klientů slepí. */
       var odkaz =
-        "mailto:" + encodeURIComponent(prijemce) +
+        "mailto:" + prijemce +
         "?subject=" + encodeURIComponent(predmet) +
-        "&body=" + encodeURIComponent(radky.join("\n"));
+        "&body=" + encodeURIComponent(radky.join("\r\n"));
 
       /* Navigace přes odkaz, ne přes window.location — protokol mailto
          tak spolehlivěji předá řízení poštovnímu klientovi. */
@@ -57,9 +59,15 @@
 
       var stav = form.querySelector(".formular-stav");
       if (stav) {
-        stav.textContent =
-          "Otevírám váš poštovní klient s předvyplněnou zprávou. " +
-          "Pokud se nic nestalo, napište nám přímo na " + prijemce + ".";
+        /* Adresa jako klikatelný odkaz — je to záchrana právě pro případ,
+           kdy se poštovní klient neotevřel. */
+        stav.textContent = "Otevírám vašeho poštovního klienta s předvyplněnou zprávou. " +
+          "Pokud se nic nestalo, napište nám přímo na ";
+        var zachrana = document.createElement("a");
+        zachrana.href = "mailto:" + prijemce;
+        zachrana.textContent = prijemce;
+        stav.appendChild(zachrana);
+        stav.appendChild(document.createTextNode("."));
       }
     });
   });

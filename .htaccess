@@ -35,7 +35,9 @@ AddDefaultCharset UTF-8
 
 # --- Komprese -------------------------------------------------------------
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  # Novější Apache hlásí XML jako application/xml, starší jako text/xml —
+  # uvedeny jsou oba, jinak by se sitemap.xml posílala nekomprimovaná.
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml
   # Novější Apache hlásí skripty jako text/javascript, starší jako
   # application/javascript — uvedeny jsou obě, jinak se komprese minula účinkem.
   AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
@@ -43,7 +45,7 @@ AddDefaultCharset UTF-8
 </IfModule>
 
 # --- Cache ----------------------------------------------------------------
-# HTML se needituje agresivně, aby se změny na webu projevily hned.
+# HTML se necachuje agresivně, aby se změny na webu projevily hned.
 # Statická aktiva vydrží dlouho — při jejich změně změňte název souboru
 # nebo připojte ?v=2 k odkazu.
 <IfModule mod_expires.c>
@@ -61,6 +63,11 @@ AddDefaultCharset UTF-8
 
 # --- Bezpečnostní hlavičky ------------------------------------------------
 <IfModule mod_headers.c>
+  # Web je plně statický a vše načítá sám ze sebe: jediný skript je lokální
+  # main.js, inline <script> je jen neexekuovaný JSON-LD (CSP ho neblokuje),
+  # styly lokální + inline atributy style. Při přidání externího zdroje
+  # (mapy, měření…) je nutné politiku rozšířit.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set X-Frame-Options "SAMEORIGIN"
