@@ -124,6 +124,10 @@ $SCHEMA = [
     "cena_dopravce" => "castka",
 
     "objednavka_datum" => "cas_zapisu",
+    "objednavka_odeslana" => "cas_zapisu",   /* kdy odešla e-mailem */
+    "potvrzeno_kdy"    => "cas_zapisu",      /* dopravce potvrdil přes odkaz */
+    "hlaseni"          => "text",            /* poslední zpráva od dopravce (zpoždění) */
+    "hlaseni_kdy"      => "cas_zapisu",
     "doklady"          => "text",   /* ceka | prijato | chybi */
     "doklady_poznamka" => "text",
 
@@ -177,6 +181,20 @@ $SCHEMA = [
     "vytvoreno"       => "cas_zapisu",
   ],
 
+  /* Veřejné odkazy bez hesla. Kód je 160 bitů náhody — hádat ho nejde.
+     Platnost se nepamatuje, počítá se z data vykládky (měsíc po ní). */
+  "odkazy" => [
+    "id"          => "id",
+    "preprava_id" => "cele",
+    "druh"        => "text",         /* zakaznik | dopravce | ridic */
+    "kod"         => "text",
+    "vytvoreno"   => "cas_zapisu",
+    "vytvoril"    => "cele",
+    "naposledy"   => "cas_zapisu",
+    "otevreni"    => "cele",
+    "zruseno"     => "ano_ne",
+  ],
+
   "prilohy" => [
     "id"          => "id",
     "preprava_id" => "cele",
@@ -219,6 +237,8 @@ $INDEXY = [
   "idx_udalosti_preprava"  => ["udalosti", "preprava_id"],
   "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
   "idx_body_preprava"      => ["body", "preprava_id"],
+  "idx_odkazy_kod"         => ["odkazy", "kod"],
+  "idx_odkazy_preprava"    => ["odkazy", "preprava_id"],
   "idx_mista_nazev"        => ["mista", "nazev"],
   "idx_prepravy_sablona"   => ["prepravy", "sablona"],
   "idx_vozidla_firma"      => ["vozidla", "firma_id"],
