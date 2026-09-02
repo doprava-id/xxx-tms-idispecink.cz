@@ -251,6 +251,11 @@
 }
 .odkaz-tlacitko:hover { color: var(--chyba-text); }
 
+/* Návrh ceny pod polem: text a tlačítko „použít". */
+.navrh-ceny { margin: -8px 0 14px; }
+.navrh-ceny .odkaz-tlacitko { color: var(--zluta); }
+.navrh-ceny .odkaz-tlacitko:hover { color: var(--krem); }
+
 /* --- Trasa (body jízdy) ------------------------------------------------- */
 
 .aplikace table.id-tabulka.trasa { min-width: 640px; }

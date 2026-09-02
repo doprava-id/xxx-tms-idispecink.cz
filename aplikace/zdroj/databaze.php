@@ -60,6 +60,13 @@ $SCHEMA = [
     "dispecink_uctovani" => "text",        /* pausal_vuz | procento | za_jizdu */
     "dispecink_sazba"    => "castka",      /* Kč; u procenta číslo v % */
     "dispecink_poznamka" => "dlouhy_text",
+    /* Doklady dopravce s platností do. Systém na konec upozorní, ale
+       objednávku pustí — rozhodnutí je na dispečerovi. */
+    "pojisteni_do"       => "datum",
+    "pojisteni_poznamka" => "text",        /* pojišťovna, číslo smlouvy, limit */
+    "opravneni_do"       => "datum",
+    "smlouva_do"         => "datum",
+    "smlouva_poznamka"   => "text",
     "aktivni"         => "ano_ne",
     "vytvoreno"       => "cas_zapisu",
     "upraveno"        => "cas_zapisu",
@@ -124,6 +131,7 @@ $SCHEMA = [
     "linka_nazev"      => "text",
     "linka_dny"        => "text",     /* „1,3,5" = pondělí, středa, pátek */
     "zdroj_sablony_id" => "cele",     /* z které šablony přeprava vznikla */
+    "nabidka_id"       => "cele",     /* z které nabídky přeprava vznikla */
 
     "zbozi"        => "text",
     "hmotnost"     => "cele",      /* kg */
@@ -131,6 +139,7 @@ $SCHEMA = [
     "ldm"          => "castka",
     "typ_vozidla"  => "text",
     "pozadavky"    => "text",
+    "km"           => "cele",      /* vzdálenost; zatím ručně, mapová služba chybí */
 
     "cena_zakaznik" => "castka",
     "cena_dopravce" => "castka",
@@ -191,6 +200,65 @@ $SCHEMA = [
     "poznamka"        => "dlouhy_text",
     "aktivni"         => "ano_ne",
     "vytvoreno"       => "cas_zapisu",
+  ],
+
+  /* Ceníky zákazníků — tři podoby pravidla. Přednost: trasa → pásmo → km,
+     pak historie trasy. Návrh ceny se nikdy nezapisuje sám. */
+  "ceniky" => [
+    "id"             => "id",
+    "firma_id"       => "cele",
+    "druh"           => "text",       /* trasa | pasmo | km */
+    "nakladka_misto" => "text",
+    "vykladka_misto" => "text",
+    "km_od"          => "cele",
+    "km_do"          => "cele",       /* NULL = bez horní hranice */
+    "cena"           => "castka",     /* Kč za trasu či pásmo; u km Kč/km */
+    "typ_vozidla"    => "text",       /* prázdné = jakékoli */
+    "poznamka"       => "text",
+    "aktivni"        => "ano_ne",
+    "vytvoreno"      => "cas_zapisu",
+  ],
+
+  /* Nabídky — stupeň před zakázkou. Z přijaté vznikne přeprava
+     (preprava_id), u neúspěšné se zapíše důvod. Platnost se nesleduje. */
+  "nabidky" => [
+    "id"            => "id",
+    "cislo"         => "text",
+    "stav"          => "text",        /* otevrena | prijata | neprosla */
+    "duvod"         => "text",        /* drahe | pozde | bez_vozu | zrusil | jiny */
+    "duvod_poznamka" => "text",
+    "zakaznik_id"   => "cele",
+    "kontakt_jmeno" => "text",
+    "kontakt_email" => "text",
+    "ref_zakaznika" => "text",
+    "nakladka_misto"  => "text",
+    "nakladka_adresa" => "text",
+    "nakladka_datum"  => "datum",
+    "nakladka_od"     => "cas",
+    "nakladka_do"     => "cas",
+    "vykladka_misto"  => "text",
+    "vykladka_adresa" => "text",
+    "vykladka_datum"  => "datum",
+    "vykladka_od"     => "cas",
+    "vykladka_do"     => "cas",
+    "zbozi"         => "text",
+    "hmotnost"      => "cele",
+    "palet"         => "cele",
+    "ldm"           => "castka",
+    "km"            => "cele",
+    "typ_vozidla"   => "text",
+    "pozadavky"     => "text",
+    "cena"          => "castka",      /* nabídnutá cena zákazníkovi bez DPH */
+    "cena_dopravce" => "castka",      /* odhad nákladu, jen pro marži */
+    "cena_podle"    => "text",        /* podle čeho cena vznikla */
+    "text_pro_zakaznika" => "dlouhy_text",
+    "poznamka"      => "dlouhy_text",
+    "odeslana"      => "cas_zapisu",
+    "rozhodnuto"    => "cas_zapisu",
+    "preprava_id"   => "cele",
+    "vytvoreno"     => "cas_zapisu",
+    "upraveno"      => "cas_zapisu",
+    "vytvoril"      => "cele",
   ],
 
   /* Faktury — vydané zákazníkům i přijaté od dopravců. Na přepravu se
@@ -269,6 +337,10 @@ $INDEXY = [
   "idx_prepravy_zakaznik"  => ["prepravy", "zakaznik_id"],
   "idx_prepravy_vozidlo"   => ["prepravy", "vozidlo_id"],
   "idx_prepravy_dispecink" => ["prepravy", "dispecink_klient_id"],
+  "idx_ceniky_firma"       => ["ceniky", "firma_id"],
+  "idx_nabidky_cislo"      => ["nabidky", "cislo"],
+  "idx_nabidky_zakaznik"   => ["nabidky", "zakaznik_id"],
+  "idx_nabidky_stav"       => ["nabidky", "stav"],
   "idx_udalosti_preprava"  => ["udalosti", "preprava_id"],
   "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
   "idx_body_preprava"      => ["body", "preprava_id"],

@@ -7,6 +7,7 @@ if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen.")
 $hledat  = vstup("hledat");
 $typ     = vstup("typ");
 $neaktivni = vstup("neaktivni") !== "";
+$jen_doklady = vstup("neaktivni") === "doklady";   /* dopravci s končícími doklady */
 
 $kde = [];
 $parametry = [];
@@ -34,6 +35,7 @@ $firmy = radky(
     ORDER BY LOWER(f.nazev)",
   $parametry
 );
+if ($jen_doklady) $firmy = array_values(array_filter($firmy, fn($f) => (int)$f["aktivni"] === 1 && upozorneni_dopravce($f)));
 
 hlava("Firmy", "firmy");
 hlava_stranky("Adresář", "Firmy",
@@ -55,7 +57,8 @@ hlava_stranky("Adresář", "Firmy",
       <label for="neaktivni">Zobrazit</label>
       <select id="neaktivni" name="neaktivni">
         <option value="">Jen aktivní</option>
-        <option value="1"<?= $neaktivni ? " selected" : "" ?>>Včetně vyřazených</option>
+        <option value="1"<?= $neaktivni && !$jen_doklady ? " selected" : "" ?>>Včetně vyřazených</option>
+        <option value="doklady"<?= $jen_doklady ? " selected" : "" ?>>Dopravci s končícími doklady</option>
       </select>
     </div>
     <div class="filtr-akce">
@@ -111,6 +114,9 @@ hlava_stranky("Adresář", "Firmy",
                          + (int)$f["prov_doklady"] + (int)$f["prov_reference"];
                 $trida = $splneno === 5 ? "hotovo" : ($splneno === 0 ? "zrus" : "bezi");
                 echo '<span class="stitek stitek-' . $trida . '">' . $splneno . ' z 5</span>';
+                foreach (upozorneni_dopravce($f) as $u) {
+                  echo '<span class="druhotny" style="color:var(--' . ($u["vazne"] ? "chyba" : "pozor") . '-text)">' . chran($u["text"]) . '</span>';
+                }
               }
             ?>
           </td>

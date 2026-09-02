@@ -153,7 +153,7 @@ $hlavicka = [
   "Číslo", "Stav", "Zákazník", "Reference zákazníka", "Bodů trasy",
   "Nakládka místo", "Nakládka adresa", "Nakládka datum", "Nakládka od", "Nakládka do",
   "Vykládka místo", "Vykládka adresa", "Vykládka datum", "Vykládka od", "Vykládka do",
-  "Zboží", "Hmotnost kg", "Palet", "LDM", "Vozidlo", "Požadavky",
+  "Zboží", "Hmotnost kg", "Palet", "LDM", "Km", "Vozidlo", "Požadavky",
   "Dopravce", "SPZ", "Řidič", "Telefon řidiče", "Externí dispečink",
 ];
 /* Pořadí musí sedět s pořadím hodnot v řádku níže. */
@@ -170,7 +170,7 @@ foreach ($data as $p) {
     $p["cislo"], nazev_stavu($p["stav"]), $p["zakaznik_nazev"], $p["ref_zakaznika"], (int)$p["bodu"],
     $p["nakladka_misto"], $p["nakladka_adresa"], csv_datum($p["nakladka_datum"]), $p["nakladka_od"], $p["nakladka_do"],
     $p["vykladka_misto"], $p["vykladka_adresa"], csv_datum($p["vykladka_datum"]), $p["vykladka_od"], $p["vykladka_do"],
-    $p["zbozi"], $p["hmotnost"], $p["palet"], $p["ldm"], nazev_typu_vozidla($p["typ_vozidla"]), $p["pozadavky"],
+    $p["zbozi"], $p["hmotnost"], $p["palet"], $p["ldm"], $p["km"], nazev_typu_vozidla($p["typ_vozidla"]), $p["pozadavky"],
     $p["dopravce_nazev"], $p["spz"], $p["ridic_jmeno"], $p["ridic_telefon"], $p["klient_nazev"],
   ];
   if ($ceny) $radek[] = csv_castka($p["cena_zakaznik"]);

@@ -215,7 +215,8 @@ hlava_stranky("Provozní systém", "Nastavení",
             <input type="number" id="cislovani_mist" name="cislovani_mist" value="<?= chran(nastaveni("cislovani_mist", "4")) ?>" min="1" max="8">
           </div>
         </div>
-        <p class="app-perex">Příští přeprava dostane číslo <b class="cislo"><?= chran($ukazka) ?></b>.</p>
+        <p class="app-perex">Příští přeprava dostane číslo <b class="cislo"><?= chran($ukazka) ?></b>.
+          Nabídky mají stejný tvar s předponou N a vlastní počítadlo; příští: <b class="cislo"><?= chran(slozene_cislo("N" . nastaveni("cislovani_predpona", "{RR}-"), (int)nastaveni("nabidky_dalsi", "1"), (int)nastaveni("cislovani_mist", "4"))) ?></b>.</p>
         <button type="submit" class="tlacitko">Uložit číslování</button>
       </div>
     </form>

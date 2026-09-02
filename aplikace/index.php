@@ -62,6 +62,9 @@ require __DIR__ . "/zdroj/posta.php";
 require __DIR__ . "/zdroj/faktury.php";
 require __DIR__ . "/zdroj/fakturoid.php";
 require __DIR__ . "/zdroj/dispecink.php";
+require __DIR__ . "/zdroj/ceniky.php";
+require __DIR__ . "/zdroj/dopravci.php";
+require __DIR__ . "/zdroj/nabidky.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -78,6 +81,8 @@ $STRANKY = [
   "prehled"    => true,
   "prepravy"   => true,
   "preprava"   => true,
+  "nabidky"    => true,      /* jen s právem na ceny — stránka si to hlídá sama */
+  "nabidka"    => true,
   "dispecink"  => true,
   "vozy"       => true,      /* plán vozů klientů externího dispečinku */
   "firmy"      => true,

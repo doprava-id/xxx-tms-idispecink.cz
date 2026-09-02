@@ -4,8 +4,9 @@
 **Větev:** `claude/idispecink-tms-software-uosnh7`
 **Stav:** jádro (19 obrazovek), ARES, přílohy, bod 1 pořadí prací (trasa
 jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
-veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid)
-a bod 4 (externí dispečink). Zbytek níže čeká.
+veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid),
+bod 4 (externí dispečink) a bod 5 (nabídky, ceníky, doklady dopravců).
+Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -58,6 +59,9 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Fakturoid: úhrady přes API, založení faktury z podkladu (3.4, 3.13) | hotové, ověřeno proti napodobenině; živě až s přístupem v config.php |
 | Historie komunikace u přepravy (3.8) | zatím jen protokol událostí; ruční poznámky s datem chybí |
 | Externí dispečink (3.6) | hotové — klienti, plán vozů, podklad k fakturaci služby i faktura ve Fakturoidu; způsob účtování a sazby jsou PLACEHOLDER na kartě klienta, viz 6 |
+| Nabídky a poptávky (3.3) | hotové — návrh ceny, tisk, e-mail, přijetí → přeprava, důvody neúspěchu, úspěšnost celkově i po zákaznících |
+| Ceníky zákazníků (3.3) | hotové — pevná cena, pásma, sazba za km s předností; kilometry ručně, dokud není mapová služba (viz 6) |
+| Smlouvy a pojistky dopravců (3.3) | hotové — platnosti s upozorněním měsíc předem; objednávka varuje a pustí |
 
 ---
 
@@ -297,7 +301,8 @@ Nic z toho si nelze domyslet.
 3. **Sazby externího dispečinku** — u každého klienta způsob účtování
    a částka. Pole jsou na kartě klienta připravená, zatím prázdná.
 4. **Mapová služba** — který poskytovatel, kdo platí, pustí ho hosting ven?
-   Bez ní nebudou kilometry ani sazba za kilometr v ceníku.
+   Bez ní se kilometry zadávají u jízdy ručně; pásma i sazba za kilometr
+   v ceníku s ručními kilometry fungují.
 5. **SMS brána** — která a s jakými přístupy. Mají řidiči WhatsApp?
 6. **Fakturoid** — přístup k API (client_id, client_secret) do `config.php`
    na hostingu. Napojení je postavené a ověřené proti napodobenině; živě

@@ -238,12 +238,13 @@ na ni nikde nevede.
 | Modul | Co dělá |
 |---|---|
 | **Přehled** | co se dnes a zítra nakládá, co nemá dopravce, kde chybí doklady, marže za měsíc |
-| **Přepravy** | evidence zásilek — trasa jako seznam bodů (kolik nakládek a vykládek je potřeba), náklad, dopravce, ceny, doklady, fakturace, přílohy; filtry, stránkování, protokol změn. U bodu se odškrtává splnění, stav jízdy se z toho dopočítá |
+| **Přepravy** | evidence zásilek — trasa jako seznam bodů (kolik nakládek a vykládek je potřeba), náklad, dopravce, ceny, doklady, fakturace, přílohy; filtry, stránkování, protokol změn. U bodu se odškrtává splnění, stav jízdy se z toho dopočítá; návrh ceny zákazníka podle ceníku nebo historie trasy |
+| **Nabídky** | poptávka a cenová nabídka před zakázkou: návrh ceny, tisk a odeslání e-mailem, jedním kliknutím přeprava; u neúspěšné důvod, úspěšnost v číslech celkově i po zákaznících |
 | **Místa** | společný adresář skladů a ramp — adresa, brána, kontakt, otevírací doba; u bodu trasy se vybere a zbytek se doplní |
 | **Stálé linky** | přeprava označená jako šablona s dny v týdnu; na kliknutí se z ní založí celý týden, státní svátky se přeskočí |
 | **Dispečink** | týdenní tabule po dnech podle data nakládky; zásilky bez dopravce mají červenou hranu |
 | **Vozy** | plán vozů klientů externího dispečinku: týden po vozidlech, jízda leží ve dnech od nakládky po vykládku, prázdná buňka založí novou jízdu s předvyplněným vozem a dnem; vytěžení za týden (jízdy, obrat vozu) |
-| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO; klient externího dispečinku se způsobem účtování a sazbou služby |
+| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO; klient externího dispečinku se způsobem účtování a sazbou služby; ceník zákazníka (pevná cena, pásma, sazba za km); platnosti pojištění, oprávnění a smlouvy dopravce s upozorněním měsíc předem |
 | **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky; odeslání e-mailem celá v těle zprávy s odkazem na potvrzení |
 | **Odkazy ven** | odkazy bez hesla: zákazník vidí stav, termíny a cenu; dopravce potvrdí objednávku, doplní vůz a řidiče, nahlásí zpoždění a nahraje doklady; řidič vidí pokyny a odklikává zastávky. Tlačítko WhatsApp odkaz rovnou předvyplní do zprávy |
 | **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti; podklad k fakturaci externího dispečinku po klientech (obrat vozů, odměna podle způsobu účtování) |
@@ -318,6 +319,26 @@ přepravy zákazníka za období, najde odběratele podle IČO (nebo ho založí
 a vystaví fakturu s řádkem za každou přepravu; číslo se zapíše k přepravám.
 Sazbu DPH a výchozí splatnost drží Nastavení (`dph_sazba`, `splatnost_dnu`),
 splatnost u zákazníka má přednost.
+
+### Nabídky a ceníky
+
+Nabídka je stupeň před zakázkou: zapíše se poptávka, systém navrhne cenu
+a nabídka se vytiskne nebo pošle e-mailem zákazníkovi. Z přijaté vznikne
+jedním kliknutím přeprava s cenou a oběma body trasy; u neúspěšné se
+zapíše důvod (drahé, pozdě, bez vozu, zákazník zrušil), aby seznam ukázal
+úspěšnost celkově i po zákaznících. Platnost nabídky se nesleduje.
+Nabídky číslují stejným tvarem jako přepravy s předponou N.
+
+Návrh ceny bere z ceníku zákazníka na kartě firmy: pevná cena za trasu má
+přednost před pásmem podle vzdálenosti, pásmo před sazbou za kilometr, a bez
+pravidla se navrhne cena, za kterou se trasa vozila naposled. Návrh vždy
+říká, podle čeho vznikl, a nikdy se nezapíše sám — převezme se tlačítkem.
+Kilometry se zadávají u jízdy ručně, dokud není mapová služba.
+
+Doklady dopravce (pojištění odpovědnosti, oprávnění, smlouva) mají na kartě
+platnost do; měsíc před koncem se objeví upozornění na kartě, v seznamu
+firem, u přepravy i na objednávce. Objednávku systém pustí i po konci —
+rozhodnutí je na dispečerovi, do tisku varování nejde.
 
 ### Externí dispečink
 

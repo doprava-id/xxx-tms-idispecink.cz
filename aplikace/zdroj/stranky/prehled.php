@@ -80,6 +80,10 @@ $po_splatnosti_soucet = 0; foreach ($po_splatnosti as $f) $po_splatnosti_soucet 
 $zavazky_brzy = array_filter(zavazky(), fn($f) => $f["dnu_do"] !== null && $f["dnu_do"] <= 7);
 $zavazky_soucet = 0; foreach ($zavazky_brzy as $f) $zavazky_soucet += (float)$f["castka_s_dph"] ?: (float)$f["castka"];
 
+/* Doklady dopravců s koncem do měsíce a otevřené nabídky. */
+$doklady_dopravcu = dopravci_s_upozornenim();
+$nabidky_otevrene = $ceny ? radek("SELECT COUNT(*) AS pocet, COALESCE(SUM(cena), 0) AS hodnota FROM nabidky WHERE stav = 'otevrena'") : ["pocet" => 0, "hodnota" => 0];
+
 hlava("Přehled", "prehled");
 hlava_stranky("Provozní systém", "Přehled",
   '<a class="tlacitko" href="' . chran(odkaz("preprava", ["id" => "nova"])) . '">Nová přeprava</a>'
@@ -148,13 +152,27 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
   </ul>
 <?php endif; ?>
 
-<?php if ($po_splatnosti || $zavazky_brzy || $klienti_pocet): ?>
+<?php if ($po_splatnosti || $zavazky_brzy || $klienti_pocet || $doklady_dopravcu || (int)$nabidky_otevrene["pocet"]): ?>
   <div class="dlazdice" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
     <?php if ($klienti_pocet): ?>
       <a class="dlazdice-polozka" href="<?= chran(odkaz("vozy")) ?>">
         <span class="popis">Vozy klientů dnes</span>
         <span class="hodnota"><?= $vozy_dnes ?> z <?= $vozy_dispecinku ?></span>
         <span class="doplnek">s jízdou · <?= $bez_vozu_tyden ? $bez_vozu_tyden . " " . sklonuj($bez_vozu_tyden, "jízda", "jízdy", "jízd") . " bez vozu do týdne" : "jízdy do týdne mají vůz" ?></span>
+      </a>
+    <?php endif; ?>
+    <?php if ((int)$nabidky_otevrene["pocet"]): ?>
+      <a class="dlazdice-polozka" href="<?= chran(odkaz("nabidky", ["stav" => "otevrena"])) ?>">
+        <span class="popis">Otevřené nabídky</span>
+        <span class="hodnota"><?= (int)$nabidky_otevrene["pocet"] ?></span>
+        <span class="doplnek">v hodnotě <?= chran(castka($nabidky_otevrene["hodnota"])) ?> bez DPH</span>
+      </a>
+    <?php endif; ?>
+    <?php if ($doklady_dopravcu): ?>
+      <a class="dlazdice-polozka" href="<?= chran(odkaz("firmy", ["neaktivni" => "doklady"])) ?>">
+        <span class="popis">Doklady dopravců</span>
+        <span class="hodnota" style="color:var(--pozor-text)"><?= count($doklady_dopravcu) ?></span>
+        <span class="doplnek"><?= chran(sklonuj(count($doklady_dopravcu), "dopravce má", "dopravci mají", "dopravců má")) ?> pojistku, oprávnění nebo smlouvu propadlou nebo končící do měsíce</span>
       </a>
     <?php endif; ?>
     <?php if ($po_splatnosti): ?>

@@ -95,6 +95,11 @@ hlava("Objednávka " . $p["cislo"], "", ["bez_navigace" => true]);
   <?php endif; ?>
 </div>
 
+<?php
+/* Propadlé nebo končící doklady dopravce: varování jen na obrazovce,
+   do tisku nejde. Objednávka se vystavit dá — rozhodnutí je na dispečerovi. */
+$upozorneni = upozorneni_dopravce_html(radek("SELECT * FROM firmy WHERE id = ?", [(int)$p["dopravce_id"]]), "Objednávku lze vystavit, rozhodnutí je na vás.");
+if ($upozorneni !== ""): ?><div class="netisknout" style="max-width:900px;margin:0 auto 20px"><?= $upozorneni ?></div><?php endif; ?>
 <?php $u_trasa = objednavka_udaje($p)["trasa"]; ?>
 <form method="post" action="<?= chran(odkaz("objednavka", ["id" => $p["id"]])) ?>" class="formular netisknout" style="max-width:900px;margin:0 auto 20px" data-jednou>
   <?= pole_token() ?>

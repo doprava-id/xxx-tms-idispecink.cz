@@ -55,6 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "dispecink_uctovani" => isset(DISPECINK_UCTOVANI[vstup("dispecink_uctovani")]) ? vstup("dispecink_uctovani") : "",
       "dispecink_sazba"    => vstup_castka("dispecink_sazba"),
       "dispecink_poznamka" => vstup("dispecink_poznamka"),
+      "pojisteni_do"       => vstup_datum("pojisteni_do"),
+      "pojisteni_poznamka" => vstup("pojisteni_poznamka"),
+      "opravneni_do"       => vstup_datum("opravneni_do"),
+      "smlouva_do"         => vstup_datum("smlouva_do"),
+      "smlouva_poznamka"   => vstup("smlouva_poznamka"),
       "aktivni"         => vstup_ano_ne("aktivni"),
       "upraveno"        => date("Y-m-d H:i:s"),
     ];
@@ -102,6 +107,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       vzkaz("pozor", (string)$chyba_ares);
     }
     presmeruj(odkaz("firma", ["id" => $nova ? "nova" : $firma["id"]]));
+
+  } elseif ($akce === "cenik_pridat" && $firma) {
+    $druh = isset(DRUHY_CENIKU[vstup("cenik_druh")]) ? vstup("cenik_druh") : "trasa";
+    $cena = vstup_castka("cenik_cena");
+    $chyba = null;
+    if ($cena === null) $chyba = "Zadejte cenu.";
+    elseif ($druh === "trasa" && (vstup("cenik_nakladka") === "" || vstup("cenik_vykladka") === "")) $chyba = "Pevná cena potřebuje obec nakládky i vykládky.";
+    elseif ($druh === "pasmo" && vstup_cislo("cenik_km_od") === null) $chyba = "Pásmo potřebuje aspoň dolní hranici kilometrů.";
+    if ($chyba !== null) {
+      vzkaz("chyba", $chyba);
+    } else {
+      vloz("ceniky", [
+        "firma_id"       => (int)$firma["id"],
+        "druh"           => $druh,
+        "nakladka_misto" => $druh === "trasa" ? vstup("cenik_nakladka") : "",
+        "vykladka_misto" => $druh === "trasa" ? vstup("cenik_vykladka") : "",
+        "km_od"          => $druh === "pasmo" ? (int)vstup_cislo("cenik_km_od") : null,
+        "km_do"          => $druh === "pasmo" ? vstup_cislo("cenik_km_do") : null,
+        "cena"           => $cena,
+        "typ_vozidla"    => isset(TYPY_VOZIDEL[vstup("cenik_vozidlo")]) ? vstup("cenik_vozidlo") : "",
+        "poznamka"       => vstup("cenik_poznamka"),
+        "aktivni"        => 1,
+        "vytvoreno"      => date("Y-m-d H:i:s"),
+      ]);
+      zapis_udalost(null, "Ceník " . $firma["nazev"] . ": přidáno pravidlo (" . DRUHY_CENIKU[$druh] . ")");
+      vzkaz("ok", "Pravidlo ceníku přidáno.");
+    }
+    presmeruj(odkaz("firma", ["id" => $firma["id"]]));
+
+  } elseif ($akce === "cenik_pryc" && $firma) {
+    dotaz("UPDATE ceniky SET aktivni = 0 WHERE id = ? AND firma_id = ?", [vstup_cislo("cenik_id"), (int)$firma["id"]]);
+    zapis_udalost(null, "Ceník " . $firma["nazev"] . ": pravidlo smazáno");
+    vzkaz("ok", "Pravidlo ceníku smazáno.");
+    presmeruj(odkaz("firma", ["id" => $firma["id"]]));
 
   } elseif ($akce === "vozidlo" && $firma) {
     $spz = vstup("spz");
@@ -158,6 +197,9 @@ $h = function (string $klic, string $vychozi = "") use ($firma, $ares) {
 
 $vozidla = $firma ? radky("SELECT * FROM vozidla WHERE firma_id = ? AND aktivni = 1 ORDER BY spz", [(int)$firma["id"]]) : [];
 $ridici  = $firma ? radky("SELECT * FROM ridici  WHERE firma_id = ? AND aktivni = 1 ORDER BY LOWER(jmeno)", [(int)$firma["id"]]) : [];
+$je_zakaznik = $firma && in_array((string)$firma["typ"], ["zakaznik", "oboji"], true);
+$cenik = $je_zakaznik ? cenik_zakaznika((int)$firma["id"]) : [];
+$mista = $je_zakaznik ? radky("SELECT nazev, mesto FROM mista WHERE aktivni = 1 ORDER BY LOWER(nazev)") : [];
 $posledni = $firma ? radky(
   "SELECT * FROM prepravy WHERE sablona = 0 AND (dopravce_id = ? OR zakaznik_id = ?)
     ORDER BY COALESCE(nakladka_datum, '') DESC, id DESC LIMIT 12",
@@ -172,9 +214,13 @@ if (!$nova && (int)$h("dispecink") === 1) {
   $akce_firmy .= '<a class="tlacitko" href="' . chran(odkaz("vozy", ["klient" => $firma["id"]])) . '">Plán vozů</a>';
   if (vidi_ceny()) $akce_firmy .= '<a class="tlacitko obrys" href="' . chran(odkaz("fakturace", ["pohled" => "dispecink"])) . '">Podklad k fakturaci služby</a>';
 }
+if ($je_zakaznik && vidi_ceny()) {
+  $akce_firmy .= '<a class="tlacitko obrys" href="' . chran(odkaz("nabidka", ["id" => "nova", "zakaznik" => $firma["id"]])) . '">Nová nabídka</a>';
+}
 hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$h("dispecink") === 1 ? " · klient dispečinku" : ""),
   $nova ? "Nová firma" : $h("nazev"), $akce_firmy);
 ?>
+<?= $firma ? upozorneni_dopravce_html($firma) : "" ?>
 
 <div class="app-sloupce">
   <div>
@@ -255,7 +301,7 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
       </div>
 
       <div class="skupina">
-        <h2>Prověření dopravce</h2>
+        <h2>Prověření a doklady dopravce</h2>
         <p class="app-perex">U zákazníka se nevyplňuje. Datum si zapište, ať je vidět, kdy se prověření dělalo naposled.</p>
         <?php
         $body = [
@@ -279,6 +325,31 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
           <div class="pole">
             <label for="prov_poznamka">Poznámka k prověření</label>
             <input type="text" id="prov_poznamka" name="prov_poznamka" value="<?= chran($h("prov_poznamka")) ?>">
+          </div>
+        </div>
+        <p class="app-perex">Platnosti dokladů: měsíc před koncem se objeví upozornění tady, v seznamu firem, u přepravy i na objednávce. Objednávku systém pustí i po konci — rozhodnutí je na vás.</p>
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="pojisteni_do">Pojištění odpovědnosti platí do</label>
+            <input type="date" id="pojisteni_do" name="pojisteni_do" value="<?= chran($h("pojisteni_do")) ?>">
+          </div>
+          <div class="pole">
+            <label for="pojisteni_poznamka">Pojišťovna, číslo smlouvy, limit</label>
+            <input type="text" id="pojisteni_poznamka" name="pojisteni_poznamka" value="<?= chran($h("pojisteni_poznamka")) ?>">
+          </div>
+        </div>
+        <div class="pole-radek tri">
+          <div class="pole">
+            <label for="opravneni_do">Oprávnění k dopravě platí do</label>
+            <input type="date" id="opravneni_do" name="opravneni_do" value="<?= chran($h("opravneni_do")) ?>">
+          </div>
+          <div class="pole">
+            <label for="smlouva_do">Smlouva platí do</label>
+            <input type="date" id="smlouva_do" name="smlouva_do" value="<?= chran($h("smlouva_do")) ?>">
+          </div>
+          <div class="pole">
+            <label for="smlouva_poznamka">Smlouva — číslo, podpis</label>
+            <input type="text" id="smlouva_poznamka" name="smlouva_poznamka" value="<?= chran($h("smlouva_poznamka")) ?>">
           </div>
         </div>
       </div>
@@ -403,6 +474,56 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
           </form>
         </div>
       </div>
+
+      <?php if ($je_zakaznik): ?>
+        <datalist id="seznam-obci">
+          <?php foreach ($mista as $m): ?><option value="<?= chran($m["mesto"]) ?>"><?= chran($m["nazev"]) ?></option><?php endforeach; ?>
+        </datalist>
+        <div class="formular" style="margin-top:20px">
+          <div class="skupina" style="margin-bottom:0">
+            <h2>Ceník</h2>
+            <p class="app-perex">Pevná cena za trasu má přednost před pásmem, pásmo před sazbou za kilometr; bez pravidla se navrhne cena z historie trasy. Pásma a sazba potřebují kilometry u jízdy.</p>
+            <?php if ($cenik): ?>
+              <ul class="protokol">
+                <?php foreach ($cenik as $c): ?>
+                  <li>
+                    <b><?= chran(popis_pravidla($c)) ?></b>
+                    <?= chran(mb_strtolower(DRUHY_CENIKU[$c["druh"]] ?? $c["druh"])) ?><?= $c["typ_vozidla"] ? " · " . chran(nazev_typu_vozidla($c["typ_vozidla"])) : "" ?><?= $c["poznamka"] ? " · " . chran($c["poznamka"]) : "" ?>
+                    <form method="post" action="<?= chran(odkaz("firma", ["id" => $firma["id"]])) ?>" style="display:inline" data-potvrdit="Smazat pravidlo ceníku?">
+                      <?= pole_token() ?><input type="hidden" name="akce" value="cenik_pryc"><input type="hidden" name="cenik_id" value="<?= (int)$c["id"] ?>">
+                      <button type="submit" class="odkaz-tlacitko">smazat</button>
+                    </form>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+            <?php else: ?>
+              <p class="app-perex">Zatím žádné pravidlo — cena se domlouvá po jedné.</p>
+            <?php endif; ?>
+            <form method="post" action="<?= chran(odkaz("firma", ["id" => $firma["id"]])) ?>" style="margin-top:14px">
+              <?= pole_token() ?>
+              <input type="hidden" name="akce" value="cenik_pridat">
+              <div class="pole">
+                <label for="cenik_druh">Druh pravidla</label>
+                <select id="cenik_druh" name="cenik_druh"><?= volby(DRUHY_CENIKU, "trasa") ?></select>
+              </div>
+              <div class="pole-radek">
+                <div class="pole"><label for="cenik_nakladka">Nakládka <span class="napoveda">obec, u pevné ceny</span></label><input type="text" id="cenik_nakladka" name="cenik_nakladka" list="seznam-obci"></div>
+                <div class="pole"><label for="cenik_vykladka">Vykládka</label><input type="text" id="cenik_vykladka" name="cenik_vykladka" list="seznam-obci"></div>
+              </div>
+              <div class="pole-radek">
+                <div class="pole"><label for="cenik_km_od">Km od <span class="napoveda">u pásma</span></label><input type="number" id="cenik_km_od" name="cenik_km_od" min="0" step="1"></div>
+                <div class="pole"><label for="cenik_km_do">Km do</label><input type="number" id="cenik_km_do" name="cenik_km_do" min="0" step="1"></div>
+              </div>
+              <div class="pole-radek">
+                <div class="pole"><label for="cenik_cena">Cena <span class="napoveda">Kč bez DPH; u sazby Kč/km</span></label><input type="text" id="cenik_cena" name="cenik_cena" inputmode="decimal" required></div>
+                <div class="pole"><label for="cenik_vozidlo">Vozidlo</label><select id="cenik_vozidlo" name="cenik_vozidlo"><?= volby(TYPY_VOZIDEL, "", "— jakékoli —") ?></select></div>
+              </div>
+              <div class="pole"><label for="cenik_poznamka">Poznámka</label><input type="text" id="cenik_poznamka" name="cenik_poznamka"></div>
+              <button type="submit" class="tlacitko obrys">Přidat pravidlo</button>
+            </form>
+          </div>
+        </div>
+      <?php endif; ?>
 
       <?php if ($posledni): ?>
         <div class="formular" style="margin-top:20px">

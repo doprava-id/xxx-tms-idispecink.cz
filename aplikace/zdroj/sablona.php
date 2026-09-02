@@ -12,6 +12,7 @@ if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen.")
 const NABIDKA = [
   "prehled"   => "Přehled",
   "prepravy"  => "Přepravy",
+  "nabidky"   => "Nabídky",
   "dispecink" => "Dispečink",
   "vozy"      => "Vozy",
   "firmy"     => "Firmy",
@@ -70,6 +71,7 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
       <button class="menu-prepinac" type="button" aria-expanded="false" aria-controls="app-menu">Menu</button>
       <nav class="menu app-menu" id="app-menu" aria-label="Hlavní nabídka">
         <?php foreach (NABIDKA as $klic => $popis): ?>
+          <?php if ($klic === "nabidky" && !vidi_ceny()) continue; ?>
           <a href="<?= chran(odkaz($klic)) ?>"<?= $aktivni === $klic ? " aria-current=\"page\"" : "" ?>><?= chran($popis) ?></a>
         <?php endforeach; ?>
         <?php if (je_spravce()): ?>

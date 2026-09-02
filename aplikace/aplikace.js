@@ -57,4 +57,17 @@
     dopravce.addEventListener("input", prepocti);
     prepocti();
   }
+
+  /* Návrh ceny: „použít" opíše částku do pole a zapíše, podle čeho vznikla. */
+  document.querySelectorAll("[data-doplnit]").forEach(function (tlacitko) {
+    tlacitko.addEventListener("click", function () {
+      var pole = document.getElementById(tlacitko.getAttribute("data-doplnit"));
+      if (!pole) return;
+      pole.value = tlacitko.getAttribute("data-hodnota");
+      pole.dispatchEvent(new Event("input", { bubbles: true }));
+      var podle = document.getElementById("cena_podle");
+      if (podle && tlacitko.hasAttribute("data-podle")) podle.value = tlacitko.getAttribute("data-podle");
+      pole.focus();
+    });
+  });
 })();
