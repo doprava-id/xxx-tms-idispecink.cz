@@ -172,6 +172,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           "Stav změněn: " . nazev_stavu($preprava["stav"]) . " → " . nazev_stavu($data["stav"]));
         srovnej_body_se_stavem((int)$preprava["id"], $data["stav"]);
       }
+      /* Kdy doklady přišly — pro rychlost vracení ve vyhodnocení. */
+      if ($data["doklady"] === "prijato" && $preprava["doklady"] !== "prijato") {
+        $data["doklady_kdy"] = date("Y-m-d H:i:s");
+        zapis_udalost((int)$preprava["id"], "Doklady přijaty");
+      }
       if ((int)$preprava["dopravce_id"] !== (int)$dopravce_id) {
         $nazev = $dopravce_id ? (string)hodnota("SELECT nazev FROM firmy WHERE id = ?", [$dopravce_id]) : "nikdo";
         zapis_udalost((int)$preprava["id"], "Dopravce: " . $nazev);

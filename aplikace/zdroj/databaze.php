@@ -150,6 +150,7 @@ $SCHEMA = [
     "hlaseni"          => "text",            /* poslední zpráva od dopravce (zpoždění) */
     "hlaseni_kdy"      => "cas_zapisu",
     "doklady"          => "text",   /* ceka | prijato | chybi */
+    "doklady_kdy"      => "cas_zapisu",   /* kdy doklady přišly — rychlost vracení */
     "doklady_poznamka" => "text",
 
     "faktura_vydana"   => "text",

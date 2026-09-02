@@ -247,7 +247,8 @@ na ni nikde nevede.
 | **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO; klient externího dispečinku se způsobem účtování a sazbou služby; ceník zákazníka (pevná cena, pásma, sazba za km); platnosti pojištění, oprávnění a smlouvy dopravce s upozorněním měsíc předem |
 | **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky; odeslání e-mailem celá v těle zprávy s odkazem na potvrzení |
 | **Odkazy ven** | odkazy bez hesla: zákazník vidí stav, termíny a cenu; dopravce potvrdí objednávku, doplní vůz a řidiče, nahlásí zpoždění a nahraje doklady; řidič vidí pokyny a odklikává zastávky. Tlačítko WhatsApp odkaz rovnou předvyplní do zprávy |
-| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti; podklad k fakturaci externího dispečinku po klientech (obrat vozů, odměna podle způsobu účtování) |
+| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti; podklad k fakturaci externího dispečinku po klientech (obrat vozů, odměna podle způsobu účtování); vyhodnocení období — marže po zákaznících, vytíženost a spolehlivost dopravců, řidiči, obrat každého vozu |
+| **Hlídání** | ranní souhrn e-mailem všem uživatelům: nakládky bez dopravce do tří dnů, doklady chybějící déle než týden, končící doklady dopravců; spouští ho cron, tlačítko v Nastavení, nebo první otevření systému toho dne |
 | **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka i za externí dispečink jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
@@ -357,6 +358,17 @@ procento z obratu, částka za jízdu). Sazbu ani způsob systém nedomýšlí:
 dokud chybí, odměnu nespočítá a řekne to. Fakturu za odměnu založí ve
 Fakturoidu stejné tlačítko jako u zákazníků; číslo se zapíše k jízdám, aby
 se podruhé neúčtovaly, a stejné období se klientovi podruhé nevystaví.
+
+### Hlídání — ranní souhrn
+
+Souhrn chodí všem aktivním uživatelům a neobsahuje ceny. Nejlepší je
+naplánovaná úloha hostingu (cron), která jednou ráno zavolá adresu
+`index.php?s=hlidani&klic=…`; klíč se vyplní do `config.php`
+(`hlidani_klic`, aspoň 16 náhodných znaků) a bez něj adresa neodpovídá.
+Nemá-li tarif cron, souhrn se pošle při prvním otevření systému toho dne.
+V Nastavení jde hlídání vypnout a souhrn poslat ručně; vyhodnocení
+dopravců počítá rychlost vracení dokladů ode dne vykládky do dne, kdy se
+doklady u přepravy označily jako přijaté.
 
 ### Zálohování
 

@@ -65,6 +65,7 @@ require __DIR__ . "/zdroj/dispecink.php";
 require __DIR__ . "/zdroj/ceniky.php";
 require __DIR__ . "/zdroj/dopravci.php";
 require __DIR__ . "/zdroj/nabidky.php";
+require __DIR__ . "/zdroj/hlidani.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -77,6 +78,7 @@ $STRANKY = [
   "instalace"  => false,
   "prihlaseni" => false,
   "verejne"    => false,     /* odkazy bez hesla pro zákazníka, dopravce a řidiče */
+  "hlidani"    => false,     /* spouštěč ranního souhrnu, místo přihlášení klíč z config.php */
   "odhlaseni"  => true,
   "prehled"    => true,
   "prepravy"   => true,
@@ -114,6 +116,8 @@ if (!$bez_uzivatelu && $stranka === "instalace") {
 
 if ($STRANKY[$stranka]) {
   vyzaduj_prihlaseni();
+  /* Ranní souhrn bez cronu: první otevření dne ho pošle samo. */
+  if ($_SERVER["REQUEST_METHOD"] === "GET") hlidani_denni_kontrola();
 }
 
 /* Každý zápis musí nést jednorázový token. */

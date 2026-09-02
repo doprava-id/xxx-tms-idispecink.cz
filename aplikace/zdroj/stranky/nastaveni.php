@@ -37,6 +37,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     vzkaz("ok", "Nastavení pošty a odkazů uloženo.");
     presmeruj(odkaz("nastaveni"));
 
+  } elseif ($akce === "hlidani") {
+    uloz_nastaveni("hlidani_zapnuto", vstup_ano_ne("hlidani_zapnuto") ? "1" : "0");
+    vzkaz("ok", "Hlídání " . (vstup_ano_ne("hlidani_zapnuto") ? "zapnuto" : "vypnuto") . ".");
+    presmeruj(odkaz("nastaveni"));
+
+  } elseif ($akce === "hlidani_ted") {
+    $v = hlidani_odesli("ručně z Nastavení");
+    vzkaz($v["chyba"] ? "chyba" : "ok", $v["chyba"] ?: "Ranní souhrn odeslán " . $v["poslano"] . " příjemcům.");
+    presmeruj(odkaz("nastaveni"));
+
   } elseif ($akce === "podminky") {
     uloz_nastaveni("podminky", (string)($_POST["podminky"] ?? ""));
     vzkaz("ok", "Podmínky objednávky uloženy.");
@@ -239,6 +249,30 @@ hlava_stranky("Provozní systém", "Nastavení",
           <input type="text" id="zakladni_adresa" name="zakladni_adresa" value="<?= chran(nastaveni("zakladni_adresa")) ?>" placeholder="https://idispecink.cz/aplikace/">
         </div>
         <button type="submit" class="tlacitko">Uložit poštu a odkazy</button>
+      </div>
+    </form>
+
+    <form method="post" action="<?= chran(odkaz("nastaveni")) ?>" class="formular">
+      <?= pole_token() ?>
+      <input type="hidden" name="akce" value="hlidani">
+      <div class="skupina" style="margin-bottom:0">
+        <h2>Hlídání — ranní souhrn</h2>
+        <p class="app-perex">E-mail všem uživatelům: nakládky bez dopravce do <?= HLIDANI_DNU_NAKLADKA ?> dnů, doklady chybějící déle než týden po vykládce a končící doklady dopravců. Ceny v něm nejsou.</p>
+        <div class="pole-zaskrtnuti">
+          <input type="checkbox" id="hlidani_zapnuto" name="hlidani_zapnuto" value="1"<?= hlidani_zapnuto() ? " checked" : "" ?>>
+          <label for="hlidani_zapnuto">Posílat ranní souhrn</label>
+        </div>
+        <?php if (trim((string)($config["hlidani_klic"] ?? "")) !== ""): ?>
+          <p class="app-perex">Naplánovaná úloha hostingu volá jednou ráno adresu
+            <span class="cislo" style="word-break:break-all"><?= chran(zakladni_adresa() . "index.php?s=hlidani&klic=" . $config["hlidani_klic"]) ?></span>.</p>
+        <?php else: ?>
+          <p class="app-perex">Klíč pro naplánovanou úlohu (<span class="cislo">hlidani_klic</span>) v config.php chybí — souhrn se pošle při prvním otevření systému toho dne.</p>
+        <?php endif; ?>
+        <?php if (nastaveni("hlidani_vysledek") !== ""): ?><p class="app-perex">Naposledy: <?= chran(nastaveni("hlidani_vysledek")) ?></p><?php endif; ?>
+        <div class="tlacitka" style="margin:0">
+          <button type="submit" class="tlacitko">Uložit hlídání</button>
+          <button type="submit" class="tlacitko obrys" name="akce" value="hlidani_ted">Poslat souhrn teď</button>
+        </div>
       </div>
     </form>
 

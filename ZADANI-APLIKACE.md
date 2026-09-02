@@ -5,8 +5,8 @@
 **Stav:** jádro (19 obrazovek), ARES, přílohy, bod 1 pořadí prací (trasa
 jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
 veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid),
-bod 4 (externí dispečink) a bod 5 (nabídky, ceníky, doklady dopravců).
-Zbytek níže čeká.
+bod 4 (externí dispečink), bod 5 (nabídky, ceníky, doklady dopravců)
+a z bodu 6 vyhodnocení a hlídání. Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -62,6 +62,8 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Nabídky a poptávky (3.3) | hotové — návrh ceny, tisk, e-mail, přijetí → přeprava, důvody neúspěchu, úspěšnost celkově i po zákaznících |
 | Ceníky zákazníků (3.3) | hotové — pevná cena, pásma, sazba za km s předností; kilometry ručně, dokud není mapová služba (viz 6) |
 | Smlouvy a pojistky dopravců (3.3) | hotové — platnosti s upozorněním měsíc předem; objednávka varuje a pustí |
+| Vyhodnocení (3.5) | hotové — pohled Vyhodnocení ve Fakturaci: zákazníci, dopravci, řidiči, vozy |
+| Hlídání (3.9) | hotové — ranní souhrn e-mailem přes cron s klíčem, ručně, nebo při prvním otevření dne (viz 6) |
 
 ---
 
@@ -309,6 +311,8 @@ Nic z toho si nelze domyslet.
    ho ověříte prvním kliknutím na „Načíst úhrady".
 7. **Naplánovaná úloha na hostingu** — má tarif u VAS Hostingu cron?
    Bez něj se ranní souhrn spustí až při prvním otevření systému toho dne.
+   Spouštěč je hotový: adresa `index.php?s=hlidani&klic=…`, klíč do
+   `config.php`.
 8. **Doba uchování osobních údajů** — jak dlouho držet jména a telefony
    řidičů u uzavřených přeprav.
 9. **Airtable a Blue Yonder** — které báze, tabulky a účty, a jaká data

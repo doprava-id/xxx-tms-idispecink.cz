@@ -10,7 +10,7 @@ if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen.")
 $ceny = vidi_ceny();
 
 $pohled = vstup("pohled", "dopravci");
-if (!in_array($pohled, ["dopravci", "zakaznici", "chybi", "faktury", "pohledavky", "zavazky", "dispecink"], true)) $pohled = "dopravci";
+if (!in_array($pohled, ["dopravci", "zakaznici", "chybi", "faktury", "pohledavky", "zavazky", "dispecink", "vyhodnoceni"], true)) $pohled = "dopravci";
 if (in_array($pohled, ["zakaznici", "pohledavky", "dispecink"], true) && !$ceny) $pohled = "dopravci";
 
 $od = vstup_datum("od") ?: date("Y-m-01");
@@ -223,6 +223,7 @@ hlava_stranky("Podklady", "Fakturace a přehledy",
   <a class="tlacitko<?= $pohled === "faktury" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "faktury", "od" => $od, "do" => $do])) ?>">Faktury</a>
   <?php if ($ceny): ?><a class="tlacitko<?= $pohled === "pohledavky" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "pohledavky", "od" => $od, "do" => $do])) ?>">Pohledávky</a><?php endif; ?>
   <a class="tlacitko<?= $pohled === "zavazky" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "zavazky", "od" => $od, "do" => $do])) ?>">Závazky</a>
+  <a class="tlacitko<?= $pohled === "vyhodnoceni" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "vyhodnoceni", "od" => $od, "do" => $do])) ?>">Vyhodnocení</a>
 </nav>
 
 <?php
@@ -368,6 +369,158 @@ function radek_faktury(array $f, string $pohled, string $od, string $do, bool $c
     <div class="tabulka-obal"><table class="id-tabulka"><thead><tr><th>Číslo</th><th>Dopravce</th><th>Vystaveno</th><th>Splatnost</th><th class="vpravo">Částka</th><th>Stav</th><th></th></tr></thead><tbody>
       <?php foreach ($seznam as $f) radek_faktury($f, "zavazky", $od, $do, $ceny); ?>
     </tbody></table></div>
+  <?php endif; ?>
+
+<?php elseif ($pohled === "vyhodnoceni"):
+  /* Vyhodnocení za období: zákazníci (jen s právem na ceny), dopravci,
+     řidiči a vozy. Sčítá se v PHP z jednoho dotazu — dat je málo a čtyři
+     seskupení v SQL by se hůř četla. Obrat vozu a jízdy dopravců berou
+     i jízdy pod dispečinkem, tržba a marže jen spedici. */
+  $jizdy = radky(
+    "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev, v.spz AS vuz_spz, vf.nazev AS vuz_firma
+       FROM prepravy p
+       LEFT JOIN firmy z ON z.id = p.zakaznik_id
+       LEFT JOIN firmy d ON d.id = p.dopravce_id
+       LEFT JOIN vozidla v ON v.id = p.vozidlo_id
+       LEFT JOIN firmy vf ON vf.id = v.firma_id
+      WHERE " . OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno' AND p.sablona = 0
+      ORDER BY " . OBDOBI_SLOUPEC . ", p.id", [$od, $do]);
+  $zakaznici = []; $dopravci = []; $ridici = []; $vozy = [];
+  foreach ($jizdy as $j) {
+    $spedice = empty($j["dispecink_klient_id"]);
+    if ($spedice && $j["zakaznik_id"]) {
+      $k = (int)$j["zakaznik_id"];
+      $z = &$zakaznici[$k]; $z["nazev"] = $j["zakaznik_nazev"]; $z["id"] = $k;
+      $z["pocet"] = ($z["pocet"] ?? 0) + 1;
+      $z["trzba"] = ($z["trzba"] ?? 0) + (float)$j["cena_zakaznik"];
+      $z["naklad"] = ($z["naklad"] ?? 0) + (float)$j["cena_dopravce"];
+      unset($z);
+    }
+    if ($j["dopravce_id"]) {
+      $k = (int)$j["dopravce_id"];
+      $d = &$dopravci[$k]; $d["nazev"] = $j["dopravce_nazev"]; $d["id"] = $k;
+      $d["pocet"] = ($d["pocet"] ?? 0) + 1;
+      $d["naklad"] = ($d["naklad"] ?? 0) + (float)$j["cena_dopravce"];
+      if (trim((string)$j["hlaseni"]) !== "") $d["zpozdeni"] = ($d["zpozdeni"] ?? 0) + 1;
+      if (in_array($j["stav"], ["vylozeno", "doklady", "fakturovano"], true)) {
+        $d["vylozeno"] = ($d["vylozeno"] ?? 0) + 1;
+        if ($j["doklady"] === "prijato") $d["doklady"] = ($d["doklady"] ?? 0) + 1;
+        if ($j["doklady"] === "prijato" && $j["doklady_kdy"] && $j["vykladka_datum"]) {
+          $d["dnu_dokladu"][] = max(0, (strtotime(substr((string)$j["doklady_kdy"], 0, 10)) - strtotime((string)$j["vykladka_datum"])) / 86400);
+        }
+      }
+      unset($d);
+    }
+    if (trim((string)$j["ridic_jmeno"]) !== "") {
+      $k = mb_strtolower(trim((string)$j["ridic_jmeno"])) . "|" . (int)$j["dopravce_id"];
+      $r = &$ridici[$k]; $r["jmeno"] = trim((string)$j["ridic_jmeno"]); $r["dopravce"] = $j["dopravce_nazev"];
+      $r["pocet"] = ($r["pocet"] ?? 0) + 1;
+      $r["obrat"] = ($r["obrat"] ?? 0) + (float)$j["cena_dopravce"];
+      if (trim((string)$j["hlaseni"]) !== "") $r["zpozdeni"] = ($r["zpozdeni"] ?? 0) + 1;
+      unset($r);
+    }
+    if ($j["vozidlo_id"] && $j["vuz_spz"]) {
+      $k = (int)$j["vozidlo_id"];
+      $v = &$vozy[$k]; $v["spz"] = $j["vuz_spz"]; $v["firma"] = $j["vuz_firma"];
+      $v["pocet"] = ($v["pocet"] ?? 0) + 1;
+      $v["obrat"] = ($v["obrat"] ?? 0) + (float)$j["cena_dopravce"];
+      $v["dispecink"] = ($v["dispecink"] ?? 0) + ($spedice ? 0 : 1);
+      unset($v);
+    }
+  }
+  usort($zakaznici, fn($a, $b) => ($b["trzba"] - $b["naklad"]) <=> ($a["trzba"] - $a["naklad"]));
+  usort($dopravci, fn($a, $b) => $b["pocet"] <=> $a["pocet"]);
+  usort($ridici, fn($a, $b) => $b["pocet"] <=> $a["pocet"]);
+  usort($vozy, fn($a, $b) => $b["obrat"] <=> $a["obrat"]);
+  $procento = fn(float $cast, float $celek) => $celek > 0 ? cislo($cast / $celek * 100, 0) . " %" : "—";
+?>
+  <h2>Vyhodnocení období</h2>
+  <p class="app-perex">Obraty a marže po zákaznících, vytíženost a spolehlivost dopravců, výkonnost řidičů a obrat každého vozu. Zpoždění je počet jízd s hlášením od dopravce; rychlost vracení dokladů se počítá ode dne vykládky do dne, kdy se doklady označily jako přijaté. Prostoje vozů se nesledují.</p>
+  <?php if (!$jizdy): ?>
+    <p class="prazdno">V období není žádná přeprava.</p>
+  <?php else: ?>
+    <?php if ($ceny): ?>
+      <h3>Zákazníci — tržba a marže <span class="napoveda" style="text-transform:none;letter-spacing:0">spedice, bez jízd pod dispečinkem</span></h3>
+      <div class="tabulka-obal" style="margin-bottom:28px">
+        <table class="id-tabulka">
+          <thead><tr><th>Zákazník</th><th class="vpravo">Přeprav</th><th class="vpravo">Tržba</th><th class="vpravo">Náklad</th><th class="vpravo">Marže</th><th class="vpravo">Marže %</th><th class="vpravo">Na přepravu</th></tr></thead>
+          <tbody>
+          <?php foreach ($zakaznici as $z): $m = $z["trzba"] - $z["naklad"]; ?>
+            <tr>
+              <td><a href="<?= chran(odkaz("firma", ["id" => $z["id"]])) ?>"><?= chran($z["nazev"] ?: "—") ?></a></td>
+              <td class="cislo vpravo"><?= (int)$z["pocet"] ?></td>
+              <td class="cislo vpravo"><?= chran(castka($z["trzba"])) ?></td>
+              <td class="cislo vpravo"><?= chran(castka($z["naklad"])) ?></td>
+              <td class="cislo vpravo"><?= chran(castka($m)) ?></td>
+              <td class="cislo vpravo"><?= chran($procento($m, (float)$z["trzba"])) ?></td>
+              <td class="cislo vpravo"><?= chran(castka($m / max(1, (int)$z["pocet"]))) ?></td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$zakaznici): ?><tr><td colspan="7">V období není žádná spediční přeprava se zákazníkem.</td></tr><?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
+
+    <h3>Dopravci — vytíženost a spolehlivost</h3>
+    <div class="tabulka-obal" style="margin-bottom:28px">
+      <table class="id-tabulka">
+        <thead><tr><th>Dopravce</th><th class="vpravo">Jízd</th><th class="vpravo">Náklad / obrat vozů</th><th class="vpravo">Hlášení zpoždění</th><th class="vpravo">Doklady vráceny</th><th class="vpravo">Průměr dní na doklady</th></tr></thead>
+        <tbody>
+        <?php foreach ($dopravci as $d): $dnu = $d["dnu_dokladu"] ?? []; ?>
+          <tr>
+            <td><a href="<?= chran(odkaz("firma", ["id" => $d["id"]])) ?>"><?= chran($d["nazev"] ?: "—") ?></a></td>
+            <td class="cislo vpravo"><?= (int)$d["pocet"] ?></td>
+            <td class="cislo vpravo"><?= chran(castka($d["naklad"])) ?></td>
+            <td class="cislo vpravo"><?= (int)($d["zpozdeni"] ?? 0) ?><span class="druhotny"><?= chran($procento((float)($d["zpozdeni"] ?? 0), (float)$d["pocet"])) ?> jízd</span></td>
+            <td class="cislo vpravo"><?= (int)($d["doklady"] ?? 0) ?> z <?= (int)($d["vylozeno"] ?? 0) ?><span class="druhotny"><?= chran($procento((float)($d["doklady"] ?? 0), (float)($d["vylozeno"] ?? 0))) ?> vyložených</span></td>
+            <td class="cislo vpravo"><?= $dnu ? chran(cislo(array_sum($dnu) / count($dnu), 1)) : "—" ?></td>
+          </tr>
+        <?php endforeach; ?>
+        <?php if (!$dopravci): ?><tr><td colspan="6">Žádná přeprava v období nemá dopravce.</td></tr><?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="app-sloupce stejne">
+      <div>
+        <h3>Řidiči</h3>
+        <div class="tabulka-obal">
+          <table class="id-tabulka" style="min-width:480px">
+            <thead><tr><th>Řidič</th><th class="vpravo">Jízd</th><th class="vpravo">Obrat</th><th class="vpravo">Zpoždění</th></tr></thead>
+            <tbody>
+            <?php foreach ($ridici as $r): ?>
+              <tr>
+                <td><?= chran($r["jmeno"]) ?><span class="druhotny"><?= chran($r["dopravce"] ?: "—") ?></span></td>
+                <td class="cislo vpravo"><?= (int)$r["pocet"] ?></td>
+                <td class="cislo vpravo"><?= chran(castka($r["obrat"])) ?></td>
+                <td class="cislo vpravo"><?= (int)($r["zpozdeni"] ?? 0) ?></td>
+              </tr>
+            <?php endforeach; ?>
+            <?php if (!$ridici): ?><tr><td colspan="4">U přeprav v období není zapsaný řidič.</td></tr><?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3>Vozy — obrat za období</h3>
+        <div class="tabulka-obal">
+          <table class="id-tabulka" style="min-width:480px">
+            <thead><tr><th>Vůz</th><th class="vpravo">Jízd</th><th class="vpravo">Obrat vozu</th></tr></thead>
+            <tbody>
+            <?php foreach ($vozy as $v): ?>
+              <tr>
+                <td><span class="cislo"><?= chran($v["spz"]) ?></span><span class="druhotny"><?= chran($v["firma"] ?: "—") ?><?= $v["dispecink"] ? " · " . (int)$v["dispecink"] . " pod dispečinkem" : "" ?></span></td>
+                <td class="cislo vpravo"><?= (int)$v["pocet"] ?></td>
+                <td class="cislo vpravo"><?= chran(castka($v["obrat"])) ?></td>
+              </tr>
+            <?php endforeach; ?>
+            <?php if (!$vozy): ?><tr><td colspan="3">U přeprav v období není vybraný vůz z karty dopravce.</td></tr><?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   <?php endif; ?>
 
 <?php elseif ($pohled === "dispecink"):

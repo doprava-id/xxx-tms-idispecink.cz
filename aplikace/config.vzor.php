@@ -43,6 +43,16 @@ return [
      zablokuje. */
   "pokusu_prihlaseni" => 5,
 
+  /* --- Hlídání — ranní souhrn e-mailem ----------------------------------
+     Naplánovaná úloha hostingu (cron) volá jednou ráno adresu
+
+         https://idispecink.cz/aplikace/index.php?s=hlidani&klic=KLÍČ
+
+     Klíč si vymyslete dlouhý a náhodný (aspoň 16 znaků); bez něj je
+     adresa mrtvá. Bez cronu se souhrn pošle při prvním otevření systému
+     toho dne. */
+  "hlidani_klic" => "",
+
   /* --- Fakturoid --------------------------------------------------------
      Čtení úhrad vydaných faktur a založení faktury z podkladu. Přístup
      vydá Fakturoid v Nastavení → Uživatelský účet → API (OAuth 2.0,

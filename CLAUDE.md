@@ -69,13 +69,15 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
     dispecink.php (externí dispečink: klienti, podmínka JEN_SPEDICE, podklad
     k fakturaci služby), ceniky.php (ceníky zákazníků, návrh ceny),
     dopravci.php (platnosti dokladů dopravce), nabidky.php (nabídky:
-    číslování, převod na přepravu, zpráva zákazníkovi)
+    číslování, převod na přepravu, zpráva zákazníkovi), hlidani.php (ranní
+    souhrn e-mailem)
   zdroj/stranky/             Jedna stránka = jeden soubor
     instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
     nabidky, nabidka (jen s právem na ceny),
     dispecink, vozy (plán vozů klientů), firmy, firma, mista, misto, linky, objednavka,
     fakturace, nastaveni, import, export, priloha,
-    verejne (bez přihlášení: zákazník, dopravce, řidič)
+    verejne (bez přihlášení: zákazník, dopravce, řidič),
+    hlidani (bez přihlášení, jen s klíčem z config.php: spouštěč souhrnu)
 ```
 
 **Zadání toho, co se má postavit dál, je v `ZADANI-APLIKACE.md`** — vzniklo
@@ -117,7 +119,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **dvaadvacet stránek** (Fakturace má sedm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
+- u zásahu do aplikace i jejích **třiadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -223,6 +225,7 @@ přihlášení.
 | šablony linek | přeprava se `sablona = 1` je šablona stálé linky. **Každý dotaz nad přepravami, který zobrazuje evidenci, musí mít `p.sablona = 0`** — jinak se šablona objeví jako zásilka v seznamu, na tabuli nebo v obratu |
 | externí dispečink | jízda s `dispecink_klient_id` je vůz klienta, který řídíme; klientem je vždy dopravce jízdy. Odesílateli fakturuje klient sám, my účtujeme jen odměnu podle karty klienta. **Každý součet tržby, nákladů a marže spedice a každý podklad k fakturaci musí mít `JEN_SPEDICE`** (`dispecink.php`) — bez toho se obrat cizích vozů přičte k našemu. Způsob účtování a sazba jsou **PLACEHOLDER** na kartě klienta: dokud chybí, podklad odměnu nespočítá a nedomýšlí ji |
 | ceníky | návrh ceny (`navrh_ceny()`) se **nikdy nezapisuje sám** — dispečer ho převezme tlačítkem „použít". Přednost: pevná cena za trasu → pásmo → sazba za km → historie trasy; návrh vždy říká, podle čeho vznikl. Pásma a sazba potřebují `km` u jízdy, zatím ručně |
+| hlídání | ranní souhrn posílá `hlidani_odesli()`; spouští ho cron přes `?s=hlidani&klic=…` (klíč jen v `config.php`, bez něj je adresa mrtvá), tlačítko v Nastavení, nebo záloha při prvním GET dne (`hlidani_denni_kontrola()` v `index.php`). **Do souhrnu nepatří žádná cena** — chodí všem uživatelům |
 | doklady dopravce | propadlé pojištění, oprávnění nebo smlouva **varují, ale nepustí** — objednávka jde vystavit, rozhodnutí je na dispečerovi. Varování jde jen na obrazovku, do tisku ne |
 | přílohy | soubory leží v `data/prilohy/` pod náhodným jménem, ven jdou jen přes `priloha.php` po přihlášení. Typ se bere z tabulky `PRILOHY_TYPY`, ne z toho, co soubor tvrdí; SVG a HTML tam schválně nejsou |
 | odchozí provoz | ven volají jen `ares.php` a `fakturoid.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
