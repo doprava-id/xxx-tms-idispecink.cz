@@ -54,9 +54,42 @@ function je_spravce(): bool {
 
 /* Vidí uživatel cenu zákazníka a marži? Správce vždycky — spravuje
    nastavení i uživatele, skrývat před ním obchodní stranu nemá smysl. */
+function role(): string {
+  $u = uzivatel();
+  return $u ? (string)$u["role"] : "";
+}
+
+/* Cena zákazníka a marže: správce vždy, dispečer a účetní podle práva,
+   brigádník nikdy. */
 function vidi_ceny(): bool {
   $u = uzivatel();
-  return $u && ($u["role"] === "spravce" || (int)$u["vidi_ceny"] === 1);
+  if (!$u) return false;
+  if ($u["role"] === "spravce") return true;
+  if ($u["role"] === "brigadnik") return false;
+  return (int)$u["vidi_ceny"] === 1;
+}
+
+/* Cena dopravce: každý kromě brigádníka. */
+function vidi_ceny_dopravce(): bool {
+  return prihlasen() && role() !== "brigadnik";
+}
+
+/* Zásahy do dispečinku — zakládat a měnit přepravy, trasu, dopravce,
+   odkazy: účetní ne. */
+function smi_dispecink(): bool {
+  return prihlasen() && role() !== "ucetni";
+}
+
+/* Fakturace a podklady nesou ceny dopravce: brigádník ne. */
+function smi_fakturaci(): bool {
+  return prihlasen() && role() !== "brigadnik";
+}
+
+function vyzaduj_pravo(bool $ma, string $text): void {
+  if (!$ma) {
+    vzkaz("chyba", $text);
+    presmeruj(odkaz("prehled"));
+  }
 }
 
 function vyzaduj_ceny(): void {

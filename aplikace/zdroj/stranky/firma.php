@@ -52,8 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "prov_datum"      => vstup_datum("prov_datum"),
       "prov_poznamka"   => vstup("prov_poznamka"),
       "dispecink"          => vstup_ano_ne("dispecink"),
-      "dispecink_uctovani" => isset(DISPECINK_UCTOVANI[vstup("dispecink_uctovani")]) ? vstup("dispecink_uctovani") : "",
-      "dispecink_sazba"    => vstup_castka("dispecink_sazba"),
       "dispecink_poznamka" => vstup("dispecink_poznamka"),
       "pojisteni_do"       => vstup_datum("pojisteni_do"),
       "pojisteni_poznamka" => vstup("pojisteni_poznamka"),
@@ -63,6 +61,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "aktivni"         => vstup_ano_ne("aktivni"),
       "upraveno"        => date("Y-m-d H:i:s"),
     ];
+
+    /* Sazba za dispečink je naše cena — kdo nevidí ceny, nesmí ji přepsat. */
+    if (vidi_ceny()) {
+      $data["dispecink_uctovani"] = isset(DISPECINK_UCTOVANI[vstup("dispecink_uctovani")]) ? vstup("dispecink_uctovani") : "";
+      $data["dispecink_sazba"]    = vstup_castka("dispecink_sazba");
+    }
 
     /* Klient dispečinku vystupuje u jízd jako dopravce — čistý zákazník
        by se u přepravy nedal vybrat. */
@@ -109,6 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     presmeruj(odkaz("firma", ["id" => $nova ? "nova" : $firma["id"]]));
 
   } elseif ($akce === "cenik_pridat" && $firma) {
+    vyzaduj_ceny();
     $druh = isset(DRUHY_CENIKU[vstup("cenik_druh")]) ? vstup("cenik_druh") : "trasa";
     $cena = vstup_castka("cenik_cena");
     $chyba = null;
@@ -137,6 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     presmeruj(odkaz("firma", ["id" => $firma["id"]]));
 
   } elseif ($akce === "cenik_pryc" && $firma) {
+    vyzaduj_ceny();
     dotaz("UPDATE ceniky SET aktivni = 0 WHERE id = ? AND firma_id = ?", [vstup_cislo("cenik_id"), (int)$firma["id"]]);
     zapis_udalost(null, "Ceník " . $firma["nazev"] . ": pravidlo smazáno");
     vzkaz("ok", "Pravidlo ceníku smazáno.");
@@ -360,6 +366,7 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
           <input type="checkbox" id="dispecink" name="dispecink" value="1"<?= (int)$h("dispecink") === 1 ? " checked" : "" ?>>
           <label for="dispecink">Klient externího dispečinku <span class="napoveda">— jeho vozy řídíme my. Jízdy jeho vozů se vedou pod dispečinkem, mají vlastní plán a nepočítají se do tržby ani marže spedice.</span></label>
         </div>
+        <?php if (vidi_ceny()): ?>
         <div class="pole-radek">
           <div class="pole">
             <label for="dispecink_uctovani">Způsob účtování služby</label>
@@ -370,6 +377,7 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
             <input type="text" id="dispecink_sazba" name="dispecink_sazba" value="<?= chran($h("dispecink_sazba")) ?>" inputmode="decimal">
           </div>
         </div>
+        <?php endif; ?>
         <div class="pole">
           <label for="dispecink_poznamka">Dohoda s klientem <span class="napoveda">— co je v ceně, fakturační období, kontakt na účtárnu</span></label>
           <input type="text" id="dispecink_poznamka" name="dispecink_poznamka" value="<?= chran($h("dispecink_poznamka")) ?>">
@@ -475,7 +483,7 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$
         </div>
       </div>
 
-      <?php if ($je_zakaznik): ?>
+      <?php if ($je_zakaznik && vidi_ceny()): ?>
         <datalist id="seznam-obci">
           <?php foreach ($mista as $m): ?><option value="<?= chran($m["mesto"]) ?>"><?= chran($m["nazev"]) ?></option><?php endforeach; ?>
         </datalist>

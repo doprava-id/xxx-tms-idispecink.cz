@@ -5,6 +5,7 @@
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
 $ceny = vidi_ceny();
+$ceny_dopravce = vidi_ceny_dopravce();
 
 $hledat   = vstup("hledat");
 $stav     = vstup("stav");
@@ -40,6 +41,8 @@ if ($jen === "bez_dopravce") {
   $kde[] = JEN_DISPECINK;
 } elseif ($jen === "spedice") {
   $kde[] = JEN_SPEDICE;
+} elseif ($jen === "moje") {
+  $kde[] = "p.vlastnik_id = ?"; $parametry[] = (int)uzivatel()["id"];
 }
 
 /* Šablony stálých linek se v evidenci neukazují — jen se z nich generuje. */
@@ -126,6 +129,7 @@ hlava_stranky("Evidence", "Přepravy",
         "nefakturovano" => "Nevyfakturované",
         "dispecink"     => "Pod externím dispečinkem",
         "spedice"       => "Jen spedice",
+        "moje"          => "Moje přepravy",
       ], $jen, "Vše") ?></select>
     </div>
     <div class="filtr-akce">
@@ -161,7 +165,7 @@ hlava_stranky("Evidence", "Přepravy",
         ? chran(cislo(((float)$souhrn["trzba"] - (float)$souhrn["naklad"]) / (float)$souhrn["trzba"] * 100, 1)) . " %"
         : "—" ?></span>
     </div>
-  <?php else: ?>
+  <?php elseif ($ceny_dopravce): ?>
     <div class="dlazdice-polozka">
       <span class="popis">Náklad dopravců</span>
       <span class="hodnota"><?= chran(castka($souhrn["naklad"])) ?></span>
@@ -183,7 +187,7 @@ hlava_stranky("Evidence", "Přepravy",
           <th>Zákazník</th>
           <th>Dopravce</th>
           <?php if ($ceny): ?><th class="vpravo">Zákazník</th><?php endif; ?>
-          <th class="vpravo">Dopravce</th>
+          <?php if ($ceny_dopravce): ?><th class="vpravo">Dopravce</th><?php endif; ?>
           <?php if ($ceny): ?><th class="vpravo">Marže</th><?php endif; ?>
           <th>Doklady</th>
         </tr>
@@ -219,7 +223,7 @@ hlava_stranky("Evidence", "Přepravy",
             <?php endif; ?>
           </td>
           <?php if ($ceny): ?><td class="cislo vpravo"><?= chran(castka($p["cena_zakaznik"])) ?></td><?php endif; ?>
-          <td class="cislo vpravo"><?= chran(castka($p["cena_dopravce"])) ?></td>
+          <?php if ($ceny_dopravce): ?><td class="cislo vpravo"><?= chran(castka($p["cena_dopravce"])) ?></td><?php endif; ?>
           <?php if ($ceny): ?>
             <td class="cislo vpravo"><?= (!empty($p["dispecink_klient_id"]) || ($p["cena_zakaznik"] === null && $p["cena_dopravce"] === null)) ? "—" : chran(castka($marze)) ?></td>
           <?php endif; ?>

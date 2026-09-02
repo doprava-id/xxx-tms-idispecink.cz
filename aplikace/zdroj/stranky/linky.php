@@ -112,7 +112,7 @@ hlava_stranky("Přepravy", "Stálé linky");
     <input type="hidden" name="akce" value="generovat">
     <div class="tabulka-obal">
       <table class="id-tabulka">
-        <thead><tr><th></th><th>Linka</th><th>Trasa</th><th>Dny</th><th>Zákazník</th><th>Dopravce</th><th class="vpravo">Cena dopravce</th></tr></thead>
+        <thead><tr><th></th><th>Linka</th><th>Trasa</th><th>Dny</th><th>Zákazník</th><th>Dopravce</th><?php if (vidi_ceny_dopravce()): ?><th class="vpravo">Cena dopravce</th><?php endif; ?></tr></thead>
         <tbody>
         <?php foreach ($sablony as $s):
           $dny = array_filter(array_map("intval", explode(",", (string)$s["linka_dny"])));
@@ -125,7 +125,7 @@ hlava_stranky("Přepravy", "Stálé linky");
             <td><?= $dny ? chran(implode(" ", array_map(fn($d) => DNY_ZKRATKY[$d] ?? "", $dny))) : '<span class="stitek stitek-zrus">bez dnů</span>' ?></td>
             <td><?= chran($s["zakaznik_nazev"] ?: "—") ?></td>
             <td><?= chran($s["dopravce_nazev"] ?: "—") ?></td>
-            <td class="cislo vpravo"><?= chran(castka($s["cena_dopravce"])) ?></td>
+            <?php if (vidi_ceny_dopravce()): ?><td class="cislo vpravo"><?= chran(castka($s["cena_dopravce"])) ?></td><?php endif; ?>
           </tr>
         <?php endforeach; ?>
         </tbody>

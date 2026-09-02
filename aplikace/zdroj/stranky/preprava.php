@@ -12,6 +12,8 @@
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
 $ceny = vidi_ceny();
+$ceny_dopravce = vidi_ceny_dopravce();
+$smi_dispecink = smi_dispecink();
 
 $id = vstup("id");
 $nova = ($id === "nova" || $id === "");
@@ -53,7 +55,32 @@ function bod_z_formulare(): array {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $akce = vstup("akce");
 
-  if ($akce === "ulozit") {
+  /* Účetní do dispečinku nezasahuje: smí jen doklady, faktury a přílohy. */
+  if (!$smi_dispecink && !in_array($akce, ["ulozit", "priloha_pridat", "priloha_smazat"], true)) {
+    vzkaz("chyba", "Do dispečinku účetní nezasahuje — trasu, dopravce a odkazy mění dispečer.");
+    presmeruj($preprava ? $zpet() : odkaz("prepravy"));
+  }
+
+  if ($akce === "ulozit" && !$smi_dispecink) {
+    /* Účetní: jen doklady a čísla faktur, ostatní pole se nepřepíšou. */
+    if ($nova) { vzkaz("chyba", "Přepravy zakládá dispečink."); presmeruj(odkaz("prepravy")); }
+    $data = [
+      "doklady"          => isset(DOKLADY[vstup("doklady")]) ? vstup("doklady") : "ceka",
+      "doklady_poznamka" => vstup("doklady_poznamka"),
+      "faktura_prijata"  => vstup("faktura_prijata"),
+      "upraveno"         => date("Y-m-d H:i:s"),
+      "upravil"          => (int)uzivatel()["id"],
+    ];
+    if ($ceny) $data["faktura_vydana"] = vstup("faktura_vydana");
+    if ($data["doklady"] === "prijato" && $preprava["doklady"] !== "prijato") {
+      $data["doklady_kdy"] = date("Y-m-d H:i:s");
+      zapis_udalost((int)$preprava["id"], "Doklady přijaty");
+    }
+    uprav("prepravy", (int)$preprava["id"], $data);
+    vzkaz("ok", "Doklady a faktury uloženy.");
+    presmeruj($zpet());
+
+  } elseif ($akce === "ulozit") {
     $dopravce_id = vstup_cislo("dopravce_id") ?: null;
     $vozidlo_id  = vstup_cislo("vozidlo_id") ?: null;
     $ridic_id    = vstup_cislo("ridic_id") ?: null;
@@ -112,8 +139,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "pozadavky"   => vstup("pozadavky"),
       "km"          => vstup_cislo("km"),
 
-      "cena_dopravce" => vstup_castka("cena_dopravce"),
-
       "doklady"          => isset(DOKLADY[vstup("doklady")]) ? vstup("doklady") : "ceka",
       "doklady_poznamka" => vstup("doklady_poznamka"),
       "faktura_prijata"  => vstup("faktura_prijata"),
@@ -130,6 +155,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $data["cena_zakaznik"]  = vstup_castka("cena_zakaznik");
       $data["faktura_vydana"] = vstup("faktura_vydana");
     }
+    /* Cenu dopravce nevidí brigádník — a nesmí ji uložením smazat. */
+    if ($ceny_dopravce) $data["cena_dopravce"] = vstup_castka("cena_dopravce");
 
     if ($nova) {
       $trasa = [
@@ -152,6 +179,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $data["vytvoreno"] = date("Y-m-d H:i:s");
         $data["vytvoril"]  = (int)uzivatel()["id"];
         $data["sablona"]   = 0;
+        $data["vlastnik_id"] = vstup_cislo("vlastnik_id") ?: (int)uzivatel()["id"];
+        $data["upravil"]   = (int)uzivatel()["id"];
         $novy = vloz("prepravy", $data);
         zaloz_body_z_poli($novy, $trasa);
         prepocitej_trasu($novy);
@@ -160,6 +189,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         presmeruj(odkaz("preprava", ["id" => $novy]));
       }
     } else {
+      /* Dva lidé nad jednou zásilkou: kdo ukládá starší podobu, neprojde
+         a musí si kartu načíst znovu. */
+      $upraveno_pred = vstup("upraveno_pred");
+      if ($upraveno_pred !== "" && $upraveno_pred !== (string)$preprava["upraveno"]) {
+        $kdo = $preprava["upravil"] ? (string)hodnota("SELECT jmeno FROM uzivatele WHERE id = ?", [(int)$preprava["upravil"]]) : "";
+        vzkaz("chyba", "Přepravu mezitím upravil " . ($kdo !== "" ? $kdo : "někdo jiný") . " (" . datum_cas($preprava["upraveno"]) . "). Vaše změny se neuložily — kartu načtěte znovu a zadejte je ještě jednou.");
+        presmeruj($zpet());
+      }
+      $data["vlastnik_id"] = vstup_cislo("vlastnik_id") ?: null;
+      $data["upravil"]     = (int)uzivatel()["id"];
+
       /* Stálá linka — jen u existující přepravy. */
       $data["sablona"]     = vstup_ano_ne("sablona");
       $data["linka_nazev"] = vstup("linka_nazev");
@@ -335,6 +375,9 @@ $zakaznici = radky("SELECT id, nazev FROM firmy WHERE typ IN ('zakaznik','oboji'
 $dopravci  = radky("SELECT id, nazev FROM firmy WHERE typ IN ('dopravce','oboji') AND (aktivni = 1 OR id = ?) ORDER BY LOWER(nazev)",
   [(int)($preprava["dopravce_id"] ?? 0)]);
 $mista     = radky("SELECT id, nazev, mesto FROM mista WHERE aktivni = 1 ORDER BY LOWER(nazev)");
+$uzivatele = radky("SELECT id, jmeno FROM uzivatele WHERE aktivni = 1 OR id = ? ORDER BY LOWER(jmeno)", [(int)($preprava["vlastnik_id"] ?? 0)]);
+$vlastnik_jmeno = !empty($preprava["vlastnik_id"]) ? (string)hodnota("SELECT jmeno FROM uzivatele WHERE id = ?", [(int)$preprava["vlastnik_id"]]) : "";
+$upravil_jmeno  = !empty($preprava["upravil"]) ? (string)hodnota("SELECT jmeno FROM uzivatele WHERE id = ?", [(int)$preprava["upravil"]]) : "";
 
 $dopravce_id = (int)($preprava["dopravce_id"] ?? $predvoleny_dopravce);
 /* Volba externího dispečinku ve formuláři: uložená jízda ukáže ano/ne,
@@ -397,13 +440,16 @@ foreach ($mista as $m) $volby_mist[(string)$m["id"]] = (string)$m["nazev"] . ($m
 
 $akce_hlavy = "";
 if (!$nova) {
-  if ($dopravce_id) {
+  /* Objednávka nese cenu dopravce — brigádník ji neotevře. */
+  if ($dopravce_id && $ceny_dopravce) {
     $akce_hlavy .= '<a class="tlacitko" href="' . chran(odkaz("objednavka", ["id" => $preprava["id"]]))
                 . '" target="_blank" rel="noopener">Objednávka přepravy</a>';
   }
-  $akce_hlavy .= '<form method="post" action="' . chran($zpet()) . '" style="display:inline">'
-    . pole_token() . '<input type="hidden" name="akce" value="kopie">'
-    . '<button type="submit" class="tlacitko obrys">Vytvořit kopii</button></form>';
+  if ($smi_dispecink) {
+    $akce_hlavy .= '<form method="post" action="' . chran($zpet()) . '" style="display:inline">'
+      . pole_token() . '<input type="hidden" name="akce" value="kopie">'
+      . '<button type="submit" class="tlacitko obrys">Vytvořit kopii</button></form>';
+  }
 }
 
 $nadpis = $nova ? "Nová přeprava" : ($body ? popis_trasy($body) : "Přeprava " . $h("cislo"));
@@ -522,6 +568,9 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                       <?php if (!$b["zbozi"] && !$d): ?><span class="druhotny">—</span><?php endif; ?>
                     </td>
                     <td>
+                      <?php if (!$smi_dispecink): ?>
+                        <?= (int)$b["splneno"] === 1 ? '<span class="stitek stitek-hotovo">✓ hotovo</span>' : '<span class="druhotny">čeká</span>' ?>
+                      <?php else: ?>
                       <form method="post" action="<?= chran($zpet()) ?>" style="margin:0">
                         <?= pole_token() ?>
                         <input type="hidden" name="bod_id" value="<?= $bid ?>">
@@ -533,8 +582,10 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                           <button type="submit" class="tlacitko obrys" style="padding:4px 10px;font-size:.8rem">Splněno</button>
                         <?php endif; ?>
                       </form>
+                      <?php endif; ?>
                     </td>
                     <td class="netisknout" style="white-space:nowrap">
+                      <?php if ($smi_dispecink): ?>
                       <a href="<?= chran(odkaz("preprava", ["id" => $preprava["id"], "bod" => $bid])) ?>#bod-<?= $bid ?>" class="odkaz-tlacitko" style="margin:0">upravit</a>
                       <?php foreach ([["bod_vys", "↑", $i > 0], ["bod_niz", "↓", $i < count($body) - 1]] as [$a, $z, $lze]): if (!$lze) continue; ?>
                         <form method="post" action="<?= chran($zpet()) ?>" style="display:inline">
@@ -546,6 +597,7 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                         <?= pole_token() ?><input type="hidden" name="akce" value="bod_smazat"><input type="hidden" name="bod_id" value="<?= $bid ?>">
                         <button type="submit" class="odkaz-tlacitko">smazat</button>
                       </form>
+                      <?php endif; ?>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -554,7 +606,8 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             </div>
           <?php endif; ?>
 
-          <?php if ($upravovany): ?>
+          <?php if (!$smi_dispecink): ?>
+          <?php elseif ($upravovany): ?>
             <form method="post" action="<?= chran($zpet()) ?>" id="bod-<?= (int)$upravovany["id"] ?>" style="margin-top:18px;padding-top:14px;border-top:1px solid var(--linka)">
               <?= pole_token() ?>
               <input type="hidden" name="akce" value="bod_ulozit">
@@ -580,6 +633,9 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
     <form method="post" action="<?= chran(odkaz("preprava", ["id" => $nova ? "nova" : $preprava["id"]])) ?>" class="formular" data-jednou>
       <?= pole_token() ?>
       <input type="hidden" name="akce" value="ulozit">
+      <?php if (!$nova): ?><input type="hidden" name="upraveno_pred" value="<?= chran($h("upraveno")) ?>"><?php endif; ?>
+      <?php if (!$smi_dispecink): ?><p class="vzkaz vzkaz-pozor">Účetní mění jen doklady a čísla faktur; ostatní pole jsou jen ke čtení.</p><?php endif; ?>
+      <fieldset class="cast"<?= $smi_dispecink ? "" : " disabled" ?>>
 
       <div class="skupina">
         <h2>Zakázka</h2>
@@ -596,6 +652,12 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             <label for="ref_zakaznika">Reference zákazníka</label>
             <input type="text" id="ref_zakaznika" name="ref_zakaznika" value="<?= chran($h("ref_zakaznika")) ?>"
                    placeholder="číslo objednávky u zákazníka">
+          </div>
+        </div>
+        <div class="pole-radek tri">
+          <div class="pole">
+            <label for="vlastnik_id">Má na starosti</label>
+            <select id="vlastnik_id" name="vlastnik_id"><?= volby($do_voleb($uzivatele, "jmeno"), $h("vlastnik_id", $nova ? (string)uzivatel()["id"] : ""), "— nikdo —") ?></select>
           </div>
         </div>
       </div>
@@ -683,10 +745,12 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             <label for="dopravce_id">Dopravce</label>
             <select id="dopravce_id" name="dopravce_id"><?= volby($do_voleb($dopravci, "nazev"), $h("dopravce_id", $predvoleny_dopravce ? (string)$predvoleny_dopravce : ""), "— nezajištěno —") ?></select>
           </div>
+          <?php if ($ceny_dopravce): ?>
           <div class="pole">
             <label for="cena_dopravce">Cena dopravce <span class="napoveda">Kč bez DPH<?= $klient_dispecinku ? "; u dispečinku obrat vozu klienta" : "" ?></span></label>
             <input type="text" id="cena_dopravce" name="cena_dopravce" value="<?= chran($h("cena_dopravce")) ?>" inputmode="decimal">
           </div>
+          <?php endif; ?>
           <div class="pole">
             <label for="dispecink">Externí dispečink <span class="napoveda">— vůz klienta, který řídíme my</span></label>
             <select id="dispecink" name="dispecink"><?= volby(["" => "— podle karty dopravce —", "1" => "Ano, jízda pod dispečinkem", "0" => "Ne, běžná spedice"], $volba_dispecinku) ?></select>
@@ -748,6 +812,8 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
         </div>
       <?php endif; ?>
 
+      </fieldset>
+
       <div class="skupina">
         <h2>Doklady</h2>
         <div class="pole-radek tri">
@@ -763,9 +829,16 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             <label for="faktura_prijata">Přijatá faktura dopravce</label>
             <input type="text" id="faktura_prijata" name="faktura_prijata" value="<?= chran($h("faktura_prijata")) ?>">
           </div>
+          <?php if ($ceny && !$smi_dispecink): ?>
+            <div class="pole">
+              <label for="faktura_vydana_ucetni">Vydaná faktura</label>
+              <input type="text" id="faktura_vydana_ucetni" name="faktura_vydana" value="<?= chran($h("faktura_vydana")) ?>">
+            </div>
+          <?php endif; ?>
         </div>
       </div>
 
+      <fieldset class="cast"<?= $smi_dispecink ? "" : " disabled" ?>>
       <?php if (!$nova): ?>
         <div class="skupina">
           <h2>Stálá linka</h2>
@@ -801,7 +874,9 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
         </div>
       </div>
 
-      <button type="submit" class="tlacitko"><?= $nova ? "Založit přepravu" : "Uložit změny" ?></button>
+      </fieldset>
+
+      <button type="submit" class="tlacitko"><?= $nova ? "Založit přepravu" : ($smi_dispecink ? "Uložit změny" : "Uložit doklady a faktury") ?></button>
     </form>
   </div>
 
@@ -838,11 +913,12 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                 else echo '<br><span class="druhotny" style="font-family:var(--pismo)">bez záznamu faktury</span>';
               ?></span></li>
             <?php endforeach; ?>
-            <li><span class="klic">Založeno</span><span class="hodnota"><?= chran(datum_cas($h("vytvoreno"))) ?></span></li>
+            <li><span class="klic">Má na starosti</span><span class="hodnota"><?= chran($vlastnik_jmeno ?: "nikdo") ?></span></li>
+            <li><span class="klic">Založeno</span><span class="hodnota"><?= chran(datum_cas($h("vytvoreno"))) ?><?= $upravil_jmeno !== "" ? "<br><span class=\"druhotny\">naposledy upravil " . chran($upravil_jmeno) . " " . chran(datum_cas($h("upraveno"))) . "</span>" : "" ?></span></li>
           </ul>
         </div>
 
-        <?php if ($historie): ?>
+        <?php if ($historie && $ceny_dopravce): ?>
           <div class="skupina">
             <h2>Naposledy na této trase</h2>
             <ul class="protokol">
@@ -885,11 +961,13 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                   </form>
                 </div>
                 <span class="druhotny"><?= (int)$o["otevreni"] ?>× otevřeno<?= $o["naposledy"] ? ", naposledy " . chran(datum_cas($o["naposledy"])) : "" ?></span>
-              <?php else: ?>
+              <?php elseif ($smi_dispecink): ?>
                 <form method="post" action="<?= chran($zpet()) ?>" style="margin-top:4px">
                   <?= pole_token() ?><input type="hidden" name="akce" value="odkaz_vytvorit"><input type="hidden" name="druh" value="<?= $d ?>">
                   <button type="submit" class="tlacitko obrys" style="padding:6px 12px;font-size:.84rem"<?= ($d !== "zakaznik" && !$dopravce_id) ? " disabled title=\"Nejdřív přiřaďte dopravce\"" : "" ?>>Vytvořit odkaz</button>
                 </form>
+              <?php else: ?>
+                <span class="druhotny">zatím bez odkazu</span>
               <?php endif; ?>
             </div>
           <?php endforeach; ?>
@@ -925,6 +1003,7 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
           </form>
         </div>
 
+        <?php if ($smi_dispecink): ?>
         <div class="skupina" style="margin-bottom:0">
           <h2>Ukončení</h2>
           <?php if ($h("stav") !== "zruseno"): ?>
@@ -946,6 +1025,7 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             </form>
           <?php endif; ?>
         </div>
+        <?php endif; ?>
       </div>
 
       <?php if ($udalosti): ?>

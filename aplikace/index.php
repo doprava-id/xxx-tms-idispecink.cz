@@ -66,6 +66,8 @@ require __DIR__ . "/zdroj/ceniky.php";
 require __DIR__ . "/zdroj/dopravci.php";
 require __DIR__ . "/zdroj/nabidky.php";
 require __DIR__ . "/zdroj/hlidani.php";
+require __DIR__ . "/zdroj/totp.php";
+require __DIR__ . "/zdroj/zalohy.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -92,6 +94,9 @@ $STRANKY = [
   "objednavka" => true,
   "fakturace"  => true,
   "nastaveni"  => true,
+  "ucet"       => true,      /* vlastní heslo a druhý faktor */
+  "zmeny"      => true,      /* protokol změn, jen správce */
+  "zaloha"     => true,      /* stažení zálohy, jen správce */
   "import"     => true,
   "mista"      => true,
   "misto"      => true,
@@ -117,7 +122,7 @@ if (!$bez_uzivatelu && $stranka === "instalace") {
 if ($STRANKY[$stranka]) {
   vyzaduj_prihlaseni();
   /* Ranní souhrn bez cronu: první otevření dne ho pošle samo. */
-  if ($_SERVER["REQUEST_METHOD"] === "GET") hlidani_denni_kontrola();
+  if ($_SERVER["REQUEST_METHOD"] === "GET") { hlidani_denni_kontrola(); zaloha_denni(); }
 }
 
 /* Každý zápis musí nést jednorázový token. */

@@ -98,7 +98,7 @@ function karta_planu(array $j, string $den, string $zacatek): void {
       <b><?= chran($j["cislo"]) ?><?= okno($j["nakladka_od"], $j["nakladka_do"]) !== "" ? " · " . chran(okno($j["nakladka_od"], $j["nakladka_do"])) : "" ?></b>
       <span class="trasa"><?= chran($j["nakladka_misto"] ?: "?") ?> → <?= chran($j["vykladka_misto"] ?: "?") ?><?= $do !== $od ? " <span class=\"trasa-pocet\">do " . chran(den_zkratka($do)) . "</span>" : "" ?></span>
       <span class="radek"><?= chran($j["zakaznik_nazev"] ?: "bez zákazníka") ?></span>
-      <span class="radek"><?= chran($j["zbozi"] ?: "zboží nezadáno") ?> · <?= chran(castka($j["cena_dopravce"])) ?></span>
+      <span class="radek"><?= chran($j["zbozi"] ?: "zboží nezadáno") ?><?= vidi_ceny_dopravce() ? " · " . chran(castka($j["cena_dopravce"])) : "" ?></span>
       <?php if (empty($j["dispecink_klient_id"])): ?><span class="radek">subdodávka, ne dispečink</span><?php endif; ?>
     <?php else: ?>
       <span class="trasa">↳ <?= chran($j["cislo"]) ?> pokračuje</span>
@@ -156,7 +156,7 @@ hlava_stranky("Externí dispečink", "Plán vozů", $akce);
         <p class="app-perex" style="margin:2px 0 0">
           <?= count($vozy_k) ?> <?= sklonuj(count($vozy_k), "vůz", "vozy", "vozů") ?>
           · tento týden <?= (int)$sk["jizd"] ?> <?= sklonuj((int)$sk["jizd"], "jízda", "jízdy", "jízd") ?>
-          · obrat vozů <b class="cislo"><?= chran(castka($sk["obrat"])) ?></b>
+          <?= vidi_ceny_dopravce() ? '· obrat vozů <b class="cislo">' . chran(castka($sk["obrat"])) . '</b>' : "" ?>
           · <?= isset(DISPECINK_UCTOVANI[(string)$k["dispecink_uctovani"]]) ? chran(mb_strtolower(DISPECINK_UCTOVANI[(string)$k["dispecink_uctovani"]])) : "způsob účtování nezadán" ?>
         </p>
       </div>
@@ -197,7 +197,7 @@ hlava_stranky("Externí dispečink", "Plán vozů", $akce);
               <?php endforeach; ?>
               <td class="vpravo">
                 <b class="cislo"><?= (int)$sv["jizd"] ?> <?= sklonuj((int)$sv["jizd"], "jízda", "jízdy", "jízd") ?></b>
-                <span class="druhotny cislo"><?= chran(castka($sv["obrat"])) ?></span>
+                <?php if (vidi_ceny_dopravce()): ?><span class="druhotny cislo"><?= chran(castka($sv["obrat"])) ?></span><?php endif; ?>
               </td>
             </tr>
           <?php endforeach; ?>

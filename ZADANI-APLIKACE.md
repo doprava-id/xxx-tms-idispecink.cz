@@ -6,7 +6,7 @@
 jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
 veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid),
 bod 4 (externí dispečink), bod 5 (nabídky, ceníky, doklady dopravců)
-a z bodu 6 vyhodnocení a hlídání. Zbytek níže čeká.
+a z bodu 6 vyhodnocení, hlídání, role a provoz. Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -64,6 +64,8 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Smlouvy a pojistky dopravců (3.3) | hotové — platnosti s upozorněním měsíc předem; objednávka varuje a pustí |
 | Vyhodnocení (3.5) | hotové — pohled Vyhodnocení ve Fakturaci: zákazníci, dopravci, řidiči, vozy |
 | Hlídání (3.9) | hotové — ranní souhrn e-mailem přes cron s klíčem, ručně, nebo při prvním otevření dne (viz 6) |
+| Role a přístupy (3.11) | hotové — čtyři role, brigádník bez jakékoli ceny, účetní bez zásahu do dispečinku; vlastník přepravy a zámek proti souběžné úpravě |
+| Provoz (3.12) | hotové — denní zálohy a stažení zálohy, druhý faktor (TOTP), přehled změn |
 
 ---
 
@@ -239,6 +241,11 @@ Dnešní dvě role nestačí. Systém má počítat se čtyřmi:
 
 Brigádnická role vyžaduje změnu: dnešní právo řeší jen ceny zákazníka
 a marže, cena dopravce je vidět vždycky.
+
+**Rozhodnutí při stavbě (2. 9. 2026):** druhý faktor je kód z aplikace
+v telefonu (TOTP), protože nepotřebuje SMS bránu ani doručitelnou poštu;
+tajemství se opisuje ručně, QR kód systém nekreslí. Účetní na kartě
+přepravy mění jen doklady a čísla faktur.
 
 Se třetím dispečerem přibude **vlastník přepravy** (kdo ji má na starosti)
 a ochrana proti tomu, aby dva lidé upravovali tutéž zásilku proti sobě.

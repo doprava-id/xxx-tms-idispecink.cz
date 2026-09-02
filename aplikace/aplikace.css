@@ -32,6 +32,8 @@
   color: var(--text-tlum); font-size: .86rem; padding: 0 10px;
   border-left: 1px solid var(--linka); margin-left: 8px;
 }
+.app-menu a.app-uzivatel { color: var(--text-tlum); font-size: .86rem; padding: 0 10px; border-left: 1px solid var(--linka); margin-left: 8px; }
+.app-menu a.app-uzivatel:hover { color: var(--zluta); }
 .app-odhlasit { margin: 0 0 0 8px; }
 .app-odhlasit .tlacitko { padding: 6px 12px; font-size: .84rem; }
 
@@ -47,7 +49,7 @@
   }
   .app-menu.otevreno { display: flex; }
   .app-menu a { padding: 12px 0; border-bottom: 1px solid var(--linka-slaba); }
-  .app-uzivatel { border-left: 0; margin: 10px 0 0; padding: 0; }
+  .app-uzivatel, .app-menu a.app-uzivatel { border-left: 0; margin: 10px 0 0; padding: 12px 0; }
   .app-odhlasit { margin: 10px 0 0; }
   .app-odhlasit .tlacitko { width: 100%; padding: 11px; }
 }
@@ -184,6 +186,9 @@
 .pole-s-tlacitkem input { flex: 1 1 auto; min-width: 0; }
 .pole-s-tlacitkem .tlacitko { flex: 0 0 auto; padding: 11px 14px; font-size: .9rem; white-space: nowrap; }
 
+/* Část formuláře, kterou účetní jen čte — fieldset vypne pole uvnitř. */
+fieldset.cast { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.cast[disabled] { opacity: .7; }
 .skupina { margin-bottom: 26px; }
 .skupina > h2 {
   font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta);

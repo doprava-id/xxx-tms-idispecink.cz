@@ -250,7 +250,8 @@ na ni nikde nevede.
 | **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti; podklad k fakturaci externího dispečinku po klientech (obrat vozů, odměna podle způsobu účtování); vyhodnocení období — marže po zákaznících, vytíženost a spolehlivost dopravců, řidiči, obrat každého vozu |
 | **Hlídání** | ranní souhrn e-mailem všem uživatelům: nakládky bez dopravce do tří dnů, doklady chybějící déle než týden, končící doklady dopravců; spouští ho cron, tlačítko v Nastavení, nebo první otevření systému toho dne |
 | **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka i za externí dispečink jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
-| **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
+| **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, hlídání, uživatelé a jejich role, přehled změn, zálohy |
+| **Můj účet** | vlastní heslo a druhý faktor (kód z aplikace v telefonu) |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
 
 ### Co je potřeba na hostingu
@@ -275,9 +276,17 @@ na ni nikde nevede.
      navázala na to, co vystavujete dnes,
    - **podmínky objednávky přepravy** — text, který se tiskne dopravci.
      Dokud je pole prázdné, objednávka to na sobě viditelně přizná.
-4. Další uživatele přidáte tamtéž. U každého se zvlášť přepíná právo
-   **vidět ceny zákazníka a marže**; cenu dopravce potřebuje ke své práci
-   každý dispečer, obchodní stranu ne. Správce vidí všechno.
+4. Další uživatele přidáte tamtéž a dáte jim roli: **správce** může
+   všechno, **dispečer** přepravy, dopravce a cenu dopravce, **účetní**
+   podklady, faktury, doklady a pohledávky (do dispečinku nezasahuje),
+   **brigádník** zásilky a doklady k přepisu bez jakékoliv ceny. Právo
+   **vidět ceny zákazníka a marže** se u dispečera a účetní přepíná zvlášť;
+   správce je vidí vždy, brigádník nikdy.
+5. Každý si v **Můj účet** změní heslo a zapne **druhý faktor** — kód
+   z aplikace v telefonu (Google Authenticator, Microsoft Authenticator,
+   Aegis…). Tajemství se do aplikace opíše nebo vloží adresou; QR kód
+   systém nekreslí. Správce umí faktor jen vypnout, když někdo přijde
+   o telefon.
 
 ### Konfigurace
 
@@ -372,10 +381,17 @@ doklady u přepravy označily jako přijaté.
 
 ### Zálohování
 
-Celá databáze je jediný soubor `aplikace/data/idispecink.sqlite`; přílohy
-k přepravám leží vedle v `aplikace/data/prilohy/`. Stáhněte si obojí po FTP;
-kopie je plnohodnotná záloha. Pro archiv mimo systém slouží
-navíc export přeprav a firem do CSV v Nastavení.
+Denní záloha vzniká sama při prvním otevření systému toho dne do
+`aplikace/data/zalohy/` (SQLite jako kopie souboru, MySQL jako výpis SQL);
+kopie starší než měsíc se mažou. Správce si čerstvou zálohu stáhne tlačítkem
+v Nastavení. Přílohy k přepravám leží v `aplikace/data/prilohy/` a zálohují
+se přes FTP spolu s databází; pro archiv mimo systém slouží navíc export
+přeprav a firem do CSV.
+
+Kdo co změnil, ukazuje správci **Přehled změn** — jeden protokol napříč
+systémem podle člověka, období a textu. Karta přepravy navíc hlídá, aby dva
+lidé neuložili tutéž zásilku proti sobě: kdo ukládá starší podobu, dostane
+zprávu a kartu si načte znovu; u zásilky je vidět, kdo ji má na starosti.
 
 ### Bezpečnost a osobní údaje
 

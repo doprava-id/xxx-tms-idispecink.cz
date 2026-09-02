@@ -72,12 +72,13 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
       <nav class="menu app-menu" id="app-menu" aria-label="Hlavní nabídka">
         <?php foreach (NABIDKA as $klic => $popis): ?>
           <?php if ($klic === "nabidky" && !vidi_ceny()) continue; ?>
+          <?php if ($klic === "fakturace" && !smi_fakturaci()) continue; ?>
           <a href="<?= chran(odkaz($klic)) ?>"<?= $aktivni === $klic ? " aria-current=\"page\"" : "" ?>><?= chran($popis) ?></a>
         <?php endforeach; ?>
         <?php if (je_spravce()): ?>
           <a href="<?= chran(odkaz("nastaveni")) ?>"<?= $aktivni === "nastaveni" ? " aria-current=\"page\"" : "" ?>>Nastavení</a>
         <?php endif; ?>
-        <span class="app-uzivatel"><?= chran(uzivatel()["jmeno"] ?? "") ?></span>
+        <a class="app-uzivatel" href="<?= chran(odkaz("ucet")) ?>" title="Můj účet: heslo a druhý faktor"><?= chran(uzivatel()["jmeno"] ?? "") ?></a>
         <form method="post" action="<?= chran(odkaz("odhlaseni")) ?>" class="app-odhlasit">
           <?= pole_token() ?>
           <button type="submit" class="tlacitko obrys">Odhlásit</button>

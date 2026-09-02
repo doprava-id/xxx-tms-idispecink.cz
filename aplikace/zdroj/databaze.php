@@ -21,10 +21,14 @@ $SCHEMA = [
     "jmeno"              => "text",
     "email"              => "text",
     "heslo"              => "text",
-    "role"               => "text",        /* spravce | dispecer */
+    "role"               => "text",        /* spravce | dispecer | ucetni | brigadnik */
     /* Právo vidět cenu zákazníka a marži. Cenu dopravce potřebuje
-       ke své práci každý dispečer, obchodní stranu ne. */
+       ke své práci každý dispečer, obchodní stranu ne. Brigádník
+       nevidí žádnou cenu bez ohledu na tohle pole. */
     "vidi_ceny"          => "ano_ne",
+    "totp_tajemstvi"     => "text",        /* druhý faktor; prázdné = vypnutý */
+    "totp_krok"          => "cele",        /* naposledy použitý krok, proti přehrání kódu */
+    "vzhled"             => "text",        /* tmavy | svetly */
     "aktivni"            => "ano_ne",
     "vytvoreno"          => "cas_zapisu",
     "posledni_prihlaseni" => "cas_zapisu",
@@ -162,6 +166,8 @@ $SCHEMA = [
     "vytvoreno" => "cas_zapisu",
     "upraveno"  => "cas_zapisu",
     "vytvoril"  => "cele",
+    "upravil"   => "cele",         /* kdo ukládal naposledy — zámek proti souběžné úpravě */
+    "vlastnik_id" => "cele",       /* kdo má zásilku na starosti */
   ],
 
   /* Body trasy — zdroj pravdy o tom, kudy jízda vede. Zboží, hmotnost
@@ -339,6 +345,7 @@ $INDEXY = [
   "idx_prepravy_vozidlo"   => ["prepravy", "vozidlo_id"],
   "idx_prepravy_dispecink" => ["prepravy", "dispecink_klient_id"],
   "idx_ceniky_firma"       => ["ceniky", "firma_id"],
+  "idx_prepravy_vlastnik"  => ["prepravy", "vlastnik_id"],
   "idx_nabidky_cislo"      => ["nabidky", "cislo"],
   "idx_nabidky_zakaznik"   => ["nabidky", "zakaznik_id"],
   "idx_nabidky_stav"       => ["nabidky", "stav"],

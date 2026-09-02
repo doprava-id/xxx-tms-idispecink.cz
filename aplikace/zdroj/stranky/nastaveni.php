@@ -37,6 +37,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     vzkaz("ok", "Nastavení pošty a odkazů uloženo.");
     presmeruj(odkaz("nastaveni"));
 
+  } elseif ($akce === "uzivatel_2f_vypnout") {
+    $uid = vstup_cislo("uzivatel_id");
+    $u = $uid ? radek("SELECT * FROM uzivatele WHERE id = ?", [$uid]) : null;
+    if ($u) {
+      uprav("uzivatele", (int)$u["id"], ["totp_tajemstvi" => "", "totp_krok" => 0]);
+      zapis_udalost(null, "Správce vypnul druhý faktor uživateli " . $u["jmeno"]);
+      vzkaz("pozor", "Druhý faktor uživatele " . $u["jmeno"] . " je vypnutý — ať si ho v Můj účet nastaví znovu.");
+    }
+    presmeruj(odkaz("nastaveni"));
+
   } elseif ($akce === "hlidani") {
     uloz_nastaveni("hlidani_zapnuto", vstup_ano_ne("hlidani_zapnuto") ? "1" : "0");
     vzkaz("ok", "Hlídání " . (vstup_ano_ne("hlidani_zapnuto") ? "zapnuto" : "vypnuto") . ".");
@@ -66,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         "email"     => $email,
         "heslo"     => password_hash($heslo, PASSWORD_DEFAULT),
         "role"      => isset(ROLE[vstup("u_role")]) ? vstup("u_role") : "dispecer",
-        "vidi_ceny" => vstup_ano_ne("u_vidi_ceny"),
+        "vidi_ceny" => vstup("u_role") === "brigadnik" ? 0 : vstup_ano_ne("u_vidi_ceny"),
         "aktivni"   => 1,
         "vytvoreno" => date("Y-m-d H:i:s"),
       ]);
@@ -87,6 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "vidi_ceny" => vstup_ano_ne("vidi_ceny"),
       "aktivni"   => vstup_ano_ne("aktivni"),
     ];
+    if ($data["role"] === "brigadnik") $data["vidi_ceny"] = 0;   /* brigádník nevidí žádnou cenu */
     $heslo = (string)($_POST["heslo"] ?? "");
     if ($heslo !== "") {
       if (mb_strlen($heslo) < 10) {
@@ -283,9 +294,14 @@ hlava_stranky("Provozní systém", "Nastavení",
           <li><a href="<?= chran(odkaz("import")) ?>">Import přeprav z CSV</a> — načtení zásilek z exportu jiného systému.</li>
           <li><a href="<?= chran(odkaz("export", ["co" => "zaloha"])) ?>">Export všech přeprav</a> — celá evidence do CSV.</li>
           <li><a href="<?= chran(odkaz("export", ["co" => "firmy"])) ?>">Export firem</a> — adresář zákazníků a dopravců.</li>
+          <li><a href="<?= chran(odkaz("zmeny")) ?>">Přehled změn</a> — kdo co kdy změnil, napříč systémem.</li>
+          <li><a href="<?= chran(odkaz("zaloha")) ?>">Stáhnout zálohu teď</a> — čerstvá kopie celé databáze; nese osobní údaje.</li>
         </ul>
-        <p class="app-perex">Databáze sama leží v adresáři <span class="cislo">aplikace/data/</span>
-          a web ji nevydá. Zálohu si stáhněte i přes FTP.</p>
+        <?php $zalohy = zalohy_seznam(); ?>
+        <p class="app-perex">Denní záloha vzniká při prvním otevření systému toho dne v <span class="cislo">aplikace/data/zalohy/</span>, drží se <?= ZALOHY_DNU ?> dní; web adresář nevydá, stahujte tudy nebo přes FTP.<?php
+          if ($zalohy) echo " Poslední: " . chran($zalohy[0]["nazev"]) . " (" . chran(velikost_souboru((int)$zalohy[0]["velikost"])) . "), celkem " . count($zalohy) . ".";
+          else echo " Zatím žádná.";
+        ?></p>
       </div>
     </div>
   </div>
@@ -293,7 +309,11 @@ hlava_stranky("Provozní systém", "Nastavení",
 
 <h2 style="margin-top:36px">Uživatelé</h2>
 <p class="app-perex">Právo na ceny zákazníka a marže se přepíná u každého
-  uživatele zvlášť; správce je vidí vždy. Heslo vyplňujte jen když ho měníte.</p>
+  uživatele zvlášť; správce je vidí vždy, brigádník nikdy. Heslo vyplňujte jen když ho měníte.
+  Druhý faktor si každý zapíná sám v Můj účet; správce ho umí jen vypnout, když někdo přijde o telefon.</p>
+<ul class="seznam" style="margin-bottom:16px">
+  <?php foreach (ROLE as $r => $popis): ?><li><b><?= chran($popis) ?></b> — <?= chran(ROLE_POPIS[$r]) ?></li><?php endforeach; ?>
+</ul>
 
 <?php
 /* Formuláře stojí mimo tabulku a pole se k nim hlásí atributem form —
@@ -309,7 +329,7 @@ foreach ($uzivatele as $u): ?>
 <div class="tabulka-obal">
   <table class="id-tabulka">
     <thead>
-      <tr><th>Jméno</th><th>E-mail</th><th>Role</th><th>Ceny</th><th>Přístup</th><th>Naposledy</th><th>Nové heslo</th><th></th></tr>
+      <tr><th>Jméno</th><th>E-mail</th><th>Role</th><th>Ceny</th><th>Přístup</th><th>2. faktor</th><th>Naposledy</th><th>Nové heslo</th><th></th></tr>
     </thead>
     <tbody>
     <?php foreach ($uzivatele as $u): $f = "uzivatel-" . (int)$u["id"]; ?>
@@ -332,6 +352,17 @@ foreach ($uzivatele as $u): ?>
           <input type="checkbox" id="aktivni-<?= (int)$u["id"] ?>" name="aktivni" value="1" form="<?= $f ?>"
                  <?= (int)$u["aktivni"] === 1 ? "checked" : "" ?>
                  style="width:18px;height:18px;accent-color:var(--zluta)">
+        </td>
+        <td>
+          <?php if (trim((string)$u["totp_tajemstvi"]) !== ""): ?>
+            <span class="stitek stitek-hotovo">zapnutý</span>
+            <form id="dvojf-<?= (int)$u["id"] ?>" method="post" action="<?= chran(odkaz("nastaveni")) ?>" style="display:inline" data-potvrdit="Vypnout druhý faktor uživateli <?= chran($u["jmeno"]) ?>?">
+              <?= pole_token() ?><input type="hidden" name="akce" value="uzivatel_2f_vypnout"><input type="hidden" name="uzivatel_id" value="<?= (int)$u["id"] ?>">
+              <button type="submit" class="odkaz-tlacitko">vypnout</button>
+            </form>
+          <?php else: ?>
+            <span class="druhotny">vypnutý</span>
+          <?php endif; ?>
         </td>
         <td><span class="druhotny"><?= chran(datum_cas($u["posledni_prihlaseni"])) ?></span></td>
         <td>
@@ -377,7 +408,7 @@ foreach ($uzivatele as $u): ?>
     </div>
     <div class="pole-zaskrtnuti">
       <input type="checkbox" id="u_vidi_ceny" name="u_vidi_ceny" value="1">
-      <label for="u_vidi_ceny">Vidí ceny zákazníka a marže <span class="napoveda">— správce je vidí vždy</span></label>
+      <label for="u_vidi_ceny">Vidí ceny zákazníka a marže <span class="napoveda">— správce je vidí vždy, brigádník nikdy</span></label>
     </div>
     <button type="submit" class="tlacitko">Přidat uživatele</button>
   </div>

@@ -6,6 +6,7 @@
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
 $ceny = vidi_ceny();
+$ceny_dopravce = vidi_ceny_dopravce();
 $co = vstup("co", "prepravy");
 
 function posli_csv(string $nazev, array $hlavicka, array $radky): void {
@@ -133,6 +134,7 @@ if ($co === "fakturace") {
   elseif ($jen === "nefakturovano")  $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno' AND " . JEN_SPEDICE;
   elseif ($jen === "dispecink")      $kde[] = JEN_DISPECINK;
   elseif ($jen === "spedice")        $kde[] = JEN_SPEDICE;
+  elseif ($jen === "moje")         { $kde[] = "p.vlastnik_id = ?"; $parametry[] = (int)uzivatel()["id"]; }
 
   $soubor = "prepravy-" . date("Y-m-d") . ".csv";
 }
@@ -158,7 +160,7 @@ $hlavicka = [
 ];
 /* Pořadí musí sedět s pořadím hodnot v řádku níže. */
 if ($ceny) $hlavicka[] = "Cena zákazníka";
-$hlavicka[] = "Cena dopravce";
+if ($ceny_dopravce) $hlavicka[] = "Cena dopravce";
 $hlavicka[] = "Přijatá faktura";
 $hlavicka[] = "Doklady";
 $hlavicka[] = "Poznámka k dokladům";
@@ -174,7 +176,7 @@ foreach ($data as $p) {
     $p["dopravce_nazev"], $p["spz"], $p["ridic_jmeno"], $p["ridic_telefon"], $p["klient_nazev"],
   ];
   if ($ceny) $radek[] = csv_castka($p["cena_zakaznik"]);
-  $radek[] = csv_castka($p["cena_dopravce"]);
+  if ($ceny_dopravce) $radek[] = csv_castka($p["cena_dopravce"]);
   $radek[] = $p["faktura_prijata"];
   $radek[] = DOKLADY[$p["doklady"]] ?? "";
   $radek[] = $p["doklady_poznamka"];

@@ -8,6 +8,7 @@
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
 $ceny = vidi_ceny();
+vyzaduj_pravo(smi_fakturaci(), "Fakturace a podklady nesou ceny dopravce — na ty brigádník právo nemá.");
 
 $pohled = vstup("pohled", "dopravci");
 if (!in_array($pohled, ["dopravci", "zakaznici", "chybi", "faktury", "pohledavky", "zavazky", "dispecink", "vyhodnoceni"], true)) $pohled = "dopravci";

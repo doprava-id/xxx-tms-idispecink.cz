@@ -57,9 +57,18 @@ const DISPECINK_UCTOVANI = [
   "za_jizdu"   => "Částka za jízdu",
 ];
 
+/* Čtyři role. Co která smí, hlídají funkce v autentizace.php. */
 const ROLE = [
-  "spravce"  => "Správce",
-  "dispecer" => "Dispečer",
+  "spravce"   => "Správce",
+  "dispecer"  => "Dispečer",
+  "ucetni"    => "Účetní",
+  "brigadnik" => "Brigádník",
+];
+const ROLE_POPIS = [
+  "spravce"   => "všechno včetně nastavení a uživatelů",
+  "dispecer"  => "přepravy, dopravci a cena dopravce; cena zákazníka a marže podle práva",
+  "ucetni"    => "podklady, faktury, doklady a pohledávky; do dispečinku nezasahuje",
+  "brigadnik" => "zásilky a doklady k přepisu; žádnou cenu, ani cenu dopravce",
 ];
 
 function nazev_stavu(?string $stav): string {

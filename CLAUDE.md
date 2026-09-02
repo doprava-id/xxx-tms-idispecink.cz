@@ -70,12 +70,14 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
     k fakturaci služby), ceniky.php (ceníky zákazníků, návrh ceny),
     dopravci.php (platnosti dokladů dopravce), nabidky.php (nabídky:
     číslování, převod na přepravu, zpráva zákazníkovi), hlidani.php (ranní
-    souhrn e-mailem)
+    souhrn e-mailem), totp.php (druhý faktor bez knihoven), zalohy.php
+    (denní kopie databáze)
   zdroj/stranky/             Jedna stránka = jeden soubor
     instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
     nabidky, nabidka (jen s právem na ceny),
     dispecink, vozy (plán vozů klientů), firmy, firma, mista, misto, linky, objednavka,
     fakturace, nastaveni, import, export, priloha,
+    ucet (vlastní heslo a druhý faktor), zmeny a zaloha (jen správce),
     verejne (bez přihlášení: zákazník, dopravce, řidič),
     hlidani (bez přihlášení, jen s klíčem z config.php: spouštěč souhrnu)
 ```
@@ -119,7 +121,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **třiadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
+- u zásahu do aplikace i jejích **šestadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), účet (změna hesla, zapnutí druhého faktoru a přihlášení s kódem — kód spočítej z tajemství přes `totp_kod()`), přehled změn, stažení zálohy, **každou roli zvlášť** (brigádník nesmí vidět žádnou cenu, účetní nesmí měnit nic než doklady a faktury), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -231,7 +233,11 @@ přihlášení.
 | odchozí provoz | ven volají jen `ares.php` a `fakturoid.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
 | Fakturoid | přístup (slug, client_id, client_secret) je **jen v `config.php`**, který je v `.gitignore`. Nic se nevolá samo: čtení úhrad i založení faktury jsou tlačítka. Faktury se na přepravy vážou **číslem** (`faktura_vydana`, `faktura_prijata`), ne cizím klíčem — jedna faktura kryje víc přeprav. Klíč `fakturoid_adresa` v konfiguraci je jen pro zkoušení proti napodobenině |
 | veřejné odkazy | `verejne.php` je jediná stránka bez přihlášení. Kód v adrese vybírá přepravu i roli; **cena dopravce a marže se tam nesmí objevit nikdy, cena zákazníka jen zákazníkovi.** Stránka posílá `Referrer-Policy: no-referrer` a odkazy ven mají `rel="noreferrer"`, jinak by kód utekl do cizích logů. Každý POST má token jako všude jinde |
-| ceny | cenu zákazníka a marži smí vidět jen `vidi_ceny()`. Kdo právo nemá, **nesmí ta pole ani přepsat** — jinak by je uložení formuláře smazalo (viz `preprava.php`) |
+| ceny | cenu zákazníka a marži smí vidět jen `vidi_ceny()`, cenu dopravce jen `vidi_ceny_dopravce()` (brigádník ani jednu). Kdo právo nemá, **nesmí ta pole ani přepsat** — jinak by je uložení formuláře smazalo (viz `preprava.php`). Stránky s cenou dopravce (fakturace, objednávka, vozy, linky, export) to hlídají samy |
+| role | čtyři role v `ROLE`: správce, dispečer, účetní, brigádník. Práva rozhodují jen funkce v `autentizace.php` (`vidi_ceny`, `vidi_ceny_dopravce`, `smi_dispecink`, `smi_fakturaci`, `je_spravce`) — **nikde jinde se role neporovnává textem.** Účetní na kartě přepravy ukládá jen doklady a čísla faktur (`fieldset disabled` v šabloně a samostatná větev v zápisu) |
+| souběžná úprava | karta přepravy nese `upraveno_pred`; kdo ukládá starší podobu, neprojde. Každé uložení zapisuje `upravil`; `vlastnik_id` říká, kdo má zásilku na starosti |
+| druhý faktor | TOTP v `totp.php`, tajemství jen v databázi (`uzivatele.totp_tajemstvi`), použitý krok se pamatuje proti přehrání kódu. Přihlášení má dva kroky: heslo, pak kód; `cekajici_2f` v sezení platí pět minut. Správce faktor jen vypíná, zapnout si ho musí každý sám |
+| zálohy | `zaloha_denni()` při prvním GET dne kopíruje databázi do `data/zalohy/` (SQLite `VACUUM INTO`, MySQL výpis SQL) a maže starší než měsíc; stažení jen správce přes `zaloha`. Adresář `data/` web nevydá |
 | `.tabulka-obal` | musí zůstat `position: relative`. Skryté popisky uvnitř široké tabulky jsou absolutně umístěné a bez toho roztáhnou stránku do vodorovného scrollu |
 | číslování | tvar řady drží Nastavení, ne kód. `dalsi_cislo()` navíc přeskočí číslo, které už existuje |
 | podmínky objednávky | **PLACEHOLDER.** Text dodá zadavatel v Nastavení. Objednávka bez něj vytiskne viditelné upozornění — nedoplňuj ho za něj |

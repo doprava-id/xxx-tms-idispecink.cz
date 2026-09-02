@@ -27,6 +27,10 @@ if (empty($p["dopravce_id"])) {
   vzkaz("chyba", "Objednávku nelze vystavit, dokud přeprava nemá dopravce.");
   presmeruj(odkaz("preprava", ["id" => $p["id"]]));
 }
+if (!vidi_ceny_dopravce()) {
+  vzkaz("chyba", "Objednávka nese cenu dopravce — na tu nemáte právo.");
+  presmeruj(odkaz("preprava", ["id" => $p["id"]]));
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "poslat") {
   $komu   = vstup("komu");
