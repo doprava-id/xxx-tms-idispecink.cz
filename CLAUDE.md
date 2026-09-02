@@ -65,10 +65,12 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
     autentizace.php, sablona.php, trasa.php (body jízdy, stálé linky,
     státní svátky), prilohy.php, ares.php, odkazy.php (veřejné odkazy,
     WhatsApp), posta.php (e-mail, objednávka jako zpráva), faktury.php
-    (pohledávky, závazky), fakturoid.php (úhrady a založení faktury přes API)
+    (pohledávky, závazky), fakturoid.php (úhrady a založení faktury přes API),
+    dispecink.php (externí dispečink: klienti, podmínka JEN_SPEDICE, podklad
+    k fakturaci služby)
   zdroj/stranky/             Jedna stránka = jeden soubor
     instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
-    dispecink, firmy, firma, mista, misto, linky, objednavka,
+    dispecink, vozy (plán vozů klientů), firmy, firma, mista, misto, linky, objednavka,
     fakturace, nastaveni, import, export, priloha,
     verejne (bez přihlášení: zákazník, dopravce, řidič)
 ```
@@ -112,7 +114,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **devatenáct stránek** (Fakturace má šest pohledů: dopravci, zákazníci, chybějící údaje, faktury, pohledávky, závazky; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
+- u zásahu do aplikace i jejích **dvacet stránek** (Fakturace má sedm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -216,6 +218,7 @@ přihlášení.
 | schéma | popisuje ho pole `$SCHEMA` v `databaze.php`, ne hotové SQL. **Nový sloupec přidej tam** — doplní se sám při dalším načtení, na SQLite i MySQL. Ručně psané `ALTER TABLE` do repozitáře nepatří |
 | trasa | zdrojem pravdy jsou **body v tabulce `body`**. Pole `nakladka_*` a `vykladka_*` na přepravě jsou jen odvozený souhrn první nakládky a poslední vykládky — přepočítává je výhradně `prepocitej_trasu()`. **Nikdo je nesmí zapisovat přímo**; seznamy a tabule je smí jen číst. Stav „naloženo" a „vyloženo" se řídí splněnými body |
 | šablony linek | přeprava se `sablona = 1` je šablona stálé linky. **Každý dotaz nad přepravami, který zobrazuje evidenci, musí mít `p.sablona = 0`** — jinak se šablona objeví jako zásilka v seznamu, na tabuli nebo v obratu |
+| externí dispečink | jízda s `dispecink_klient_id` je vůz klienta, který řídíme; klientem je vždy dopravce jízdy. Odesílateli fakturuje klient sám, my účtujeme jen odměnu podle karty klienta. **Každý součet tržby, nákladů a marže spedice a každý podklad k fakturaci musí mít `JEN_SPEDICE`** (`dispecink.php`) — bez toho se obrat cizích vozů přičte k našemu. Způsob účtování a sazba jsou **PLACEHOLDER** na kartě klienta: dokud chybí, podklad odměnu nespočítá a nedomýšlí ji |
 | přílohy | soubory leží v `data/prilohy/` pod náhodným jménem, ven jdou jen přes `priloha.php` po přihlášení. Typ se bere z tabulky `PRILOHY_TYPY`, ne z toho, co soubor tvrdí; SVG a HTML tam schválně nejsou |
 | odchozí provoz | ven volají jen `ares.php` a `fakturoid.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
 | Fakturoid | přístup (slug, client_id, client_secret) je **jen v `config.php`**, který je v `.gitignore`. Nic se nevolá samo: čtení úhrad i založení faktury jsou tlačítka. Faktury se na přepravy vážou **číslem** (`faktura_vydana`, `faktura_prijata`), ne cizím klíčem — jedna faktura kryje víc přeprav. Klíč `fakturoid_adresa` v konfiguraci je jen pro zkoušení proti napodobenině |

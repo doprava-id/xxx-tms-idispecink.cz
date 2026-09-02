@@ -26,6 +26,10 @@ if (!$nova) {
 }
 $zpet = function () use ($preprava) { return odkaz("preprava", ["id" => $preprava["id"]]); };
 
+/* Nová jízda z plánu vozů přichází s předvyplněným dopravcem, vozem a dnem
+   nakládky v adrese. */
+$predvoleny_dopravce = $nova ? (vstup_cislo("dopravce") ?: 0) : 0;
+
 /* Údaje bodu z formuláře — společné pro přidání i úpravu. */
 function bod_z_formulare(): array {
   return [
@@ -58,6 +62,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $r_jmeno = vstup("ridic_jmeno");
     $r_tel   = vstup("ridic_telefon");
 
+    /* Vůz a řidič z karty musí patřit vybranému dopravci — po změně
+       dopravce by jinak zůstal v jízdě cizí vůz a rozbil plán vozů. */
+    if ($vozidlo_id && (int)hodnota("SELECT firma_id FROM vozidla WHERE id = ?", [$vozidlo_id]) !== (int)$dopravce_id) $vozidlo_id = null;
+    if ($ridic_id && (int)hodnota("SELECT firma_id FROM ridici WHERE id = ?", [$ridic_id]) !== (int)$dopravce_id) $ridic_id = null;
+
+    /* Externí dispečink: „podle karty dopravce" nechá rozhodnout příznak
+       na firmě, ano/ne ho přebije. Klientem je vždy dopravce jízdy. */
+    $dopravce_je_klient = je_klient_dispecinku($dopravce_id);
+    $volba_dispecinku = vstup("dispecink");
+    if ($volba_dispecinku === "1" && !$dopravce_je_klient) {
+      vzkaz("pozor", $dopravce_id
+        ? "Dopravce není klient dispečinku — zaškrtněte to nejdřív na jeho kartě. Jízda je uložená jako běžná spedice."
+        : "Jízda pod dispečinkem potřebuje dopravce, který je klientem dispečinku. Uložená je jako běžná spedice.");
+      $volba_dispecinku = "0";
+    }
+    $dispecink_klient_id = ($volba_dispecinku === "1" || ($volba_dispecinku === "" && $dopravce_je_klient)) ? $dopravce_id : null;
+
     if ($vozidlo_id && $spz === "") {
       $v = radek("SELECT spz FROM vozidla WHERE id = ?", [$vozidlo_id]);
       if ($v) $spz = (string)$v["spz"];
@@ -81,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "spz"           => $spz,
       "ridic_jmeno"   => $r_jmeno,
       "ridic_telefon" => $r_tel,
+      "dispecink_klient_id" => $dispecink_klient_id,
 
       "zbozi"       => vstup("zbozi"),
       "hmotnost"    => vstup_cislo("hmotnost"),
@@ -132,7 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $novy = vloz("prepravy", $data);
         zaloz_body_z_poli($novy, $trasa);
         prepocitej_trasu($novy);
-        zapis_udalost($novy, "Přeprava " . $data["cislo"] . " založena");
+        zapis_udalost($novy, "Přeprava " . $data["cislo"] . " založena" . ($dispecink_klient_id ? " pod externím dispečinkem" : ""));
         vzkaz("ok", "Přeprava " . $data["cislo"] . " založena. Další body trasy přidáte níže.");
         presmeruj(odkaz("preprava", ["id" => $novy]));
       }
@@ -152,6 +174,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       if ((int)$preprava["dopravce_id"] !== (int)$dopravce_id) {
         $nazev = $dopravce_id ? (string)hodnota("SELECT nazev FROM firmy WHERE id = ?", [$dopravce_id]) : "nikdo";
         zapis_udalost((int)$preprava["id"], "Dopravce: " . $nazev);
+      }
+      if ((int)($preprava["dispecink_klient_id"] ?? 0) !== (int)$dispecink_klient_id) {
+        zapis_udalost((int)$preprava["id"], $dispecink_klient_id ? "Jízda vedená pod externím dispečinkem" : "Jízda vyřazená z externího dispečinku");
       }
       uprav("prepravy", (int)$preprava["id"], $data);
       prepocitej_trasu((int)$preprava["id"]);
@@ -305,7 +330,16 @@ $dopravci  = radky("SELECT id, nazev FROM firmy WHERE typ IN ('dopravce','oboji'
   [(int)($preprava["dopravce_id"] ?? 0)]);
 $mista     = radky("SELECT id, nazev, mesto FROM mista WHERE aktivni = 1 ORDER BY LOWER(nazev)");
 
-$dopravce_id = (int)($preprava["dopravce_id"] ?? 0);
+$dopravce_id = (int)($preprava["dopravce_id"] ?? $predvoleny_dopravce);
+/* Volba externího dispečinku ve formuláři: uložená jízda ukáže ano/ne,
+   nová nechá rozhodnout kartu dopravce (nebo přijde z plánu vozů s ano). */
+$dopravce_je_klient = je_klient_dispecinku($dopravce_id ?: null);
+if ($nova) {
+  $volba_dispecinku = vstup("dispecink") === "1" ? "1" : "";
+} else {
+  $volba_dispecinku = !empty($preprava["dispecink_klient_id"]) ? "1" : ($dopravce_je_klient ? "0" : "");
+}
+$klient_dispecinku = !empty($preprava["dispecink_klient_id"]) ? radek("SELECT id, nazev FROM firmy WHERE id = ?", [(int)$preprava["dispecink_klient_id"]]) : null;
 $vozidla = $dopravce_id ? radky("SELECT id, spz, typ FROM vozidla WHERE firma_id = ? AND aktivni = 1 ORDER BY spz", [$dopravce_id]) : [];
 $ridici  = $dopravce_id ? radky("SELECT id, jmeno FROM ridici WHERE firma_id = ? AND aktivni = 1 ORDER BY LOWER(jmeno)", [$dopravce_id]) : [];
 
@@ -332,7 +366,7 @@ if ($preprava && vstup_cislo("bod")) {
 $historie = [];
 if ($preprava && $h("nakladka_misto") !== "" && $h("vykladka_misto") !== "") {
   $historie = radky(
-    "SELECT p.id, p.cislo, p.nakladka_datum, p.cena_zakaznik, p.cena_dopravce, d.nazev AS dopravce_nazev
+    "SELECT p.id, p.cislo, p.nakladka_datum, p.cena_zakaznik, p.cena_dopravce, p.dispecink_klient_id, d.nazev AS dopravce_nazev
        FROM prepravy p LEFT JOIN firmy d ON d.id = p.dopravce_id
       WHERE p.id <> ? AND p.sablona = 0 AND p.stav <> 'zruseno'
         AND LOWER(p.nakladka_misto) = LOWER(?) AND LOWER(p.vykladka_misto) = LOWER(?)
@@ -364,7 +398,7 @@ hlava($nova ? "Nová přeprava" : "Přeprava " . $h("cislo"), "prepravy");
 ?>
 <a class="app-zpet" href="<?= chran(odkaz("prepravy")) ?>">← Zpět na seznam přeprav</a>
 <?php
-hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo") . ((int)$h("sablona") === 1 ? " · šablona linky" : ""), $nadpis, $akce_hlavy);
+hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo") . ((int)$h("sablona") === 1 ? " · šablona linky" : "") . ($klient_dispecinku ? " · externí dispečink" : ""), $nadpis, $akce_hlavy);
 
 /* Formulář bodu — sdílený pro přidání i úpravu. */
 function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
@@ -567,7 +601,7 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             </div>
           </div>
           <div class="pole-radek tri">
-            <div class="pole"><label for="nakladka_datum">Datum</label><input type="date" id="nakladka_datum" name="nakladka_datum"></div>
+            <div class="pole"><label for="nakladka_datum">Datum</label><input type="date" id="nakladka_datum" name="nakladka_datum" value="<?= chran((string)(vstup_datum("den") ?? "")) ?>"></div>
             <div class="pole"><label for="nakladka_od">Okno od</label><input type="time" id="nakladka_od" name="nakladka_od"></div>
             <div class="pole"><label for="nakladka_do">Okno do</label><input type="time" id="nakladka_do" name="nakladka_do"></div>
           </div>
@@ -625,21 +659,25 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
 
       <div class="skupina">
         <h2>Dopravce</h2>
-        <div class="pole-radek">
+        <div class="pole-radek tri">
           <div class="pole">
             <label for="dopravce_id">Dopravce</label>
-            <select id="dopravce_id" name="dopravce_id"><?= volby($do_voleb($dopravci, "nazev"), $h("dopravce_id"), "— nezajištěno —") ?></select>
+            <select id="dopravce_id" name="dopravce_id"><?= volby($do_voleb($dopravci, "nazev"), $h("dopravce_id", $predvoleny_dopravce ? (string)$predvoleny_dopravce : ""), "— nezajištěno —") ?></select>
           </div>
           <div class="pole">
-            <label for="cena_dopravce">Cena dopravce <span class="napoveda">Kč bez DPH</span></label>
+            <label for="cena_dopravce">Cena dopravce <span class="napoveda">Kč bez DPH<?= $klient_dispecinku ? "; u dispečinku obrat vozu klienta" : "" ?></span></label>
             <input type="text" id="cena_dopravce" name="cena_dopravce" value="<?= chran($h("cena_dopravce")) ?>" inputmode="decimal">
+          </div>
+          <div class="pole">
+            <label for="dispecink">Externí dispečink <span class="napoveda">— vůz klienta, který řídíme my</span></label>
+            <select id="dispecink" name="dispecink"><?= volby(["" => "— podle karty dopravce —", "1" => "Ano, jízda pod dispečinkem", "0" => "Ne, běžná spedice"], $volba_dispecinku) ?></select>
           </div>
         </div>
         <?php if ($dopravce_id): ?>
           <div class="pole-radek">
             <div class="pole">
               <label for="vozidlo_id">Vozidlo z karty dopravce</label>
-              <select id="vozidlo_id" name="vozidlo_id"><?= volby($do_voleb($vozidla, "spz"), $h("vozidlo_id"), "— nevybráno —") ?></select>
+              <select id="vozidlo_id" name="vozidlo_id"><?= volby($do_voleb($vozidla, "spz"), $h("vozidlo_id", $nova ? (string)(vstup_cislo("vozidlo") ?: "") : ""), "— nevybráno —") ?></select>
             </div>
             <div class="pole">
               <label for="ridic_id">Řidič z karty dopravce</label>
@@ -754,10 +792,16 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
           <ul class="udaje">
             <li><span class="klic">Číslo</span><span class="hodnota cislo"><?= chran($h("cislo")) ?></span></li>
             <li><span class="klic">Stav</span><span class="hodnota"><?= stitek_stavu($h("stav")) ?></span></li>
+            <?php if ($klient_dispecinku): ?>
+              <li><span class="klic">Dispečink</span><span class="hodnota">vůz klienta <a href="<?= chran(odkaz("firma", ["id" => $klient_dispecinku["id"]])) ?>"><?= chran($klient_dispecinku["nazev"]) ?></a><br>
+                <span class="druhotny"><a href="<?= chran(odkaz("vozy", array_filter(["klient" => $klient_dispecinku["id"], "tyden" => $h("nakladka_datum")]))) ?>">plán vozů</a> · odesílateli fakturuje klient</span></span></li>
+            <?php endif; ?>
             <li><span class="klic">Objednávka</span><span class="hodnota"><?= $h("objednavka_datum") ? chran(datum_cas($h("objednavka_datum"))) : "nevystavena" ?><?= $h("objednavka_odeslana") ? "<br><span class=\"druhotny\">odeslána " . chran(datum_cas($h("objednavka_odeslana"))) . "</span>" : "" ?></span></li>
             <?php if ($h("potvrzeno_kdy")): ?><li><span class="klic">Potvrzeno</span><span class="hodnota"><?= chran(datum_cas($h("potvrzeno_kdy"))) ?> dopravcem</span></li><?php endif; ?>
             <?php if ($h("hlaseni")): ?><li><span class="klic">Hlášení</span><span class="hodnota" style="color:var(--pozor-text)">„<?= chran($h("hlaseni")) ?>"<br><span class="druhotny"><?= chran(datum_cas($h("hlaseni_kdy"))) ?></span></span></li><?php endif; ?>
-            <?php if ($ceny): ?>
+            <?php if ($ceny && $klient_dispecinku): ?>
+              <li><span class="klic">Marže</span><span class="hodnota">— <span style="font-weight:400;color:var(--text-tlum)">pod dispečinkem se nepočítá, odměnu ukáže podklad</span></span></li>
+            <?php elseif ($ceny): ?>
               <li><span class="klic">Marže</span><span class="hodnota cislo"><?=
                 ($preprava["cena_zakaznik"] === null && $preprava["cena_dopravce"] === null) ? "—"
                 : chran(castka((float)$preprava["cena_zakaznik"] - (float)$preprava["cena_dopravce"])) ?></span></li>
@@ -784,7 +828,8 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                   — <?= chran($hist["dopravce_nazev"] ?: "bez dopravce") ?>
                   <time><?= chran(datum($hist["nakladka_datum"])) ?>
                     · dopravce <?= chran(castka($hist["cena_dopravce"])) ?><?php
-                    if ($ceny) echo " · zákazník " . chran(castka($hist["cena_zakaznik"]))
+                    if (!empty($hist["dispecink_klient_id"])) echo " · pod dispečinkem";
+                    elseif ($ceny) echo " · zákazník " . chran(castka($hist["cena_zakaznik"]))
                       . " · marže " . chran(castka((float)$hist["cena_zakaznik"] - (float)$hist["cena_dopravce"]));
                   ?></time>
                 </li>

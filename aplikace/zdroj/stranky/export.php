@@ -76,6 +76,27 @@ if ($co === "radky_faktury") {
   ], $vystup);
 }
 
+/* --- Řádky faktury za externí dispečink --------------------------------- */
+
+if ($co === "dispecink_radky") {
+  vyzaduj_ceny();
+  $od = vstup_datum("od") ?: date("Y-m-01");
+  $do = vstup_datum("do") ?: date("Y-m-t");
+  $klient = radek("SELECT * FROM firmy WHERE id = ?", [vstup_cislo("firma")]);
+  if (!$klient) { vzkaz("chyba", "Klient nenalezen."); presmeruj(odkaz("fakturace", ["pohled" => "dispecink"])); }
+  $pk = dispecink_podklad($klient, $od, $do);
+  $vystup = [];
+  foreach ($pk["radky"] as [$nazev, $mnozstvi, $jednotka, $cena]) {
+    $vystup[] = [
+      $klient["nazev"], $klient["ico"], $klient["dic"], $nazev, $mnozstvi, $jednotka,
+      csv_castka($cena), csv_castka((float)$cena * (float)$mnozstvi),
+    ];
+  }
+  posli_csv("dispecink-radky-" . preg_replace('/[^A-Za-z0-9]+/', "-", (string)@iconv("UTF-8", "ASCII//TRANSLIT", (string)$klient["nazev"])) . "-" . $od . "-" . $do . ".csv", [
+    "Odběratel", "IČO", "DIČ", "Položka", "Množství", "Jednotka", "Cena za jednotku bez DPH", "Celkem bez DPH",
+  ], $vystup);
+}
+
 /* --- Přepravy ----------------------------------------------------------- */
 
 $kde = []; $parametry = [];
@@ -109,7 +130,9 @@ if ($co === "fakturace") {
   if ($do) { $kde[] = "p.nakladka_datum <= ?"; $parametry[] = $do; }
   if ($jen === "bez_dopravce")       $kde[] = "(p.dopravce_id IS NULL OR p.dopravce_id = 0) AND p.stav <> 'zruseno'";
   elseif ($jen === "doklady")        $kde[] = "p.doklady <> 'prijato' AND p.stav IN ('vylozeno','doklady','fakturovano')";
-  elseif ($jen === "nefakturovano")  $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno'";
+  elseif ($jen === "nefakturovano")  $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno' AND " . JEN_SPEDICE;
+  elseif ($jen === "dispecink")      $kde[] = JEN_DISPECINK;
+  elseif ($jen === "spedice")        $kde[] = JEN_SPEDICE;
 
   $soubor = "prepravy-" . date("Y-m-d") . ".csv";
 }
@@ -118,11 +141,12 @@ $kde[] = "p.sablona = 0";
 $podminka = " WHERE " . implode(" AND ", $kde);
 
 $data = radky(
-  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev,
+  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev, k.nazev AS klient_nazev,
           (SELECT COUNT(*) FROM body b WHERE b.preprava_id = p.id) AS bodu
      FROM prepravy p
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
-     LEFT JOIN firmy d ON d.id = p.dopravce_id" . $podminka . "
+     LEFT JOIN firmy d ON d.id = p.dopravce_id
+     LEFT JOIN firmy k ON k.id = p.dispecink_klient_id" . $podminka . "
     ORDER BY COALESCE(p.nakladka_datum, '9999-12-31'), p.id", $parametry);
 
 $hlavicka = [
@@ -130,7 +154,7 @@ $hlavicka = [
   "Nakládka místo", "Nakládka adresa", "Nakládka datum", "Nakládka od", "Nakládka do",
   "Vykládka místo", "Vykládka adresa", "Vykládka datum", "Vykládka od", "Vykládka do",
   "Zboží", "Hmotnost kg", "Palet", "LDM", "Vozidlo", "Požadavky",
-  "Dopravce", "SPZ", "Řidič", "Telefon řidiče",
+  "Dopravce", "SPZ", "Řidič", "Telefon řidiče", "Externí dispečink",
 ];
 /* Pořadí musí sedět s pořadím hodnot v řádku níže. */
 if ($ceny) $hlavicka[] = "Cena zákazníka";
@@ -147,7 +171,7 @@ foreach ($data as $p) {
     $p["nakladka_misto"], $p["nakladka_adresa"], csv_datum($p["nakladka_datum"]), $p["nakladka_od"], $p["nakladka_do"],
     $p["vykladka_misto"], $p["vykladka_adresa"], csv_datum($p["vykladka_datum"]), $p["vykladka_od"], $p["vykladka_do"],
     $p["zbozi"], $p["hmotnost"], $p["palet"], $p["ldm"], nazev_typu_vozidla($p["typ_vozidla"]), $p["pozadavky"],
-    $p["dopravce_nazev"], $p["spz"], $p["ridic_jmeno"], $p["ridic_telefon"],
+    $p["dopravce_nazev"], $p["spz"], $p["ridic_jmeno"], $p["ridic_telefon"], $p["klient_nazev"],
   ];
   if ($ceny) $radek[] = csv_castka($p["cena_zakaznik"]);
   $radek[] = csv_castka($p["cena_dopravce"]);

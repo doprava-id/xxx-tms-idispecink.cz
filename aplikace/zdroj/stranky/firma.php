@@ -51,9 +51,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "prov_reference"  => vstup_ano_ne("prov_reference"),
       "prov_datum"      => vstup_datum("prov_datum"),
       "prov_poznamka"   => vstup("prov_poznamka"),
+      "dispecink"          => vstup_ano_ne("dispecink"),
+      "dispecink_uctovani" => isset(DISPECINK_UCTOVANI[vstup("dispecink_uctovani")]) ? vstup("dispecink_uctovani") : "",
+      "dispecink_sazba"    => vstup_castka("dispecink_sazba"),
+      "dispecink_poznamka" => vstup("dispecink_poznamka"),
       "aktivni"         => vstup_ano_ne("aktivni"),
       "upraveno"        => date("Y-m-d H:i:s"),
     ];
+
+    /* Klient dispečinku vystupuje u jízd jako dopravce — čistý zákazník
+       by se u přepravy nedal vybrat. */
+    if ($data["dispecink"] === 1 && $data["typ"] === "zakaznik") {
+      $data["typ"] = "oboji";
+      vzkaz("pozor", "Klient dispečinku vystupuje u jízd jako dopravce, typ firmy je proto „Zákazník i dopravce\".");
+    }
 
     if ($data["nazev"] === "") {
       vzkaz("chyba", "Název firmy je povinný.");
@@ -156,8 +167,13 @@ hlava($nova ? "Nová firma" : $h("nazev"), "firmy");
 ?>
 <a class="app-zpet" href="<?= chran(odkaz("firmy")) ?>">← Zpět na seznam firem</a>
 <?php
-hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma"),
-  $nova ? "Nová firma" : $h("nazev"));
+$akce_firmy = "";
+if (!$nova && (int)$h("dispecink") === 1) {
+  $akce_firmy .= '<a class="tlacitko" href="' . chran(odkaz("vozy", ["klient" => $firma["id"]])) . '">Plán vozů</a>';
+  if (vidi_ceny()) $akce_firmy .= '<a class="tlacitko obrys" href="' . chran(odkaz("fakturace", ["pohled" => "dispecink"])) . '">Podklad k fakturaci služby</a>';
+}
+hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma") . ((int)$h("dispecink") === 1 ? " · klient dispečinku" : ""),
+  $nova ? "Nová firma" : $h("nazev"), $akce_firmy);
 ?>
 
 <div class="app-sloupce">
@@ -265,6 +281,29 @@ hlava_stranky($nova ? "Adresář" : (TYPY_FIREM[$h("typ")] ?? "Firma"),
             <input type="text" id="prov_poznamka" name="prov_poznamka" value="<?= chran($h("prov_poznamka")) ?>">
           </div>
         </div>
+      </div>
+
+      <div class="skupina">
+        <h2>Externí dispečink</h2>
+        <div class="pole-zaskrtnuti">
+          <input type="checkbox" id="dispecink" name="dispecink" value="1"<?= (int)$h("dispecink") === 1 ? " checked" : "" ?>>
+          <label for="dispecink">Klient externího dispečinku <span class="napoveda">— jeho vozy řídíme my. Jízdy jeho vozů se vedou pod dispečinkem, mají vlastní plán a nepočítají se do tržby ani marže spedice.</span></label>
+        </div>
+        <div class="pole-radek">
+          <div class="pole">
+            <label for="dispecink_uctovani">Způsob účtování služby</label>
+            <select id="dispecink_uctovani" name="dispecink_uctovani"><?= volby(DISPECINK_UCTOVANI, $h("dispecink_uctovani"), "— nezadáno —") ?></select>
+          </div>
+          <div class="pole">
+            <label for="dispecink_sazba">Sazba <span class="napoveda">Kč bez DPH; u procenta číslo v %</span></label>
+            <input type="text" id="dispecink_sazba" name="dispecink_sazba" value="<?= chran($h("dispecink_sazba")) ?>" inputmode="decimal">
+          </div>
+        </div>
+        <div class="pole">
+          <label for="dispecink_poznamka">Dohoda s klientem <span class="napoveda">— co je v ceně, fakturační období, kontakt na účtárnu</span></label>
+          <input type="text" id="dispecink_poznamka" name="dispecink_poznamka" value="<?= chran($h("dispecink_poznamka")) ?>">
+        </div>
+        <p class="app-perex">Sazbu a způsob účtování dodá vedení firmy — dokud chybí, podklad k fakturaci služby odměnu nespočítá a řekne to.</p>
       </div>
 
       <div class="skupina">

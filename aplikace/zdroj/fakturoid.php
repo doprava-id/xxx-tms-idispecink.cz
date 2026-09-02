@@ -186,29 +186,29 @@ function fakturoid_odberatel(array $firma, ?string &$chyba = null): ?int {
   return (int)$novy["id"];
 }
 
-/* Založí ve Fakturoidu fakturu s řádkem za každou přepravu. Vrací
-   [cislo, id] nebo null. Volá se jen z tlačítka po potvrzení. */
-function fakturoid_zaloz_fakturu(array $firma, array $prepravy, int $splatnost_dnu, float $dph, ?string &$chyba = null): ?array {
+/* Založí ve Fakturoidu fakturu s danými řádky — každý je [název, množství,
+   jednotka, cena za jednotku bez DPH]. Vrací [cislo, id, data] nebo null.
+   Volá se jen z tlačítka po potvrzení. */
+function fakturoid_zaloz_fakturu_radky(array $firma, array $radky, int $splatnost_dnu, float $dph, ?string &$chyba = null): ?array {
   $chyba = null;
+  if (!$radky) { $chyba = "Faktura nemá žádný řádek."; return null; }
   $subject_id = fakturoid_odberatel($firma, $chyba);
   if ($subject_id === null) return null;
 
-  $radky = [];
-  foreach ($prepravy as $p) {
-    $radky[] = [
-      "name"       => "Přeprava " . $p["cislo"] . " " . ($p["nakladka_misto"] ?: "?") . " – " . ($p["vykladka_misto"] ?: "?")
-                     . ($p["nakladka_datum"] ? " " . datum($p["nakladka_datum"]) : "")
-                     . ($p["ref_zakaznika"] ? " (" . $p["ref_zakaznika"] . ")" : ""),
-      "quantity"   => 1,
-      "unit_name"  => "ks",
-      "unit_price" => round((float)$p["cena_zakaznik"], 2),
+  $lines = [];
+  foreach ($radky as [$nazev, $mnozstvi, $jednotka, $cena]) {
+    $lines[] = [
+      "name"       => (string)$nazev,
+      "quantity"   => $mnozstvi,
+      "unit_name"  => (string)$jednotka,
+      "unit_price" => round((float)$cena, 2),
       "vat_rate"   => $dph,
     ];
   }
   $odpoved = fakturoid_pozadavek("POST", "invoices.json", [
     "subject_id"     => $subject_id,
     "due"            => max(1, $splatnost_dnu),
-    "lines"          => $radky,
+    "lines"          => $lines,
     "vat_price_mode" => "without_vat",
   ], $stav);
   if (!is_array($odpoved) || empty($odpoved["number"])) {
@@ -216,4 +216,18 @@ function fakturoid_zaloz_fakturu(array $firma, array $prepravy, int $splatnost_d
     return null;
   }
   return ["cislo" => (string)$odpoved["number"], "id" => (int)($odpoved["id"] ?? 0), "data" => fakturoid_preved_fakturu($odpoved)];
+}
+
+/* Faktura zákazníkovi s řádkem za každou přepravu. */
+function fakturoid_zaloz_fakturu(array $firma, array $prepravy, int $splatnost_dnu, float $dph, ?string &$chyba = null): ?array {
+  $radky = [];
+  foreach ($prepravy as $p) {
+    $radky[] = [
+      "Přeprava " . $p["cislo"] . " " . ($p["nakladka_misto"] ?: "?") . " – " . ($p["vykladka_misto"] ?: "?")
+        . ($p["nakladka_datum"] ? " " . datum($p["nakladka_datum"]) : "")
+        . ($p["ref_zakaznika"] ? " (" . $p["ref_zakaznika"] . ")" : ""),
+      1, "ks", (float)$p["cena_zakaznik"],
+    ];
+  }
+  return fakturoid_zaloz_fakturu_radky($firma, $radky, $splatnost_dnu, $dph, $chyba);
 }

@@ -12,7 +12,7 @@ $dopravce = vstup_cislo("dopravce");
 $zakaznik = vstup_cislo("zakaznik");
 $od       = vstup_datum("od");
 $do       = vstup_datum("do");
-$jen      = vstup("jen");            /* bez_dopravce | doklady | nefakturovano */
+$jen      = vstup("jen");            /* bez_dopravce | doklady | nefakturovano | dispecink | spedice */
 $strana   = max(1, (int)vstup("strana", "1"));
 $na_stranu = 50;
 
@@ -35,7 +35,11 @@ if ($jen === "bez_dopravce") {
 } elseif ($jen === "doklady") {
   $kde[] = "p.doklady <> 'prijato' AND p.stav IN ('vylozeno','doklady','fakturovano')";
 } elseif ($jen === "nefakturovano") {
-  $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno'";
+  $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno' AND " . JEN_SPEDICE;
+} elseif ($jen === "dispecink") {
+  $kde[] = JEN_DISPECINK;
+} elseif ($jen === "spedice") {
+  $kde[] = JEN_SPEDICE;
 }
 
 /* Šablony stálých linek se v evidenci neukazují — jen se z nich generuje. */
@@ -46,10 +50,14 @@ $celkem = (int)hodnota("SELECT COUNT(*) FROM prepravy p" . $podminka, $parametry
 $stran  = max(1, (int)ceil($celkem / $na_stranu));
 if ($strana > $stran) $strana = $stran;
 
+/* Tržba, náklad a marže jsou jen spedice: jízdy pod externím dispečinkem
+   fakturuje odesílateli klient, u nás se sčítají zvlášť jako obrat vozů. */
 $souhrn = radek(
   "SELECT COUNT(*) AS pocet,
-          COALESCE(SUM(CASE WHEN p.stav <> 'zruseno' THEN p.cena_zakaznik END), 0) AS trzba,
-          COALESCE(SUM(CASE WHEN p.stav <> 'zruseno' THEN p.cena_dopravce END), 0) AS naklad
+          SUM(CASE WHEN " . JEN_DISPECINK . " THEN 1 ELSE 0 END) AS dispecink,
+          COALESCE(SUM(CASE WHEN p.stav <> 'zruseno' AND " . JEN_SPEDICE . " THEN p.cena_zakaznik END), 0) AS trzba,
+          COALESCE(SUM(CASE WHEN p.stav <> 'zruseno' AND " . JEN_SPEDICE . " THEN p.cena_dopravce END), 0) AS naklad,
+          COALESCE(SUM(CASE WHEN p.stav <> 'zruseno' AND " . JEN_DISPECINK . " THEN p.cena_dopravce END), 0) AS obrat_vozu
      FROM prepravy p" . $podminka, $parametry);
 
 $prepravy = radky(
@@ -116,6 +124,8 @@ hlava_stranky("Evidence", "Přepravy",
         "bez_dopravce"  => "Bez dopravce",
         "doklady"       => "Chybějící doklady",
         "nefakturovano" => "Nevyfakturované",
+        "dispecink"     => "Pod externím dispečinkem",
+        "spedice"       => "Jen spedice",
       ], $jen, "Vše") ?></select>
     </div>
     <div class="filtr-akce">
@@ -129,17 +139,20 @@ hlava_stranky("Evidence", "Přepravy",
   <div class="dlazdice-polozka">
     <span class="popis">Přeprav ve výběru</span>
     <span class="hodnota"><?= (int)$souhrn["pocet"] ?></span>
+    <?php if ((int)$souhrn["dispecink"]): ?>
+      <span class="doplnek">z toho <?= (int)$souhrn["dispecink"] ?> pod dispečinkem · obrat vozů <?= chran(castka($souhrn["obrat_vozu"])) ?></span>
+    <?php endif; ?>
   </div>
   <?php if ($ceny): ?>
     <div class="dlazdice-polozka">
       <span class="popis">Tržba</span>
       <span class="hodnota"><?= chran(castka($souhrn["trzba"])) ?></span>
-      <span class="doplnek">bez DPH, mimo zrušené</span>
+      <span class="doplnek">bez DPH · spedice, mimo zrušené</span>
     </div>
     <div class="dlazdice-polozka">
       <span class="popis">Náklad dopravců</span>
       <span class="hodnota"><?= chran(castka($souhrn["naklad"])) ?></span>
-      <span class="doplnek">bez DPH</span>
+      <span class="doplnek">bez DPH · spedice</span>
     </div>
     <div class="dlazdice-polozka">
       <span class="popis">Marže</span>
@@ -152,7 +165,7 @@ hlava_stranky("Evidence", "Přepravy",
     <div class="dlazdice-polozka">
       <span class="popis">Náklad dopravců</span>
       <span class="hodnota"><?= chran(castka($souhrn["naklad"])) ?></span>
-      <span class="doplnek">bez DPH</span>
+      <span class="doplnek">bez DPH · spedice</span>
     </div>
   <?php endif; ?>
 </div>
@@ -200,6 +213,7 @@ hlava_stranky("Evidence", "Přepravy",
             <?php if ($p["dopravce_nazev"]): ?>
               <?= chran($p["dopravce_nazev"]) ?>
               <?php if ($p["spz"]): ?><span class="druhotny cislo"><?= chran($p["spz"]) ?></span><?php endif; ?>
+              <?php if (!empty($p["dispecink_klient_id"])): ?><span class="druhotny">externí dispečink</span><?php endif; ?>
             <?php else: ?>
               <span class="stitek stitek-zrus">nezajištěno</span>
             <?php endif; ?>
@@ -207,7 +221,7 @@ hlava_stranky("Evidence", "Přepravy",
           <?php if ($ceny): ?><td class="cislo vpravo"><?= chran(castka($p["cena_zakaznik"])) ?></td><?php endif; ?>
           <td class="cislo vpravo"><?= chran(castka($p["cena_dopravce"])) ?></td>
           <?php if ($ceny): ?>
-            <td class="cislo vpravo"><?= ($p["cena_zakaznik"] === null && $p["cena_dopravce"] === null) ? "—" : chran(castka($marze)) ?></td>
+            <td class="cislo vpravo"><?= (!empty($p["dispecink_klient_id"]) || ($p["cena_zakaznik"] === null && $p["cena_dopravce"] === null)) ? "—" : chran(castka($marze)) ?></td>
           <?php endif; ?>
           <td><?= chran(DOKLADY[$p["doklady"]] ?? "Čekáme") ?></td>
         </tr>

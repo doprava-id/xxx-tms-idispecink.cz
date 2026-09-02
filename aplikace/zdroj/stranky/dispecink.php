@@ -42,12 +42,13 @@ function karta_jizdy(array $p): void {
   elseif (in_array($p["stav"], ["doklady", "fakturovano"], true)) $trida .= " hotova";
   elseif (empty($p["dopravce_id"])) $trida .= " bez-dopravce";
   elseif (in_array($p["stav"], ["nalozeno", "vylozeno"], true)) $trida .= " rozjeta";
+  if (!empty($p["dispecink_klient_id"])) $trida .= " dispecink";
   ?>
   <a class="<?= $trida ?>" href="<?= chran(odkaz("preprava", ["id" => $p["id"]])) ?>">
     <b><?= chran($p["cislo"]) ?><?= okno($p["nakladka_od"], $p["nakladka_do"]) !== "" ? " · " . chran(okno($p["nakladka_od"], $p["nakladka_do"])) : "" ?></b>
     <span class="trasa"><?= chran($p["nakladka_misto"] ?: "?") ?> → <?= chran($p["vykladka_misto"] ?: "?") ?><?php
       if ((int)($p["bodu"] ?? 2) > 2) echo ' <span class="trasa-pocet">' . (int)$p["bodu"] . ' bodů</span>'; ?></span>
-    <span class="radek"><?= chran($p["dopravce_nazev"] ?: "bez dopravce") ?><?= $p["spz"] ? " · " . chran($p["spz"]) : "" ?></span>
+    <span class="radek"><?= chran($p["dopravce_nazev"] ?: "bez dopravce") ?><?= $p["spz"] ? " · " . chran($p["spz"]) : "" ?><?= !empty($p["dispecink_klient_id"]) ? " · dispečink" : "" ?></span>
     <?php if (!empty($p["zbozi"])): ?><span class="radek"><?= chran($p["zbozi"]) ?></span><?php endif; ?>
   </a>
   <?php
@@ -55,7 +56,8 @@ function karta_jizdy(array $p): void {
 
 hlava("Dispečink", "dispecink");
 hlava_stranky("Tabule", "Dispečink",
-  '<a class="tlacitko" href="' . chran(odkaz("preprava", ["id" => "nova"])) . '">Nová přeprava</a>');
+  '<a class="tlacitko" href="' . chran(odkaz("preprava", ["id" => "nova"])) . '">Nová přeprava</a>'
+  . '<a class="tlacitko obrys" href="' . chran(odkaz("vozy", ["tyden" => $pondeli->format("Y-m-d")])) . '">Plán vozů</a>');
 ?>
 
 <div class="tydny">

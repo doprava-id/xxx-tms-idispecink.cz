@@ -10,8 +10,8 @@ if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen.")
 $ceny = vidi_ceny();
 
 $pohled = vstup("pohled", "dopravci");
-if (!in_array($pohled, ["dopravci", "zakaznici", "chybi", "faktury", "pohledavky", "zavazky"], true)) $pohled = "dopravci";
-if (in_array($pohled, ["zakaznici", "pohledavky"], true) && !$ceny) $pohled = "dopravci";
+if (!in_array($pohled, ["dopravci", "zakaznici", "chybi", "faktury", "pohledavky", "zavazky", "dispecink"], true)) $pohled = "dopravci";
+if (in_array($pohled, ["zakaznici", "pohledavky", "dispecink"], true) && !$ceny) $pohled = "dopravci";
 
 $od = vstup_datum("od") ?: date("Y-m-01");
 $do = vstup_datum("do") ?: date("Y-m-t");
@@ -20,8 +20,11 @@ $do = vstup_datum("do") ?: date("Y-m-t");
    Bez data vykládky rozhoduje datum nakládky. */
 const OBDOBI_SLOUPEC = "COALESCE(NULLIF(p.vykladka_datum, ''), p.nakladka_datum)";
 
-$kde = OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno' AND p.sablona = 0";
+/* Jízdy pod externím dispečinkem fakturuje odesílateli klient sám; sem
+   patří jen spedice, dispečink má vlastní pohled a podklad. */
+$kde = OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno' AND p.sablona = 0 AND " . JEN_SPEDICE;
 $parametry = [$od, $do];
+$dispecink_pocet = (int)hodnota("SELECT COUNT(*) FROM prepravy p WHERE " . OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno' AND p.sablona = 0 AND " . JEN_DISPECINK, $parametry);
 
 $souhrn = radek(
   "SELECT COUNT(*) AS pocet,
@@ -107,6 +110,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     zapis_udalost(null, "Ve Fakturoidu založena faktura " . $vysledek["cislo"] . " pro " . $firma["nazev"] . " (" . count($polozky) . " přeprav)");
     vzkaz("ok", "Ve Fakturoidu vznikla faktura " . $vysledek["cislo"] . " za " . count($polozky) . " přeprav. Číslo je zapsané u přeprav.");
     presmeruj(odkaz("fakturace", ["pohled" => "zakaznici", "od" => $od, "do" => $do]));
+
+  } elseif ($akce === "fakturoid_dispecink") {
+    vyzaduj_ceny();
+    $navrat = odkaz("fakturace", ["pohled" => "dispecink", "od" => $od, "do" => $do]);
+    $klient = radek("SELECT * FROM firmy WHERE id = ?", [vstup_cislo("firma_id")]);
+    if (!$klient) { vzkaz("chyba", "Klient nenalezen."); presmeruj($navrat); }
+    $pk = dispecink_podklad($klient, $od, $do);
+    if ($pk["odmena"] === null) {
+      vzkaz("chyba", "Odměnu nelze spočítat. " . ($pk["upozorneni"][0] ?? ""));
+      presmeruj($navrat);
+    }
+    if (!$pk["radky"] || !($pk["odmena"] > 0)) {
+      vzkaz("chyba", "Není co fakturovat: " . ($pk["zpusob"] === "pausal_vuz" ? "klient nemá žádný aktivní vůz." : "v období nejsou nevyúčtované jízdy."));
+      presmeruj($navrat);
+    }
+    /* Stejné období podruhé nefakturovat — paušál se na jízdy neváže,
+       tak ho hlídá poznámka faktury. */
+    $dvojite = radek("SELECT cislo FROM faktury WHERE druh = 'vydana' AND firma_id = ? AND poznamka = ?",
+      [(int)$klient["id"], "Externí dispečink " . $pk["obdobi"]]);
+    if ($dvojite) { vzkaz("chyba", "Za období " . $pk["obdobi"] . " už je klientovi vystavená faktura " . $dvojite["cislo"] . "."); presmeruj($navrat); }
+
+    $splatnost = (int)($klient["splatnost"] ?: nastaveni("splatnost_dnu", "14"));
+    $dph = (float)str_replace(",", ".", nastaveni("dph_sazba", "21"));
+    $vysledek = fakturoid_zaloz_fakturu_radky($klient, $pk["radky"], $splatnost, $dph, $chyba);
+    if (!$vysledek) { vzkaz("chyba", (string)$chyba); presmeruj($navrat); }
+
+    foreach ($pk["jizdy"] as $j) {
+      if (trim((string)$j["faktura_vydana"]) !== "") continue;
+      uprav("prepravy", (int)$j["id"], ["faktura_vydana" => $vysledek["cislo"], "upraveno" => date("Y-m-d H:i:s")]);
+      zapis_udalost((int)$j["id"], "Dispečink vyúčtován ve Fakturoidu, faktura " . $vysledek["cislo"]);
+    }
+    faktura_uloz("vydana", $vysledek["cislo"], array_merge($vysledek["data"],
+      ["firma_id" => (int)$klient["id"], "poznamka" => "Externí dispečink " . $pk["obdobi"]]));
+    zapis_udalost(null, "Ve Fakturoidu založena faktura " . $vysledek["cislo"] . " za externí dispečink pro " . $klient["nazev"]);
+    vzkaz("ok", "Ve Fakturoidu vznikla faktura " . $vysledek["cislo"] . " za externí dispečink " . $pk["obdobi"] . ", " . castka($pk["odmena"]) . " bez DPH.");
+    presmeruj($navrat);
   }
 }
 
@@ -144,14 +183,14 @@ hlava_stranky("Podklady", "Fakturace a přehledy",
       <?php endforeach; ?>
     </div>
   </div>
-  <p class="app-perex" style="margin:12px 0 0">Období se počítá podle data vykládky; u přeprav bez vykládky podle nakládky. Zrušené se nepočítají.</p>
+  <p class="app-perex" style="margin:12px 0 0">Období se počítá podle data vykládky; u přeprav bez vykládky podle nakládky. Zrušené se nepočítají, jízdy pod externím dispečinkem mají vlastní pohled.</p>
 </form>
 
 <div class="dlazdice">
   <div class="dlazdice-polozka">
     <span class="popis">Přeprav</span>
     <span class="hodnota"><?= (int)$souhrn["pocet"] ?></span>
-    <span class="doplnek"><?= chran(datum($od)) ?> – <?= chran(datum($do)) ?></span>
+    <span class="doplnek"><?= chran(datum($od)) ?> – <?= chran(datum($do)) ?><?= $dispecink_pocet ? " · a " . $dispecink_pocet . " pod dispečinkem" : "" ?></span>
   </div>
   <?php if ($ceny): ?>
     <div class="dlazdice-polozka">
@@ -178,6 +217,7 @@ hlava_stranky("Podklady", "Fakturace a přehledy",
   <a class="tlacitko<?= $pohled === "dopravci" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "dopravci", "od" => $od, "do" => $do])) ?>">Podle dopravců</a>
   <?php if ($ceny): ?>
     <a class="tlacitko<?= $pohled === "zakaznici" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "zakaznici", "od" => $od, "do" => $do])) ?>">Podle zákazníků</a>
+    <a class="tlacitko<?= $pohled === "dispecink" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "dispecink", "od" => $od, "do" => $do])) ?>">Externí dispečink</a>
   <?php endif; ?>
   <a class="tlacitko<?= $pohled === "chybi" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "chybi", "od" => $od, "do" => $do])) ?>">Chybějící údaje</a>
   <a class="tlacitko<?= $pohled === "faktury" ? "" : " obrys" ?>" href="<?= chran(odkaz("fakturace", ["pohled" => "faktury", "od" => $od, "do" => $do])) ?>">Faktury</a>
@@ -329,6 +369,99 @@ function radek_faktury(array $f, string $pohled, string $od, string $do, bool $c
       <?php foreach ($seznam as $f) radek_faktury($f, "zavazky", $od, $do, $ceny); ?>
     </tbody></table></div>
   <?php endif; ?>
+
+<?php elseif ($pohled === "dispecink"):
+  /* Klienti s příznakem plus ti, kdo mají v období jízdy (i vyřazení). */
+  $klienti = radky(
+    "SELECT f.* FROM firmy f
+      WHERE (f.dispecink = 1 AND f.aktivni = 1)
+         OR f.id IN (SELECT p.dispecink_klient_id FROM prepravy p
+                      WHERE p.sablona = 0 AND p.stav <> 'zruseno' AND " . JEN_DISPECINK . "
+                        AND " . OBDOBI_SLOUPEC . " BETWEEN ? AND ?)
+      ORDER BY LOWER(f.nazev)", [$od, $do]);
+  $navrat = odkaz("fakturace", ["pohled" => "dispecink", "od" => $od, "do" => $do]);
+?>
+  <h2>Externí dispečink — podklad k fakturaci služby</h2>
+  <p class="app-perex">Jízdy vozů klientů za období, obrat vozů a odměna podle způsobu účtování na kartě klienta. Odesílateli fakturuje klient sám, do tržby a marže spedice se tyhle jízdy nepočítají. Odměna se počítá z jízd, které ještě nemají číslo faktury.</p>
+  <?php if (!$klienti): ?>
+    <p class="prazdno">Žádný klient dispečinku. Na kartě firmy zaškrtněte „Klient externího dispečinku".</p>
+  <?php else: foreach ($klienti as $klient): $pk = dispecink_podklad($klient, $od, $do); ?>
+    <section style="margin-bottom:32px">
+      <div class="app-hlava" style="margin-bottom:12px">
+        <div>
+          <h3 style="margin:0"><a href="<?= chran(odkaz("firma", ["id" => $klient["id"]])) ?>"><?= chran($klient["nazev"]) ?></a></h3>
+          <p class="app-perex" style="margin:2px 0 0"><?php
+            if (isset(DISPECINK_UCTOVANI[$pk["zpusob"]])) {
+              echo chran(DISPECINK_UCTOVANI[$pk["zpusob"]]);
+              if ($pk["sazba"] !== null) echo " · " . ($pk["zpusob"] === "procento" ? chran(cislo($pk["sazba"], 1)) . " %" : chran(castka($pk["sazba"])));
+            } else {
+              echo "způsob účtování a sazba nejsou zadané";
+            }
+            if ($klient["dispecink_poznamka"]) echo " · " . chran($klient["dispecink_poznamka"]);
+          ?></p>
+        </div>
+        <div class="app-hlava-akce netisknout">
+          <?php if ($pk["radky"]): ?>
+            <a class="tlacitko obrys" href="<?= chran(odkaz("export", ["co" => "dispecink_radky", "od" => $od, "do" => $do, "firma" => $klient["id"]])) ?>">Řádky faktury CSV</a>
+            <?php if (fakturoid_nastaven() && $pk["odmena"] > 0): ?>
+              <form method="post" action="<?= chran($navrat) ?>"
+                    data-potvrdit="Založit ve Fakturoidu fakturu pro <?= chran($klient["nazev"]) ?> za externí dispečink <?= chran($pk["obdobi"]) ?>: <?= chran(castka($pk["odmena"])) ?> bez DPH, s DPH <?= chran(nastaveni("dph_sazba", "21")) ?> %? Faktura vznikne v účetnictví doopravdy.">
+                <?= pole_token() ?><input type="hidden" name="akce" value="fakturoid_dispecink"><input type="hidden" name="firma_id" value="<?= (int)$klient["id"] ?>"><input type="hidden" name="pohled" value="dispecink">
+                <button type="submit" class="tlacitko">Založit fakturu ve Fakturoidu</button>
+              </form>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+      </div>
+      <div class="dlazdice">
+        <div class="dlazdice-polozka">
+          <span class="popis">Jízd v období</span>
+          <span class="hodnota"><?= (int)$pk["pocet"] ?></span>
+          <span class="doplnek"><?= $pk["vyuctovane"] ? (int)$pk["vyuctovane"] . " už vyúčtovaných · " : "" ?><?= (int)$pk["otevrene"] ?> k vyúčtování</span>
+        </div>
+        <div class="dlazdice-polozka">
+          <span class="popis">Obrat vozů</span>
+          <span class="hodnota"><?= chran(castka($pk["obrat"])) ?></span>
+          <span class="doplnek">ceny jízd bez DPH<?= $pk["bez_ceny"] ? " · " . (int)$pk["bez_ceny"] . " " . sklonuj((int)$pk["bez_ceny"], "jízda", "jízdy", "jízd") . " bez ceny" : "" ?></span>
+        </div>
+        <div class="dlazdice-polozka">
+          <span class="popis">Vozů v provozu</span>
+          <span class="hodnota"><?= (int)$pk["vozu_v_provozu"] ?> z <?= count($pk["vozy"]) ?></span>
+          <span class="doplnek">aktivních vozů na kartě<?= $pk["bez_vozu"] ? " · " . (int)$pk["bez_vozu"] . " " . sklonuj((int)$pk["bez_vozu"], "jízda", "jízdy", "jízd") . " bez vozu" : "" ?></span>
+        </div>
+        <div class="dlazdice-polozka">
+          <span class="popis">Odměna za dispečink</span>
+          <span class="hodnota"><?= $pk["odmena"] === null ? "—" : chran(castka($pk["odmena"])) ?></span>
+          <span class="doplnek"><?= $pk["odmena"] === null ? "nelze spočítat" : chran($pk["vypocet"]) ?></span>
+        </div>
+      </div>
+      <?php foreach ($pk["upozorneni"] as $u): ?><p class="vzkaz vzkaz-pozor"><?= chran($u) ?></p><?php endforeach; ?>
+      <?php if (!$pk["jizdy"]): ?>
+        <p class="prazdno">V období klient žádnou jízdu pod dispečinkem nemá.</p>
+      <?php else: ?>
+        <div class="tabulka-obal">
+          <table class="id-tabulka">
+            <thead><tr><th>Číslo</th><th>Trasa</th><th>Vůz</th><th>Zákazník</th><th>Zboží</th><th class="vpravo">Cena jízdy</th><th>Doklady</th><th>Vyúčtováno</th></tr></thead>
+            <tbody>
+            <?php foreach ($pk["jizdy"] as $j): ?>
+              <tr>
+                <td><a href="<?= chran(odkaz("preprava", ["id" => $j["id"]])) ?>" class="cislo"><?= chran($j["cislo"]) ?></a><span class="druhotny"><?= stitek_stavu($j["stav"]) ?></span></td>
+                <td><?= chran($j["nakladka_misto"] ?: "?") ?> → <?= chran($j["vykladka_misto"] ?: "?") ?>
+                  <span class="druhotny"><?= chran(datum($j["nakladka_datum"])) ?><?= $j["vykladka_datum"] && $j["vykladka_datum"] !== $j["nakladka_datum"] ? " – " . chran(datum($j["vykladka_datum"])) : "" ?></span></td>
+                <td><span class="cislo"><?= chran($j["vuz_spz"] ?: ($j["spz"] ?: "—")) ?></span><?php if ($j["ridic_jmeno"]): ?><span class="druhotny"><?= chran($j["ridic_jmeno"]) ?></span><?php endif; ?></td>
+                <td><?= chran($j["zakaznik_nazev"] ?: "—") ?></td>
+                <td><?= chran($j["zbozi"] ?: "—") ?></td>
+                <td class="cislo vpravo"><?= chran(castka($j["cena_dopravce"])) ?></td>
+                <td><?= chran(DOKLADY[$j["doklady"]] ?? "—") ?></td>
+                <td class="cislo"><?= chran(trim((string)$j["faktura_vydana"]) !== "" ? $j["faktura_vydana"] : "—") ?></td>
+              </tr>
+            <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php endif; ?>
+    </section>
+  <?php endforeach; endif; ?>
 <?php endif; ?>
 
 <?php if ($pohled === "chybi"):
@@ -373,7 +506,7 @@ function radek_faktury(array $f, string $pohled, string $od, string $do, bool $c
     </div>
   <?php endif; ?>
 
-<?php else:
+<?php elseif (in_array($pohled, ["dopravci", "zakaznici"], true)):
   $po_firmach = $pohled === "dopravci"
     ? radky("SELECT f.id, f.nazev, COUNT(*) AS pocet, COALESCE(SUM(p.cena_dopravce), 0) AS soucet
                FROM prepravy p JOIN firmy f ON f.id = p.dopravce_id

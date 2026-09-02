@@ -4,8 +4,8 @@
 **Větev:** `claude/idispecink-tms-software-uosnh7`
 **Stav:** jádro (19 obrazovek), ARES, přílohy, bod 1 pořadí prací (trasa
 jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
-veřejné odkazy, WhatsApp) a bod 3 (faktury, pohledávky, závazky, Fakturoid).
-Zbytek níže čeká.
+veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid)
+a bod 4 (externí dispečink). Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -57,6 +57,7 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Pohledávky a závazky (3.4) | hotové |
 | Fakturoid: úhrady přes API, založení faktury z podkladu (3.4, 3.13) | hotové, ověřeno proti napodobenině; živě až s přístupem v config.php |
 | Historie komunikace u přepravy (3.8) | zatím jen protokol událostí; ruční poznámky s datem chybí |
+| Externí dispečink (3.6) | hotové — klienti, plán vozů, podklad k fakturaci služby i faktura ve Fakturoidu; způsob účtování a sazby jsou PLACEHOLDER na kartě klienta, viz 6 |
 
 ---
 
@@ -165,6 +166,13 @@ Modul obsahuje:
 - **Podklad k fakturaci služby** — **způsob účtování a sazba jsou údaj
   u každého klienta zvlášť** (paušál za vůz, procento z obratu, částka za
   jízdu — s každým jinak). Sazby dodá zadavatel, nedomýšlejí se.
+
+**Rozhodnutí při stavbě (2. 9. 2026):** odesílateli fakturuje klient sám;
+systém mu účtuje jen odměnu za dispečink. Jízdy pod dispečinkem se proto
+nepočítají do tržby, nákladů ani marže spedice a nejsou v podkladech po
+dopravcích a zákaznících — mají vlastní pohled ve Fakturaci. Kdyby některý
+klient jel jako subdodavatel spedice (odesílateli fakturujete vy), nechá se
+jízda bez příznaku a je to běžná přeprava s marží. Viz otázka 11.
 
 ### 3.7 Veřejné odkazy bez hesla
 
@@ -287,7 +295,7 @@ Nic z toho si nelze domyslet.
    objednávka tiskne viditelné upozornění.
 2. **Číselná řada** — tvar a poslední použité číslo, aby řada navázala.
 3. **Sazby externího dispečinku** — u každého klienta způsob účtování
-   a částka.
+   a částka. Pole jsou na kartě klienta připravená, zatím prázdná.
 4. **Mapová služba** — který poskytovatel, kdo platí, pustí ho hosting ven?
    Bez ní nebudou kilometry ani sazba za kilometr v ceníku.
 5. **SMS brána** — která a s jakými přístupy. Mají řidiči WhatsApp?
@@ -302,6 +310,10 @@ Nic z toho si nelze domyslet.
    mají téct kterým směrem.
 10. **Živé volání ARES** — prostředí, ve kterém aplikace vznikala, nepustí
     ven. Po nasazení zkusit jedno IČO a ověřit.
+11. **Kdo fakturuje odesílateli u externího dispečinku** — systém počítá
+    s tím, že klient sám a vy účtujete jen odměnu. Pokud u některého klienta
+    fakturujete odesílateli vy a k tomu odměnu, je potřeba říct, jak se to
+    má počítat do marže.
 
 ---
 

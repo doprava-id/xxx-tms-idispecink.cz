@@ -16,7 +16,9 @@ if ($hledat !== "") {
   $vzor = "%" . $hledat . "%";
   array_push($parametry, $vzor, $vzor, $vzor, $vzor);
 }
-if (isset(TYPY_FIREM[$typ])) {
+if ($typ === "dispecink") {
+  $kde[] = "f.dispecink = 1";
+} elseif (isset(TYPY_FIREM[$typ])) {
   /* „oboji" musí vyjít i při hledání zákazníků a při hledání dopravců. */
   $kde[] = "(f.typ = ? OR f.typ = 'oboji')";
   $parametry[] = $typ;
@@ -47,7 +49,7 @@ hlava_stranky("Adresář", "Firmy",
     </div>
     <div class="pole">
       <label for="typ">Typ</label>
-      <select id="typ" name="typ"><?= volby(TYPY_FIREM, $typ, "Všechny") ?></select>
+      <select id="typ" name="typ"><?= volby(TYPY_FIREM + ["dispecink" => "Klienti dispečinku"], $typ, "Všechny") ?></select>
     </div>
     <div class="pole">
       <label for="neaktivni">Zobrazit</label>
@@ -86,7 +88,10 @@ hlava_stranky("Adresář", "Firmy",
             <?php if ($f["mesto"]): ?><span class="druhotny"><?= chran($f["mesto"]) ?></span><?php endif; ?>
             <?php if ((int)$f["aktivni"] !== 1): ?><span class="druhotny">vyřazená</span><?php endif; ?>
           </td>
-          <td><?= chran(TYPY_FIREM[$f["typ"]] ?? "—") ?></td>
+          <td>
+            <?= chran(TYPY_FIREM[$f["typ"]] ?? "—") ?>
+            <?php if ((int)$f["dispecink"] === 1): ?><span class="druhotny">klient dispečinku</span><?php endif; ?>
+          </td>
           <td>
             <span class="cislo"><?= chran($f["ico"] ?: "—") ?></span>
             <?php if ($f["dic"]): ?><span class="druhotny cislo"><?= chran($f["dic"]) ?></span><?php endif; ?>

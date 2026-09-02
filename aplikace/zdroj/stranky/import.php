@@ -223,13 +223,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "importovat" && $
         "vykladka_od"     => import_cas($ber("vykladka_od")),
         "vykladka_do"     => import_cas($ber("vykladka_do")),
       ];
+      /* Dopravce, který je klientem dispečinku, vede jízdu pod dispečinkem
+         — stejně jako „podle karty dopravce" ve formuláři. */
+      $dopravce_importu = import_firma($ber("dopravce"), "dopravce", $zakladat);
       $id = vloz("prepravy", [
         "cislo"           => $cislo !== "" ? $cislo : dalsi_cislo(),
         "stav"            => $stav,
         "sablona"         => 0,
         "zakaznik_id"     => import_firma($ber("zakaznik"), "zakaznik", $zakladat),
         "ref_zakaznika"   => $ber("ref_zakaznika"),
-        "dopravce_id"     => import_firma($ber("dopravce"), "dopravce", $zakladat),
+        "dopravce_id"     => $dopravce_importu,
+        "dispecink_klient_id" => je_klient_dispecinku($dopravce_importu ? (int)$dopravce_importu : null) ? (int)$dopravce_importu : null,
         "nakladka_misto"  => $nakladka,
         "nakladka_adresa" => $ber("nakladka_adresa"),
         "nakladka_datum"  => import_datum($ber("nakladka_datum")),

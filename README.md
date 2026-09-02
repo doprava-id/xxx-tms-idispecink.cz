@@ -242,11 +242,12 @@ na ni nikde nevede.
 | **Místa** | společný adresář skladů a ramp — adresa, brána, kontakt, otevírací doba; u bodu trasy se vybere a zbytek se doplní |
 | **Stálé linky** | přeprava označená jako šablona s dny v týdnu; na kliknutí se z ní založí celý týden, státní svátky se přeskočí |
 | **Dispečink** | týdenní tabule po dnech podle data nakládky; zásilky bez dopravce mají červenou hranu |
-| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO |
+| **Vozy** | plán vozů klientů externího dispečinku: týden po vozidlech, jízda leží ve dnech od nakládky po vykládku, prázdná buňka založí novou jízdu s předvyplněným vozem a dnem; vytěžení za týden (jízdy, obrat vozu) |
+| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO; klient externího dispečinku se způsobem účtování a sazbou služby |
 | **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky; odeslání e-mailem celá v těle zprávy s odkazem na potvrzení |
 | **Odkazy ven** | odkazy bez hesla: zákazník vidí stav, termíny a cenu; dopravce potvrdí objednávku, doplní vůz a řidiče, nahlásí zpoždění a nahraje doklady; řidič vidí pokyny a odklikává zastávky. Tlačítko WhatsApp odkaz rovnou předvyplní do zprávy |
-| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti |
-| **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
+| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti; podklad k fakturaci externího dispečinku po klientech (obrat vozů, odměna podle způsobu účtování) |
+| **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka i za externí dispečink jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
 
@@ -317,6 +318,24 @@ přepravy zákazníka za období, najde odběratele podle IČO (nebo ho založí
 a vystaví fakturu s řádkem za každou přepravu; číslo se zapíše k přepravám.
 Sazbu DPH a výchozí splatnost drží Nastavení (`dph_sazba`, `splatnost_dnu`),
 splatnost u zákazníka má přednost.
+
+### Externí dispečink
+
+Klient dispečinku je firma s příznakem na kartě; jeho vozy a řidiči jsou
+tamtéž. Jízda jeho vozu je obyčejná přeprava: zákazníkem je odesílatel,
+dopravcem klient, a navíc nese příznak „pod externím dispečinkem". Ten se
+nastaví sám podle karty dopravce, u jízdy jde přepnout na ano nebo ne.
+Plán vozů ukazuje týden po vozidlech; prázdná buňka je volný vůz a kliknutím
+založí jízdu s předvyplněným vozem a dnem.
+
+Odesílateli fakturuje klient sám. Jízdy pod dispečinkem se proto nepočítají
+do tržby, nákladů ani marže spedice a nejsou v podkladech po dopravcích
+a zákaznících — mají vlastní pohled ve Fakturaci: obrat vozů, počet jízd
+a odměna podle způsobu účtování na kartě klienta (paušál za vůz a měsíc,
+procento z obratu, částka za jízdu). Sazbu ani způsob systém nedomýšlí:
+dokud chybí, odměnu nespočítá a řekne to. Fakturu za odměnu založí ve
+Fakturoidu stejné tlačítko jako u zákazníků; číslo se zapíše k jízdám, aby
+se podruhé neúčtovaly, a stejné období se klientovi podruhé nevystaví.
 
 ### Zálohování
 

@@ -53,6 +53,13 @@ $SCHEMA = [
     "prov_reference"  => "ano_ne",
     "prov_datum"      => "datum",
     "prov_poznamka"   => "dlouhy_text",
+    /* Externí dispečink — klient, jehož vozy řídíme jako službu. Způsob
+       účtování a sazba jsou s každým klientem jinak; dokud chybí, podklad
+       odměnu nespočítá a řekne to. Sazby dodá zadavatel, nedomýšlejí se. */
+    "dispecink"          => "ano_ne",
+    "dispecink_uctovani" => "text",        /* pausal_vuz | procento | za_jizdu */
+    "dispecink_sazba"    => "castka",      /* Kč; u procenta číslo v % */
+    "dispecink_poznamka" => "dlouhy_text",
     "aktivni"         => "ano_ne",
     "vytvoreno"       => "cas_zapisu",
     "upraveno"        => "cas_zapisu",
@@ -90,6 +97,11 @@ $SCHEMA = [
     "spz"         => "text",       /* opis pro objednávku, nezávislý na číselníku */
     "ridic_jmeno" => "text",
     "ridic_telefon" => "text",
+
+    /* Jízda pod externím dispečinkem: vůz klienta, který řídíme my. Klientem
+       je dopravce jízdy; NULL = běžná spedice. Odesílateli fakturuje klient
+       sám, proto se tyhle jízdy nepočítají do tržby ani marže (JEN_SPEDICE). */
+    "dispecink_klient_id" => "cele",
 
     /* ODVOZENÝ SOUHRN TRASY — první nakládka a poslední vykládka.
        Zdrojem pravdy jsou body v tabulce `body`; tahle pole přepočítává
@@ -255,6 +267,8 @@ $INDEXY = [
   "idx_prepravy_stav"      => ["prepravy", "stav"],
   "idx_prepravy_dopravce"  => ["prepravy", "dopravce_id"],
   "idx_prepravy_zakaznik"  => ["prepravy", "zakaznik_id"],
+  "idx_prepravy_vozidlo"   => ["prepravy", "vozidlo_id"],
+  "idx_prepravy_dispecink" => ["prepravy", "dispecink_klient_id"],
   "idx_udalosti_preprava"  => ["udalosti", "preprava_id"],
   "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
   "idx_body_preprava"      => ["body", "preprava_id"],

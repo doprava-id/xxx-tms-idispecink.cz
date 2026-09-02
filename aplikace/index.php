@@ -61,6 +61,7 @@ require __DIR__ . "/zdroj/odkazy.php";
 require __DIR__ . "/zdroj/posta.php";
 require __DIR__ . "/zdroj/faktury.php";
 require __DIR__ . "/zdroj/fakturoid.php";
+require __DIR__ . "/zdroj/dispecink.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -78,6 +79,7 @@ $STRANKY = [
   "prepravy"   => true,
   "preprava"   => true,
   "dispecink"  => true,
+  "vozy"       => true,      /* plán vozů klientů externího dispečinku */
   "firmy"      => true,
   "firma"      => true,
   "objednavka" => true,

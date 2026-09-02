@@ -32,7 +32,7 @@ $nevyfakturovano = $ceny ? radky(
   "SELECT p.*, z.nazev AS zakaznik_nazev FROM prepravy p
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
     WHERE p.sablona = 0 AND (p.faktura_vydana IS NULL OR p.faktura_vydana = '')
-      AND p.stav IN ('vylozeno','doklady')
+      AND p.stav IN ('vylozeno','doklady') AND " . JEN_SPEDICE . "
     ORDER BY COALESCE(p.vykladka_datum, p.nakladka_datum), p.id LIMIT 20") : [];
 
 $blizke = radky(
@@ -49,12 +49,31 @@ $hlaseni = radky(
       AND p.hlaseni_kdy >= ? AND p.stav NOT IN ('zruseno','fakturovano')
     ORDER BY p.hlaseni_kdy DESC LIMIT 10", [date("Y-m-d H:i:s", strtotime("-7 days"))]);
 
+/* Marže měsíce je spedice — jízdy pod externím dispečinkem fakturuje
+   odesílateli klient a sčítají se zvlášť. */
 $mesic = radek(
   "SELECT COUNT(*) AS pocet,
           COALESCE(SUM(cena_zakaznik), 0) AS trzba,
           COALESCE(SUM(cena_dopravce), 0) AS naklad
      FROM prepravy
-    WHERE sablona = 0 AND stav <> 'zruseno' AND nakladka_datum BETWEEN ? AND ?", [$mesic_od, $mesic_do]);
+    WHERE sablona = 0 AND stav <> 'zruseno' AND COALESCE(dispecink_klient_id, 0) = 0
+      AND nakladka_datum BETWEEN ? AND ?", [$mesic_od, $mesic_do]);
+
+/* Externí dispečink: kolik vozů klientů má dnes jízdu a co nemá vůz. */
+$klienti_pocet = (int)hodnota("SELECT COUNT(*) FROM firmy WHERE dispecink = 1 AND aktivni = 1");
+$vozy_dispecinku = 0; $vozy_dnes = 0; $bez_vozu_tyden = 0;
+if ($klienti_pocet) {
+  $vozy_dispecinku = (int)hodnota("SELECT COUNT(*) FROM vozidla v JOIN firmy f ON f.id = v.firma_id WHERE v.aktivni = 1 AND f.dispecink = 1 AND f.aktivni = 1");
+  $vozy_dnes = (int)hodnota(
+    "SELECT COUNT(DISTINCT p.vozidlo_id) FROM prepravy p
+       JOIN vozidla v ON v.id = p.vozidlo_id JOIN firmy f ON f.id = v.firma_id
+      WHERE p.sablona = 0 AND p.stav <> 'zruseno' AND f.dispecink = 1 AND f.aktivni = 1 AND v.aktivni = 1
+        AND p.nakladka_datum <= ? AND COALESCE(NULLIF(p.vykladka_datum, ''), p.nakladka_datum) >= ?", [$dnes, $dnes]);
+  $bez_vozu_tyden = (int)hodnota(
+    "SELECT COUNT(*) FROM prepravy p
+      WHERE p.sablona = 0 AND p.stav <> 'zruseno' AND " . JEN_DISPECINK . "
+        AND (p.vozidlo_id IS NULL OR p.vozidlo_id = 0) AND p.nakladka_datum BETWEEN ? AND ?", [$dnes, $tyden_do]);
+}
 
 $po_splatnosti = $ceny ? pohledavky(true) : [];
 $po_splatnosti_soucet = 0; foreach ($po_splatnosti as $f) $po_splatnosti_soucet += (float)$f["castka_s_dph"] ?: (float)$f["castka"];
@@ -129,8 +148,15 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
   </ul>
 <?php endif; ?>
 
-<?php if ($po_splatnosti || $zavazky_brzy): ?>
-  <div class="dlazdice" style="grid-template-columns:repeat(2,1fr)">
+<?php if ($po_splatnosti || $zavazky_brzy || $klienti_pocet): ?>
+  <div class="dlazdice" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+    <?php if ($klienti_pocet): ?>
+      <a class="dlazdice-polozka" href="<?= chran(odkaz("vozy")) ?>">
+        <span class="popis">Vozy klientů dnes</span>
+        <span class="hodnota"><?= $vozy_dnes ?> z <?= $vozy_dispecinku ?></span>
+        <span class="doplnek">s jízdou · <?= $bez_vozu_tyden ? $bez_vozu_tyden . " " . sklonuj($bez_vozu_tyden, "jízda", "jízdy", "jízd") . " bez vozu do týdne" : "jízdy do týdne mají vůz" ?></span>
+      </a>
+    <?php endif; ?>
     <?php if ($po_splatnosti): ?>
       <a class="dlazdice-polozka" href="<?= chran(odkaz("fakturace", ["pohled" => "pohledavky"])) ?>">
         <span class="popis">Pohledávky po splatnosti</span>
@@ -175,7 +201,7 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
   </div>
 <?php endif; ?>
 
-<div class="app-sloupce" style="margin-top:36px;grid-template-columns:1fr 1fr">
+<div class="app-sloupce stejne" style="margin-top:36px">
   <div>
     <h2>Čeká na dopravce</h2>
     <?php if (!$bez_dopravce): ?>

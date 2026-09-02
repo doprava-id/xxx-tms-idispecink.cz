@@ -50,6 +50,13 @@ const DOKLADY = [
   "chybi"   => "Chybí",
 ];
 
+/* Způsob účtování externího dispečinku — s každým klientem jinak. */
+const DISPECINK_UCTOVANI = [
+  "pausal_vuz" => "Paušál za vůz a měsíc",
+  "procento"   => "Procento z obratu vozů",
+  "za_jizdu"   => "Částka za jízdu",
+];
+
 const ROLE = [
   "spravce"  => "Správce",
   "dispecer" => "Dispečer",

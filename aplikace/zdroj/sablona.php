@@ -13,6 +13,7 @@ const NABIDKA = [
   "prehled"   => "Přehled",
   "prepravy"  => "Přepravy",
   "dispecink" => "Dispečink",
+  "vozy"      => "Vozy",
   "firmy"     => "Firmy",
   "mista"     => "Místa",
   "fakturace" => "Fakturace",

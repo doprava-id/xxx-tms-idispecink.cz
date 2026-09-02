@@ -198,7 +198,10 @@
 /* Sloupec mřížky má výchozí min-width: auto a rolovací obal tabulky uvnitř
    ho i tak natáhne na šířku tabulky. S nulou se obal smí zúžit a rolovat. */
 .app-sloupce > * { min-width: 0; }
-@media (max-width: 1000px) { .app-sloupce { grid-template-columns: 1fr; } }
+.app-sloupce.stejne { grid-template-columns: 1fr 1fr; }
+/* Na úzkém displeji se sloupce skládají pod sebe — i ty stejně široké,
+   jinak by dlouhé slovo v nadpisu vyčnívalo ze stránky. */
+@media (max-width: 1000px) { .app-sloupce, .app-sloupce.stejne { grid-template-columns: 1fr; } }
 
 /* --- Dispečerská tabule ------------------------------------------------- */
 
@@ -258,6 +261,29 @@ button.stitek { font-family: inherit; line-height: 1.4; }
 .trasa-pocet { color: var(--text-tlum); font-size: .8rem; white-space: nowrap; }
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
+
+/* --- Plán vozů (externí dispečink) -------------------------------------- */
+
+/* Pevné rozvržení: sedm dní stejně široko, vůz a týden mají svou šířku.
+   Tabulka je širší než obrazovka a roluje uvnitř .tabulka-obal. */
+.aplikace table.id-tabulka.plan-vozu { min-width: 1240px; table-layout: fixed; }
+.plan-vozu col.sl-vuz { width: 150px; }
+.plan-vozu col.sl-tyden { width: 112px; }
+.aplikace table.id-tabulka.plan-vozu td { padding: 6px; }
+.plan-vozu td.vuz b { display: block; font-size: .95rem; }
+.plan-vozu th.dnes { color: var(--zluta); }
+.plan-vozu td.dnes { background: var(--povrch-2); }
+.plan-vozu .jizda { font-size: .8rem; padding: 7px 9px; margin-bottom: 6px; }
+.plan-vozu td > :last-child { margin-bottom: 0; }
+.jizda.pokracovani { border-left-style: dashed; color: var(--text-tlum); }
+.jizda.pokracovani .trasa { font-weight: 400; }
+.jizda.subdodavka { border-left-color: var(--linka-pole); }
+.plan-pridat {
+  display: block; border: 1px dashed var(--linka); padding: 6px 8px;
+  font-size: .78rem; color: var(--text-tlum); text-align: center;
+}
+.plan-pridat:hover { color: var(--zluta); border-color: var(--zluta); text-decoration: none; }
+.plan-vozu tr.bez-vozu td.vuz b { color: var(--chyba-text); }
 
 /* --- Protokol ----------------------------------------------------------- */
 
@@ -367,6 +393,7 @@ details > summary::-webkit-details-marker { display: none; }
   .jizda .radek, .protokol li { color: #222 !important; }
   .dlazdice .hodnota, .jizda b, .jizda .trasa { color: #000 !important; }
   .stitek { border-color: #666 !important; background: none !important; color: #000 !important; }
+  .jizda.pokracovani, .jizda.pokracovani .trasa, .plan-vozu td.vuz .druhotny { color: #222 !important; }
   .tabulka-obal { overflow: visible; }
   .aplikace table.id-tabulka { min-width: 0; }
   .tabule { grid-template-columns: repeat(2, 1fr); }
