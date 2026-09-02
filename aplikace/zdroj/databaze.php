@@ -181,6 +181,27 @@ $SCHEMA = [
     "vytvoreno"       => "cas_zapisu",
   ],
 
+  /* Faktury — vydané zákazníkům i přijaté od dopravců. Na přepravu se
+     vážou číslem (faktura_vydana / faktura_prijata), protože jedna faktura
+     kryje víc přeprav. Vydané se dají tahat z Fakturoidu, přijaté se
+     zapisují ručně. */
+  "faktury" => [
+    "id"           => "id",
+    "druh"         => "text",         /* vydana | prijata */
+    "cislo"        => "text",
+    "firma_id"     => "cele",
+    "castka"       => "castka",       /* bez DPH */
+    "castka_s_dph" => "castka",
+    "vystaveno"    => "datum",
+    "splatnost"    => "datum",
+    "uhrazeno"     => "datum",        /* NULL = nezaplaceno */
+    "stav"         => "text",         /* z Fakturoidu: open | paid | overdue | cancelled | uncollectible */
+    "fakturoid_id" => "cele",
+    "poznamka"     => "text",
+    "vytvoreno"    => "cas_zapisu",
+    "upraveno"     => "cas_zapisu",
+  ],
+
   /* Veřejné odkazy bez hesla. Kód je 160 bitů náhody — hádat ho nejde.
      Platnost se nepamatuje, počítá se z data vykládky (měsíc po ní). */
   "odkazy" => [
@@ -238,6 +259,8 @@ $INDEXY = [
   "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
   "idx_body_preprava"      => ["body", "preprava_id"],
   "idx_odkazy_kod"         => ["odkazy", "kod"],
+  "idx_faktury_cislo"      => ["faktury", "cislo"],
+  "idx_faktury_firma"      => ["faktury", "firma_id"],
   "idx_odkazy_preprava"    => ["odkazy", "preprava_id"],
   "idx_mista_nazev"        => ["mista", "nazev"],
   "idx_prepravy_sablona"   => ["prepravy", "sablona"],

@@ -59,6 +59,8 @@ require __DIR__ . "/zdroj/trasa.php";
 require __DIR__ . "/zdroj/prilohy.php";
 require __DIR__ . "/zdroj/odkazy.php";
 require __DIR__ . "/zdroj/posta.php";
+require __DIR__ . "/zdroj/faktury.php";
+require __DIR__ . "/zdroj/fakturoid.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */

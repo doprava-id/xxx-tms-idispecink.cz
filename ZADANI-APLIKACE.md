@@ -3,8 +3,9 @@
 **Datum:** 1. 9. 2026
 **Větev:** `claude/idispecink-tms-software-uosnh7`
 **Stav:** jádro (19 obrazovek), ARES, přílohy, bod 1 pořadí prací (trasa
-jako seznam bodů, místa, linky, historie trasy) a bod 2 (odeslání objednávky,
-veřejné odkazy, WhatsApp). Zbytek níže čeká.
+jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
+veřejné odkazy, WhatsApp) a bod 3 (faktury, pohledávky, závazky, Fakturoid).
+Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -53,6 +54,8 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Veřejné odkazy pro zákazníka, dopravce a řidiče (3.7) | hotové |
 | Odeslání objednávky e-mailem, WhatsApp odkaz (3.8) | hotové |
 | SMS řidičům (3.8) | čeká na bránu, viz 6 |
+| Pohledávky a závazky (3.4) | hotové |
+| Fakturoid: úhrady přes API, založení faktury z podkladu (3.4, 3.13) | hotové, ověřeno proti napodobenině; živě až s přístupem v config.php |
 | Historie komunikace u přepravy (3.8) | zatím jen protokol událostí; ruční poznámky s datem chybí |
 
 ---
@@ -288,7 +291,9 @@ Nic z toho si nelze domyslet.
 4. **Mapová služba** — který poskytovatel, kdo platí, pustí ho hosting ven?
    Bez ní nebudou kilometry ani sazba za kilometr v ceníku.
 5. **SMS brána** — která a s jakými přístupy. Mají řidiči WhatsApp?
-6. **Fakturoid** — účet a přístup k API.
+6. **Fakturoid** — přístup k API (client_id, client_secret) do `config.php`
+   na hostingu. Napojení je postavené a ověřené proti napodobenině; živě
+   ho ověříte prvním kliknutím na „Načíst úhrady".
 7. **Naplánovaná úloha na hostingu** — má tarif u VAS Hostingu cron?
    Bez něj se ranní souhrn spustí až při prvním otevření systému toho dne.
 8. **Doba uchování osobních údajů** — jak dlouho držet jména a telefony

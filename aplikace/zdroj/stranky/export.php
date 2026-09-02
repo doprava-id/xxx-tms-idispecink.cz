@@ -49,6 +49,33 @@ if ($co === "firmy") {
   ], $vystup);
 }
 
+/* --- Řádky faktury pro zákazníka za období ------------------------------ */
+
+if ($co === "radky_faktury") {
+  vyzaduj_ceny();
+  $od = vstup_datum("od") ?: date("Y-m-01");
+  $do = vstup_datum("do") ?: date("Y-m-t");
+  $firma = radek("SELECT * FROM firmy WHERE id = ?", [vstup_cislo("firma")]);
+  if (!$firma) { vzkaz("chyba", "Zákazník nenalezen."); presmeruj(odkaz("fakturace")); }
+  $polozky = radky(
+    "SELECT p.* FROM prepravy p
+      WHERE COALESCE(NULLIF(p.vykladka_datum, ''), p.nakladka_datum) BETWEEN ? AND ?
+        AND p.stav <> 'zruseno' AND p.sablona = 0 AND p.zakaznik_id = ?
+      ORDER BY COALESCE(NULLIF(p.vykladka_datum, ''), p.nakladka_datum), p.id", [$od, $do, (int)$firma["id"]]);
+  $vystup = [];
+  foreach ($polozky as $p) {
+    $vystup[] = [
+      $firma["nazev"], $firma["ico"], $firma["dic"],
+      "Přeprava " . $p["cislo"] . " " . ($p["nakladka_misto"] ?: "?") . " – " . ($p["vykladka_misto"] ?: "?"),
+      csv_datum($p["nakladka_datum"]), csv_datum($p["vykladka_datum"]), $p["ref_zakaznika"],
+      1, "ks", csv_castka($p["cena_zakaznik"]), $p["faktura_vydana"],
+    ];
+  }
+  posli_csv("faktura-radky-" . preg_replace('/[^A-Za-z0-9]+/', "-", (string)@iconv("UTF-8", "ASCII//TRANSLIT", (string)$firma["nazev"])) . "-" . $od . "-" . $do . ".csv", [
+    "Odběratel", "IČO", "DIČ", "Položka", "Nakládka", "Vykládka", "Reference", "Množství", "Jednotka", "Cena bez DPH", "Faktura",
+  ], $vystup);
+}
+
 /* --- Přepravy ----------------------------------------------------------- */
 
 $kde = []; $parametry = [];

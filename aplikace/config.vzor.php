@@ -42,4 +42,16 @@ return [
   /* Kolik neúspěšných přihlášení povolit, než se adresa na čtvrt hodiny
      zablokuje. */
   "pokusu_prihlaseni" => 5,
+
+  /* --- Fakturoid --------------------------------------------------------
+     Čtení úhrad vydaných faktur a založení faktury z podkladu. Přístup
+     vydá Fakturoid v Nastavení → Uživatelský účet → API (OAuth 2.0,
+     client credentials). Bez vyplnění modul spí.
+
+     Tohle jsou přístupy k účetnictví. Patří JEN sem, do config.php,
+     který je v .gitignore. Repozitář je veřejný. */
+  "fakturoid_slug"          => "",
+  "fakturoid_client_id"     => "",
+  "fakturoid_client_secret" => "",
+  "fakturoid_email"         => "",   /* kontaktní e-mail do hlavičky User-Agent */
 ];

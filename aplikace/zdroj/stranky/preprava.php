@@ -762,6 +762,14 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
                 ($preprava["cena_zakaznik"] === null && $preprava["cena_dopravce"] === null) ? "—"
                 : chran(castka((float)$preprava["cena_zakaznik"] - (float)$preprava["cena_dopravce"])) ?></span></li>
             <?php endif; ?>
+            <?php foreach ([["vydana", "faktura_vydana", "Vydaná faktura", $ceny], ["prijata", "faktura_prijata", "Přijatá faktura", true]] as [$dr, $sl, $popis, $smi]):
+              if (!$smi || $h($sl) === "") continue;
+              $fk = faktura_podle_cisla($dr, $h($sl)); ?>
+              <li><span class="klic"><?= $popis ?></span><span class="hodnota cislo"><?= chran($h($sl)) ?><?php
+                if ($fk) echo '<br><span class="druhotny" style="font-family:var(--pismo)">' . ($fk["uhrazeno"] ? "zaplaceno " . chran(datum($fk["uhrazeno"])) : "splatnost " . chran(datum($fk["splatnost"])) . (dnu_od_splatnosti($fk["splatnost"]) > 0 ? ", <span style=\"color:var(--chyba-text)\">" . dnu_od_splatnosti($fk["splatnost"]) . " dní po</span>" : "")) . '</span>';
+                else echo '<br><span class="druhotny" style="font-family:var(--pismo)">bez záznamu faktury</span>';
+              ?></span></li>
+            <?php endforeach; ?>
             <li><span class="klic">Založeno</span><span class="hodnota"><?= chran(datum_cas($h("vytvoreno"))) ?></span></li>
           </ul>
         </div>

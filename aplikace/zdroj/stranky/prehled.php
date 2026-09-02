@@ -56,6 +56,11 @@ $mesic = radek(
      FROM prepravy
     WHERE sablona = 0 AND stav <> 'zruseno' AND nakladka_datum BETWEEN ? AND ?", [$mesic_od, $mesic_do]);
 
+$po_splatnosti = $ceny ? pohledavky(true) : [];
+$po_splatnosti_soucet = 0; foreach ($po_splatnosti as $f) $po_splatnosti_soucet += (float)$f["castka_s_dph"] ?: (float)$f["castka"];
+$zavazky_brzy = array_filter(zavazky(), fn($f) => $f["dnu_do"] !== null && $f["dnu_do"] <= 7);
+$zavazky_soucet = 0; foreach ($zavazky_brzy as $f) $zavazky_soucet += (float)$f["castka_s_dph"] ?: (float)$f["castka"];
+
 hlava("Přehled", "prehled");
 hlava_stranky("Provozní systém", "Přehled",
   '<a class="tlacitko" href="' . chran(odkaz("preprava", ["id" => "nova"])) . '">Nová přeprava</a>'
@@ -122,6 +127,25 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
       </li>
     <?php endforeach; ?>
   </ul>
+<?php endif; ?>
+
+<?php if ($po_splatnosti || $zavazky_brzy): ?>
+  <div class="dlazdice" style="grid-template-columns:repeat(2,1fr)">
+    <?php if ($po_splatnosti): ?>
+      <a class="dlazdice-polozka" href="<?= chran(odkaz("fakturace", ["pohled" => "pohledavky"])) ?>">
+        <span class="popis">Pohledávky po splatnosti</span>
+        <span class="hodnota" style="color:var(--chyba-text)"><?= chran(castka($po_splatnosti_soucet)) ?></span>
+        <span class="doplnek"><?= count($po_splatnosti) ?> faktur, nejstarší <?= (int)max(array_column($po_splatnosti, "dnu_po")) ?> dní</span>
+      </a>
+    <?php endif; ?>
+    <?php if ($zavazky_brzy): ?>
+      <a class="dlazdice-polozka" href="<?= chran(odkaz("fakturace", ["pohled" => "zavazky"])) ?>">
+        <span class="popis">Dopravcům zaplatit do týdne</span>
+        <span class="hodnota"><?= chran(castka($zavazky_soucet)) ?></span>
+        <span class="doplnek"><?= count($zavazky_brzy) ?> faktur</span>
+      </a>
+    <?php endif; ?>
+  </div>
 <?php endif; ?>
 
 <h2>Dnes a zítra</h2>

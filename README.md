@@ -245,7 +245,8 @@ na ni nikde nevede.
 | **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO |
 | **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky; odeslání e-mailem celá v těle zprávy s odkazem na potvrzení |
 | **Odkazy ven** | odkazy bez hesla: zákazník vidí stav, termíny a cenu; dopravce potvrdí objednávku, doplní vůz a řidiče, nahlásí zpoždění a nahraje doklady; řidič vidí pokyny a odklikává zastávky. Tlačítko WhatsApp odkaz rovnou předvyplní do zprávy |
-| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání |
+| **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání; faktury vydané i přijaté, pohledávky po splatnosti a závazky vůči dopravcům podle splatnosti |
+| **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
 
@@ -301,6 +302,21 @@ Odkazy bez hesla platí měsíc po vykládce a jdou kdykoliv zrušit. Kdo odkaz
 má, vidí jen tu jednu přepravu; nepřeposílejte ho dál, než je potřeba.
 Adresa, kterou odkazy nesou, se odvozuje z požadavku; za proxy ji nastavte
 v Nastavení ručně.
+
+### Fakturoid
+
+Napojení je volitelné a vypnuté, dokud do `config.php` nedoplníte přístup:
+slug účtu, `client_id` a `client_secret` z Fakturoidu (Nastavení → Uživatelský
+účet → API, OAuth 2.0 client credentials) a kontaktní e-mail. Přístup patří
+jen do `config.php`, který je v `.gitignore`.
+
+Aplikace nikdy nevolá Fakturoid sama od sebe. „Načíst úhrady" projde vydané
+faktury bez zaplacení a čísla zapsaná u přeprav a doplní stav, splatnost
+a datum úhrady. „Založit fakturu ve Fakturoidu" vezme nevyfakturované
+přepravy zákazníka za období, najde odběratele podle IČO (nebo ho založí)
+a vystaví fakturu s řádkem za každou přepravu; číslo se zapíše k přepravám.
+Sazbu DPH a výchozí splatnost drží Nastavení (`dph_sazba`, `splatnost_dnu`),
+splatnost u zákazníka má přednost.
 
 ### Zálohování
 
