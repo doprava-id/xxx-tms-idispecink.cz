@@ -169,6 +169,10 @@
 /* Pole přes dva sloupce. Na jednosloupcové mřížce se musí vrátit na jeden,
    jinak si mřížka přidá sloupce navíc a stránka přeteče do šířky. */
 .pole-radek .pole.sirsi { grid-column: span 2; }
+/* Pole s datem má vlastní vnitřní šířku a v úzkém sloupci by mřížku
+   roztáhlo přes okraj; s nulou se smí zúžit jako ostatní. */
+.pole-radek > .pole { min-width: 0; }
+.pole input, .pole select { min-width: 0; }
 @media (max-width: 900px) { .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) {
   .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: 1fr; }

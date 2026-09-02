@@ -87,9 +87,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!$firma) { vzkaz("chyba", "Zákazník nenalezen."); presmeruj($navrat); }
     $polozky = radky(
       "SELECT p.* FROM prepravy p WHERE " . $kde . " AND p.zakaznik_id = ?
+        AND p.stav IN ('vylozeno', 'doklady')
         AND (p.faktura_vydana IS NULL OR TRIM(p.faktura_vydana) = '') AND p.cena_zakaznik IS NOT NULL
         ORDER BY " . OBDOBI_SLOUPEC . ", p.id", array_merge($parametry, [(int)$firma["id"]]));
-    if (!$polozky) { vzkaz("chyba", "Zákazník nemá v období žádnou nevyfakturovanou přepravu s cenou."); presmeruj($navrat); }
+    /* Fakturuje se jen to, co je odjeté: objednaná nebo teprve naložená
+       zásilka do faktury nepatří, i kdyby jí datum spadlo do období. */
+    if (!$polozky) { vzkaz("chyba", "Zákazník nemá v období žádnou vyloženou, nevyfakturovanou přepravu s cenou."); presmeruj($navrat); }
 
     $splatnost = (int)($firma["splatnost"] ?: nastaveni("splatnost_dnu", "14"));
     $dph = (float)str_replace(",", ".", nastaveni("dph_sazba", "21"));
@@ -97,8 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!$vysledek) { vzkaz("chyba", (string)$chyba); presmeruj($navrat); }
 
     foreach ($polozky as $p) {
-      uprav("prepravy", (int)$p["id"], ["faktura_vydana" => $vysledek["cislo"], "upraveno" => date("Y-m-d H:i:s")]);
-      if (in_array($p["stav"], ["vylozeno", "doklady"], true)) uprav("prepravy", (int)$p["id"], ["stav" => "fakturovano"]);
+      uprav("prepravy", (int)$p["id"], ["faktura_vydana" => $vysledek["cislo"], "stav" => "fakturovano", "upraveno" => date("Y-m-d H:i:s")]);
       zapis_udalost((int)$p["id"], "Vyfakturováno ve Fakturoidu, faktura " . $vysledek["cislo"]);
     }
     faktura_uloz("vydana", $vysledek["cislo"], array_merge($vysledek["data"], ["firma_id" => (int)$firma["id"]]));
@@ -399,7 +401,7 @@ function radek_faktury(array $f, string $pohled, string $od, string $do, bool $c
           </div>
           <?php if ($pohled === "zakaznici"):
             $nevyfakt = 0; $nevyfakt_soucet = 0.0;
-            foreach ($polozky as $px) if (trim((string)$px["faktura_vydana"]) === "" && $px["cena_zakaznik"] !== null) { $nevyfakt++; $nevyfakt_soucet += (float)$px["cena_zakaznik"]; }
+            foreach ($polozky as $px) if (in_array($px["stav"], ["vylozeno", "doklady"], true) && trim((string)$px["faktura_vydana"]) === "" && $px["cena_zakaznik"] !== null) { $nevyfakt++; $nevyfakt_soucet += (float)$px["cena_zakaznik"]; }
           ?>
             <div class="app-hlava-akce netisknout">
               <a class="tlacitko obrys" href="<?= chran(odkaz("export", ["co" => "radky_faktury", "od" => $od, "do" => $do, "firma" => $f["id"]])) ?>">Řádky faktury CSV</a>
@@ -410,7 +412,7 @@ function radek_faktury(array $f, string $pohled, string $od, string $do, bool $c
                   <button type="submit" class="tlacitko">Založit fakturu ve Fakturoidu (<?= $nevyfakt ?>)</button>
                 </form>
               <?php elseif ($nevyfakt): ?>
-                <span class="app-perex"><?= $nevyfakt ?> nevyfakturovaných · Fakturoid není napojený</span>
+                <span class="app-perex"><?= $nevyfakt ?> vyložených k fakturaci · Fakturoid není napojený</span>
               <?php endif; ?>
             </div>
           <?php endif; ?>
