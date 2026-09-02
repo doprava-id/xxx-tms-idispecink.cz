@@ -227,6 +227,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     presmeruj($zpet());
 
+  /* --- Odkazy ven --- */
+
+  } elseif (in_array($akce, ["odkaz_vytvorit", "odkaz_zrusit"], true) && $preprava) {
+    $druh_odkazu = vstup("druh");
+    if (!isset(DRUHY_ODKAZU[$druh_odkazu])) {
+      vzkaz("chyba", "Neznámý druh odkazu.");
+    } elseif ($akce === "odkaz_vytvorit") {
+      if ($druh_odkazu !== "zakaznik" && empty($preprava["dopravce_id"])) {
+        vzkaz("chyba", "Nejdřív přiřaďte dopravce.");
+      } else {
+        odkaz_verejny_zajisti((int)$preprava["id"], $druh_odkazu);
+        zapis_udalost((int)$preprava["id"], "Vytvořen odkaz pro " . mb_strtolower(DRUHY_ODKAZU[$druh_odkazu]));
+        vzkaz("ok", "Odkaz vytvořen. Zkopírujte ho a pošlete.");
+      }
+    } else {
+      odkaz_verejny_zrus((int)$preprava["id"], $druh_odkazu);
+      zapis_udalost((int)$preprava["id"], "Zrušen odkaz pro " . mb_strtolower(DRUHY_ODKAZU[$druh_odkazu]));
+      vzkaz("ok", "Odkaz zrušen, přestal platit.");
+    }
+    presmeruj($zpet());
+
   /* --- Celá přeprava --- */
 
   } elseif ($akce === "zrusit" && $preprava) {
@@ -290,6 +311,12 @@ $ridici  = $dopravce_id ? radky("SELECT id, jmeno FROM ridici WHERE firma_id = ?
 
 $body     = $preprava ? body_prepravy((int)$preprava["id"]) : [];
 $prilohy  = $preprava ? radky("SELECT p.*, u.jmeno AS kdo FROM prilohy p LEFT JOIN uzivatele u ON u.id = p.uzivatel_id WHERE p.preprava_id = ? ORDER BY p.id", [(int)$preprava["id"]]) : [];
+$dopravce_firma = $dopravce_id ? radek("SELECT nazev, kontakt_telefon, kontakt_email FROM firmy WHERE id = ?", [$dopravce_id]) : null;
+$odkazy_ven = [];
+if ($preprava) {
+  foreach (DRUHY_ODKAZU as $d => $popis) $odkazy_ven[$d] = odkaz_verejny((int)$preprava["id"], $d);
+}
+
 $udalosti = $preprava ? radky(
   "SELECT u.*, z.jmeno AS kdo FROM udalosti u
      LEFT JOIN uzivatele z ON z.id = u.uzivatel_id
@@ -727,7 +754,9 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
           <ul class="udaje">
             <li><span class="klic">Číslo</span><span class="hodnota cislo"><?= chran($h("cislo")) ?></span></li>
             <li><span class="klic">Stav</span><span class="hodnota"><?= stitek_stavu($h("stav")) ?></span></li>
-            <li><span class="klic">Objednávka</span><span class="hodnota"><?= $h("objednavka_datum") ? chran(datum_cas($h("objednavka_datum"))) : "nevystavena" ?></span></li>
+            <li><span class="klic">Objednávka</span><span class="hodnota"><?= $h("objednavka_datum") ? chran(datum_cas($h("objednavka_datum"))) : "nevystavena" ?><?= $h("objednavka_odeslana") ? "<br><span class=\"druhotny\">odeslána " . chran(datum_cas($h("objednavka_odeslana"))) . "</span>" : "" ?></span></li>
+            <?php if ($h("potvrzeno_kdy")): ?><li><span class="klic">Potvrzeno</span><span class="hodnota"><?= chran(datum_cas($h("potvrzeno_kdy"))) ?> dopravcem</span></li><?php endif; ?>
+            <?php if ($h("hlaseni")): ?><li><span class="klic">Hlášení</span><span class="hodnota" style="color:var(--pozor-text)">„<?= chran($h("hlaseni")) ?>"<br><span class="druhotny"><?= chran(datum_cas($h("hlaseni_kdy"))) ?></span></span></li><?php endif; ?>
             <?php if ($ceny): ?>
               <li><span class="klic">Marže</span><span class="hodnota cislo"><?=
                 ($preprava["cena_zakaznik"] === null && $preprava["cena_dopravce"] === null) ? "—"
@@ -755,6 +784,39 @@ function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
             </ul>
           </div>
         <?php endif; ?>
+
+        <div class="skupina">
+          <h2>Odkazy ven</h2>
+          <p class="app-perex">Bez hesla; kdo odkaz má, vidí jen tuhle přepravu a jen to, co mu patří. Platí měsíc po vykládce.</p>
+          <?php foreach (DRUHY_ODKAZU as $d => $popis):
+            $o = $odkazy_ven[$d];
+            $telefon = $d === "ridic" ? $h("ridic_telefon") : ($d === "dopravce" ? (string)($dopravce_firma["kontakt_telefon"] ?? "") : "");
+          ?>
+            <div class="odkaz-ven">
+              <b><?= chran($popis) ?></b>
+              <?php if ($o): $adresa = verejna_adresa((string)$o["kod"]); ?>
+                <input type="text" readonly value="<?= chran($adresa) ?>" onfocus="this.select()" aria-label="Odkaz pro <?= chran(mb_strtolower($popis)) ?>">
+                <div class="tlacitka" style="margin:6px 0 0;gap:6px">
+                  <a class="tlacitko obrys" style="padding:6px 10px;font-size:.82rem" href="<?= chran($adresa) ?>" target="_blank" rel="noopener noreferrer">Otevřít</a>
+                  <?php if ($telefon !== "" && whatsapp_adresa($telefon, "") !== ""): ?>
+                    <a class="tlacitko obrys" style="padding:6px 10px;font-size:.82rem" target="_blank" rel="noopener noreferrer"
+                       href="<?= chran(whatsapp_adresa($telefon, ($d === "ridic" ? "Pokyny k jízdě " : "Objednávka přepravy ") . $h("cislo") . " od " . nastaveni("firma_nazev") . ": " . $adresa)) ?>">WhatsApp</a>
+                  <?php endif; ?>
+                  <form method="post" action="<?= chran($zpet()) ?>" style="display:inline" data-potvrdit="Zrušit odkaz pro <?= chran(mb_strtolower($popis)) ?>? Přestane okamžitě platit.">
+                    <?= pole_token() ?><input type="hidden" name="akce" value="odkaz_zrusit"><input type="hidden" name="druh" value="<?= $d ?>">
+                    <button type="submit" class="odkaz-tlacitko" style="margin:0">zrušit</button>
+                  </form>
+                </div>
+                <span class="druhotny"><?= (int)$o["otevreni"] ?>× otevřeno<?= $o["naposledy"] ? ", naposledy " . chran(datum_cas($o["naposledy"])) : "" ?></span>
+              <?php else: ?>
+                <form method="post" action="<?= chran($zpet()) ?>" style="margin-top:4px">
+                  <?= pole_token() ?><input type="hidden" name="akce" value="odkaz_vytvorit"><input type="hidden" name="druh" value="<?= $d ?>">
+                  <button type="submit" class="tlacitko obrys" style="padding:6px 12px;font-size:.84rem"<?= ($d !== "zakaznik" && !$dopravce_id) ? " disabled title=\"Nejdřív přiřaďte dopravce\"" : "" ?>>Vytvořit odkaz</button>
+                </form>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
 
         <div class="skupina">
           <h2>Přílohy</h2>

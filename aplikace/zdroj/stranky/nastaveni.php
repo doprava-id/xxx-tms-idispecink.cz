@@ -26,6 +26,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     vzkaz("ok", "Číselná řada nastavena.");
     presmeruj(odkaz("nastaveni"));
 
+  } elseif ($akce === "posta") {
+    $od = vstup("email_odesilatel"); $kopie = vstup("email_kopie"); $zakl = vstup("zakladni_adresa");
+    if ($od !== "" && !platny_email($od)) { vzkaz("chyba", "Adresa odesílatele není platná."); presmeruj(odkaz("nastaveni")); }
+    if ($kopie !== "" && !platny_email($kopie)) { vzkaz("chyba", "Adresa pro kopii není platná."); presmeruj(odkaz("nastaveni")); }
+    if ($zakl !== "" && !preg_match('~^https?://[^\s]+$~', $zakl)) { vzkaz("chyba", "Základní adresa musí začínat http:// nebo https://."); presmeruj(odkaz("nastaveni")); }
+    uloz_nastaveni("email_odesilatel", $od);
+    uloz_nastaveni("email_kopie", $kopie);
+    uloz_nastaveni("zakladni_adresa", $zakl);
+    vzkaz("ok", "Nastavení pošty a odkazů uloženo.");
+    presmeruj(odkaz("nastaveni"));
+
   } elseif ($akce === "podminky") {
     uloz_nastaveni("podminky", (string)($_POST["podminky"] ?? ""));
     vzkaz("ok", "Podmínky objednávky uloženy.");
@@ -206,6 +217,27 @@ hlava_stranky("Provozní systém", "Nastavení",
         </div>
         <p class="app-perex">Příští přeprava dostane číslo <b class="cislo"><?= chran($ukazka) ?></b>.</p>
         <button type="submit" class="tlacitko">Uložit číslování</button>
+      </div>
+    </form>
+
+    <form method="post" action="<?= chran(odkaz("nastaveni")) ?>" class="formular">
+      <?= pole_token() ?>
+      <input type="hidden" name="akce" value="posta">
+      <div class="skupina" style="margin-bottom:0">
+        <h2>Pošta a odkazy ven</h2>
+        <div class="pole">
+          <label for="email_odesilatel">Odesílatel <span class="napoveda">— hlavička From; SPF domény musí pustit servery hostingu</span></label>
+          <input type="email" id="email_odesilatel" name="email_odesilatel" value="<?= chran(nastaveni("email_odesilatel", "web@idispecink.cz")) ?>">
+        </div>
+        <div class="pole">
+          <label for="email_kopie">Skrytá kopie každé odeslané objednávky <span class="napoveda">— nepovinné</span></label>
+          <input type="email" id="email_kopie" name="email_kopie" value="<?= chran(nastaveni("email_kopie")) ?>">
+        </div>
+        <div class="pole">
+          <label for="zakladni_adresa">Základní adresa aplikace <span class="napoveda">— pro odkazy v e-mailech; prázdné = odvodit z požadavku</span></label>
+          <input type="text" id="zakladni_adresa" name="zakladni_adresa" value="<?= chran(nastaveni("zakladni_adresa")) ?>" placeholder="https://idispecink.cz/aplikace/">
+        </div>
+        <button type="submit" class="tlacitko">Uložit poštu a odkazy</button>
       </div>
     </form>
 

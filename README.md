@@ -243,7 +243,8 @@ na ni nikde nevede.
 | **Stálé linky** | přeprava označená jako šablona s dny v týdnu; na kliknutí se z ní založí celý týden, státní svátky se přeskočí |
 | **Dispečink** | týdenní tabule po dnech podle data nakládky; zásilky bez dopravce mají červenou hranu |
 | **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO |
-| **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky |
+| **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky; odeslání e-mailem celá v těle zprávy s odkazem na potvrzení |
+| **Odkazy ven** | odkazy bez hesla: zákazník vidí stav, termíny a cenu; dopravce potvrdí objednávku, doplní vůz a řidiče, nahlásí zpoždění a nahraje doklady; řidič vidí pokyny a odklikává zastávky. Tlačítko WhatsApp odkaz rovnou předvyplní do zprávy |
 | **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
@@ -287,6 +288,19 @@ cp aplikace/config.vzor.php aplikace/config.php
 `config.php` **není v repozitáři** (je v `.gitignore`) — repozitář je veřejný.
 Vynucené HTTPS zapněte až s funkčním certifikátem, stejně jako přesměrování
 zakomentované v kořenovém `.htaccess`.
+
+### Pošta a odkazy ven
+
+Objednávka odchází z adresy nastavené v Nastavení (výchozí
+`web@idispecink.cz`, stejná jako u formulářů webu), odpověď přijde tomu, kdo
+ji poslal. Aby zprávy nekončily ve spamu, musí SPF záznam domény zahrnovat
+servery hostingu, stejně jako u formulářů. Do každé odeslané objednávky se
+dá poslat skrytá kopie na vlastní adresu.
+
+Odkazy bez hesla platí měsíc po vykládce a jdou kdykoliv zrušit. Kdo odkaz
+má, vidí jen tu jednu přepravu; nepřeposílejte ho dál, než je potřeba.
+Adresa, kterou odkazy nesou, se odvozuje z požadavku; za proxy ji nastavte
+v Nastavení ručně.
 
 ### Zálohování
 

@@ -28,7 +28,7 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
   header("Content-Type: text/html; charset=utf-8");
   header("X-Robots-Tag: noindex, nofollow");
   header("Cache-Control: no-store, no-cache, must-revalidate");
-  header("Referrer-Policy: same-origin");
+  header("Referrer-Policy: " . (string)($volby["referrer"] ?? "same-origin"));
   header("X-Content-Type-Options: nosniff");
   header("X-Frame-Options: DENY");
   ?>
@@ -39,6 +39,7 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#14191B">
+<meta name="referrer" content="<?= chran((string)($volby["referrer"] ?? "same-origin")) ?>">
 <title><?= chran($nadpis) ?> — provozní systém iDispečink.cz</title>
 <link rel="icon" href="../favicon.ico" sizes="32x32">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">

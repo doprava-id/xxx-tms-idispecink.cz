@@ -28,6 +28,44 @@ if (empty($p["dopravce_id"])) {
   presmeruj(odkaz("preprava", ["id" => $p["id"]]));
 }
 
+if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "poslat") {
+  $komu   = vstup("komu");
+  $predmet = vstup("predmet");
+  $uvod   = (string)($_POST["uvod"] ?? "");
+
+  if (!platny_email($komu)) {
+    vzkaz("chyba", "Zadejte platnou e-mailovou adresu dopravce.");
+    presmeruj(odkaz("objednavka", ["id" => $p["id"]]));
+  }
+
+  /* Odkaz pro dopravce se založí, když ještě není — v e-mailu je pod objednávkou. */
+  $o = odkaz_verejny_zajisti((int)$p["id"], "dopravce");
+  $u = objednavka_udaje($p);
+  $adresa = verejna_adresa((string)$o["kod"]);
+  $ja = uzivatel();
+
+  $poslano = posli_email(
+    $komu,
+    $predmet !== "" ? $predmet : "Objednávka přepravy " . $p["cislo"] . " – " . $u["trasa"],
+    objednavka_text($u, trim($uvod), $adresa),
+    objednavka_html($u, trim($uvod), $adresa),
+    (string)($ja["email"] ?? ""),
+    (string)nastaveni("email_kopie")
+  );
+
+  if ($poslano) {
+    $zmeny = ["objednavka_odeslana" => date("Y-m-d H:i:s"), "upraveno" => date("Y-m-d H:i:s")];
+    if (!$p["objednavka_datum"]) $zmeny["objednavka_datum"] = date("Y-m-d H:i:s");
+    if ($p["stav"] === "nova") $zmeny["stav"] = "objednana";
+    uprav("prepravy", (int)$p["id"], $zmeny);
+    zapis_udalost((int)$p["id"], "Objednávka odeslána e-mailem na " . $komu);
+    vzkaz("ok", "Objednávka odeslána na " . $komu . ".");
+  } else {
+    vzkaz("chyba", "Poštovní server zprávu nepřijal. Objednávku vytiskněte nebo uložte jako PDF a pošlete ručně; hosting musí mít povolené odesílání pošty.");
+  }
+  presmeruj(odkaz("objednavka", ["id" => $p["id"]]));
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "vystavena") {
   $zmeny = ["objednavka_datum" => date("Y-m-d H:i:s"), "upraveno" => date("Y-m-d H:i:s")];
   if ($p["stav"] === "nova") $zmeny["stav"] = "objednana";
@@ -56,6 +94,35 @@ hlava("Objednávka " . $p["cislo"], "", ["bez_navigace" => true]);
     <span class="app-perex" style="margin:0">Vystavena <?= chran(datum_cas($p["objednavka_datum"])) ?>.</span>
   <?php endif; ?>
 </div>
+
+<?php $u_trasa = objednavka_udaje($p)["trasa"]; ?>
+<form method="post" action="<?= chran(odkaz("objednavka", ["id" => $p["id"]])) ?>" class="formular netisknout" style="max-width:900px;margin:0 auto 20px" data-jednou>
+  <?= pole_token() ?>
+  <input type="hidden" name="akce" value="poslat">
+  <div class="skupina" style="margin-bottom:0">
+    <h2>Poslat dopravci</h2>
+    <?php if ($p["objednavka_odeslana"]): ?>
+      <p class="vzkaz vzkaz-ok" style="margin-bottom:12px">Odeslána <?= chran(datum_cas($p["objednavka_odeslana"])) ?>.<?= $p["potvrzeno_kdy"] ? " Dopravce potvrdil " . chran(datum_cas($p["potvrzeno_kdy"])) . "." : " Dopravce zatím nepotvrdil." ?></p>
+    <?php endif; ?>
+    <div class="pole-radek">
+      <div class="pole">
+        <label for="komu">Komu</label>
+        <input type="email" id="komu" name="komu" value="<?= chran($p["d_email"] ?: "") ?>" required>
+      </div>
+      <div class="pole">
+        <label for="predmet">Předmět</label>
+        <input type="text" id="predmet" name="predmet" value="<?= chran("Objednávka přepravy " . $p["cislo"] . " – " . $u_trasa) ?>">
+      </div>
+    </div>
+    <div class="pole">
+      <label for="uvod">Úvodní text <span class="napoveda">— objednávka celá následuje pod ním, s odkazem na potvrzení a doklady</span></label>
+      <textarea id="uvod" name="uvod" style="min-height:70px">Dobrý den,
+posíláme objednávku přepravy. Prosíme o potvrzení kliknutím na odkaz pod objednávkou; tamtéž pak nahrajete doklady.</textarea>
+    </div>
+    <button type="submit" class="tlacitko">Odeslat e-mailem</button>
+    <p class="formular-poznamka">Odejde z adresy <?= chran(nastaveni("email_odesilatel", "web@idispecink.cz")) ?>, odpověď přijde vám<?= platny_email((string)nastaveni("email_kopie")) ? ", kopie na " . chran(nastaveni("email_kopie")) : "" ?>.</p>
+  </div>
+</form>
 
 <article class="objednavka">
   <header class="objednavka-hlava">

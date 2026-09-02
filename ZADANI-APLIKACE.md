@@ -2,8 +2,9 @@
 
 **Datum:** 1. 9. 2026
 **Větev:** `claude/idispecink-tms-software-uosnh7`
-**Stav:** jádro (18 obrazovek), ARES, přílohy a bod 1 pořadí prací — trasa
-jako seznam bodů, místa, linky, historie trasy. Zbytek níže čeká.
+**Stav:** jádro (19 obrazovek), ARES, přílohy, bod 1 pořadí prací (trasa
+jako seznam bodů, místa, linky, historie trasy) a bod 2 (odeslání objednávky,
+veřejné odkazy, WhatsApp). Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -49,6 +50,10 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Stálé linky a generování týdne (3.2) | hotové |
 | Návrh ceny podle historie trasy (3.2) | hotové |
 | Kilometry a čas trasy (3.2) | čeká na mapovou službu, viz 6 |
+| Veřejné odkazy pro zákazníka, dopravce a řidiče (3.7) | hotové |
+| Odeslání objednávky e-mailem, WhatsApp odkaz (3.8) | hotové |
+| SMS řidičům (3.8) | čeká na bránu, viz 6 |
+| Historie komunikace u přepravy (3.8) | zatím jen protokol událostí; ruční poznámky s datem chybí |
 
 ---
 

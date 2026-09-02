@@ -57,6 +57,8 @@ zahaj_sezeni($config);
 require __DIR__ . "/zdroj/sablona.php";
 require __DIR__ . "/zdroj/trasa.php";
 require __DIR__ . "/zdroj/prilohy.php";
+require __DIR__ . "/zdroj/odkazy.php";
+require __DIR__ . "/zdroj/posta.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -68,6 +70,7 @@ preved_prepravy_na_body();
 $STRANKY = [
   "instalace"  => false,
   "prihlaseni" => false,
+  "verejne"    => false,     /* odkazy bez hesla pro zákazníka, dopravce a řidiče */
   "odhlaseni"  => true,
   "prehled"    => true,
   "prepravy"   => true,

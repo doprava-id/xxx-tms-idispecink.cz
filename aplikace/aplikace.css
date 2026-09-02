@@ -286,6 +286,46 @@ details > summary::-webkit-details-marker { display: none; }
                            font-size: .84rem; color: var(--text-tlum); }
 @media (max-width: 700px) { .objednavka { padding: 22px; } .objednavka .strany, .objednavka .podpisy { grid-template-columns: 1fr; } }
 
+/* --- Odkazy ven na detailu přepravy ------------------------------------- */
+
+.odkaz-ven { padding: 10px 0; border-bottom: 1px solid var(--linka-slaba); display: grid; gap: 4px; }
+.odkaz-ven:last-child { border-bottom: 0; }
+.odkaz-ven b { font-size: .9rem; }
+.odkaz-ven input[readonly] {
+  width: 100%; background: var(--pozadi); border: 1px solid var(--linka-pole); color: var(--text-tlum);
+  font-family: var(--pismo-cislo); font-size: .78rem; padding: 7px 9px;
+}
+.odkaz-ven .tlacitko[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* --- Veřejná stránka (zákazník, dopravce, řidič) ------------------------ */
+
+.verejne { max-width: 760px; margin: 0 auto; padding: 8px 0 40px; }
+.verejne-hlava {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 14px 0 18px; margin-bottom: 22px; border-bottom: 3px solid var(--zluta);
+}
+.verejne-hlava img { height: 29px; width: auto; }
+.verejne h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: .2em; }
+.verejne h2 { font-size: 1.05rem; margin: 28px 0 10px; }
+.verejne .formular { padding: 18px; margin-bottom: 14px; }
+.verejne-pata { margin-top: 32px; padding-top: 14px; border-top: 1px solid var(--linka); color: var(--text-tlum); font-size: .9rem; }
+
+.body-verejne { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.body-verejne li {
+  border: 1px solid var(--linka); border-left: 3px solid var(--zluta);
+  background-color: var(--povrch); background-image: var(--kov-povrch);
+  box-shadow: inset 0 1px 0 var(--odlesk);
+  padding: 12px 14px; display: grid; gap: 3px;
+}
+.body-verejne li b { font-size: 1.02rem; }
+.body-verejne li span { color: var(--text-tlum); font-size: .92rem; }
+.body-verejne li.hotovo { border-left-color: var(--ok-text); }
+.body-verejne li.hotovo b { color: var(--text-tlum); }
+.body-verejne li form { margin-top: 8px; }
+.body-verejne.ridic li { padding: 16px; }
+.body-verejne.ridic .tlacitko { width: 100%; padding: 16px; font-size: 1.05rem; }
+.body-verejne .stitek { justify-self: start; margin-top: 4px; }
+
 /* --- Patička ------------------------------------------------------------ */
 
 .app-pata {

@@ -63,11 +63,13 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
   zdroj/                     Vkládané soubory; přímo se neotevírají
     zavaděč v index.php, databaze.php, pomocnici.php, ciselniky.php,
     autentizace.php, sablona.php, trasa.php (body jízdy, stálé linky,
-    státní svátky), prilohy.php, ares.php
+    státní svátky), prilohy.php, ares.php, odkazy.php (veřejné odkazy,
+    WhatsApp), posta.php (e-mail, objednávka jako zpráva)
   zdroj/stranky/             Jedna stránka = jeden soubor
     instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
     dispecink, firmy, firma, mista, misto, linky, objednavka,
-    fakturace, nastaveni, import, export, priloha
+    fakturace, nastaveni, import, export, priloha,
+    verejne (bez přihlášení: zákazník, dopravce, řidič)
 ```
 
 **Zadání toho, co se má postavit dál, je v `ZADANI-APLIKACE.md`** — vzniklo
@@ -109,7 +111,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **osmnáct stránek**: instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, objednávka, fakturace, import a export,
+- u zásahu do aplikace i jejích **devatenáct stránek**: instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -214,7 +216,8 @@ přihlášení.
 | trasa | zdrojem pravdy jsou **body v tabulce `body`**. Pole `nakladka_*` a `vykladka_*` na přepravě jsou jen odvozený souhrn první nakládky a poslední vykládky — přepočítává je výhradně `prepocitej_trasu()`. **Nikdo je nesmí zapisovat přímo**; seznamy a tabule je smí jen číst. Stav „naloženo" a „vyloženo" se řídí splněnými body |
 | šablony linek | přeprava se `sablona = 1` je šablona stálé linky. **Každý dotaz nad přepravami, který zobrazuje evidenci, musí mít `p.sablona = 0`** — jinak se šablona objeví jako zásilka v seznamu, na tabuli nebo v obratu |
 | přílohy | soubory leží v `data/prilohy/` pod náhodným jménem, ven jdou jen přes `priloha.php` po přihlášení. Typ se bere z tabulky `PRILOHY_TYPY`, ne z toho, co soubor tvrdí; SVG a HTML tam schválně nejsou |
-| odchozí provoz | jediné místo, odkud aplikace volá ven, je `ares.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát |
+| odchozí provoz | jediné místo, odkud aplikace volá ven, je `ares.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
+| veřejné odkazy | `verejne.php` je jediná stránka bez přihlášení. Kód v adrese vybírá přepravu i roli; **cena dopravce a marže se tam nesmí objevit nikdy, cena zákazníka jen zákazníkovi.** Stránka posílá `Referrer-Policy: no-referrer` a odkazy ven mají `rel="noreferrer"`, jinak by kód utekl do cizích logů. Každý POST má token jako všude jinde |
 | ceny | cenu zákazníka a marži smí vidět jen `vidi_ceny()`. Kdo právo nemá, **nesmí ta pole ani přepsat** — jinak by je uložení formuláře smazalo (viz `preprava.php`) |
 | `.tabulka-obal` | musí zůstat `position: relative`. Skryté popisky uvnitř široké tabulky jsou absolutně umístěné a bez toho roztáhnou stránku do vodorovného scrollu |
 | číslování | tvar řady drží Nastavení, ne kód. `dalsi_cislo()` navíc přeskočí číslo, které už existuje |

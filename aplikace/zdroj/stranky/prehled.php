@@ -42,6 +42,13 @@ $blizke = radky(
     WHERE p.sablona = 0 AND p.nakladka_datum IN (?, ?) AND p.stav <> 'zruseno'
     ORDER BY p.nakladka_datum, COALESCE(p.nakladka_od, '99:99'), p.id", [$dnes, $zitra]);
 
+$hlaseni = radky(
+  "SELECT p.id, p.cislo, p.hlaseni, p.hlaseni_kdy, p.nakladka_misto, p.vykladka_misto, d.nazev AS dopravce_nazev
+     FROM prepravy p LEFT JOIN firmy d ON d.id = p.dopravce_id
+    WHERE p.sablona = 0 AND p.hlaseni IS NOT NULL AND p.hlaseni <> ''
+      AND p.hlaseni_kdy >= ? AND p.stav NOT IN ('zruseno','fakturovano')
+    ORDER BY p.hlaseni_kdy DESC LIMIT 10", [date("Y-m-d H:i:s", strtotime("-7 days"))]);
+
 $mesic = radek(
   "SELECT COUNT(*) AS pocet,
           COALESCE(SUM(cena_zakaznik), 0) AS trzba,
@@ -102,6 +109,20 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
     </a>
   <?php endif; ?>
 </div>
+
+<?php if ($hlaseni): ?>
+  <h2>Hlášení od dopravců</h2>
+  <ul class="protokol" style="margin-bottom:28px">
+    <?php foreach ($hlaseni as $hl): ?>
+      <li>
+        <a href="<?= chran(odkaz("preprava", ["id" => $hl["id"]])) ?>" class="cislo"><?= chran($hl["cislo"]) ?></a>
+        <?= chran($hl["nakladka_misto"] ?: "?") ?> → <?= chran($hl["vykladka_misto"] ?: "?") ?>
+        · <b><?= chran($hl["dopravce_nazev"] ?: "dopravce") ?>:</b> „<?= chran($hl["hlaseni"]) ?>"
+        <time><?= chran(datum_cas($hl["hlaseni_kdy"])) ?></time>
+      </li>
+    <?php endforeach; ?>
+  </ul>
+<?php endif; ?>
 
 <h2>Dnes a zítra</h2>
 <?php if (!$blizke): ?>
