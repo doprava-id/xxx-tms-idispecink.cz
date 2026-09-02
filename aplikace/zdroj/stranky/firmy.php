@@ -72,7 +72,7 @@ hlava_stranky("Adresář", "Firmy",
   <p class="prazdno">Žádná firma neodpovídá filtru.</p>
 <?php else: ?>
   <div class="tabulka-obal">
-    <table class="id-tabulka">
+    <table class="id-tabulka karty">
       <thead>
         <tr>
           <th>Firma</th>
@@ -86,26 +86,26 @@ hlava_stranky("Adresář", "Firmy",
       <tbody>
       <?php foreach ($firmy as $f): ?>
         <tr<?= (int)$f["aktivni"] === 1 ? "" : ' class="zrusena"' ?>>
-          <td>
+          <td data-popis="Firma">
             <a href="<?= chran(odkaz("firma", ["id" => $f["id"]])) ?>"><?= chran($f["nazev"]) ?></a>
             <?php if ($f["mesto"]): ?><span class="druhotny"><?= chran($f["mesto"]) ?></span><?php endif; ?>
             <?php if ((int)$f["aktivni"] !== 1): ?><span class="druhotny">vyřazená</span><?php endif; ?>
           </td>
-          <td>
+          <td data-popis="Typ">
             <?= chran(TYPY_FIREM[$f["typ"]] ?? "—") ?>
             <?php if ((int)$f["dispecink"] === 1): ?><span class="druhotny">klient dispečinku</span><?php endif; ?>
           </td>
-          <td>
+          <td data-popis="IČO / DIČ">
             <span class="cislo"><?= chran($f["ico"] ?: "—") ?></span>
             <?php if ($f["dic"]): ?><span class="druhotny cislo"><?= chran($f["dic"]) ?></span><?php endif; ?>
           </td>
-          <td>
+          <td data-popis="Kontakt">
             <?= chran($f["kontakt_jmeno"] ?: "—") ?>
             <?php if ($f["kontakt_telefon"]): ?>
               <span class="druhotny"><a href="tel:<?= chran(preg_replace('/\s+/', '', (string)$f["kontakt_telefon"])) ?>"><?= chran($f["kontakt_telefon"]) ?></a></span>
             <?php endif; ?>
           </td>
-          <td>
+          <td data-popis="Prověření">
             <?php
               if ($f["typ"] === "zakaznik") {
                 echo "—";
@@ -120,7 +120,7 @@ hlava_stranky("Adresář", "Firmy",
               }
             ?>
           </td>
-          <td class="cislo vpravo"><?= (int)$f["prepravy_pocet"] ?></td>
+          <td class="cislo vpravo" data-popis="Přeprav"><?= (int)$f["prepravy_pocet"] ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>

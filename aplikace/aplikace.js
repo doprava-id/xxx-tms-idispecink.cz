@@ -58,6 +58,28 @@
     prepocti();
   }
 
+  /* Klávesové zkratky: „/" skočí do hledání, Alt+N založí novou přepravu.
+     V poli formuláře lomítko zůstává lomítkem. */
+  var hledani = document.getElementById("app-hledat");
+  document.addEventListener("keydown", function (udalost) {
+    var cil = udalost.target;
+    var vPoli = cil && (cil.tagName === "INPUT" || cil.tagName === "TEXTAREA" || cil.tagName === "SELECT" || cil.isContentEditable);
+    if (udalost.key === "/" && !vPoli && hledani && !udalost.ctrlKey && !udalost.altKey && !udalost.metaKey) {
+      udalost.preventDefault(); hledani.focus(); hledani.select();
+    }
+    if (udalost.altKey && !udalost.ctrlKey && (udalost.key === "n" || udalost.key === "N")) {
+      var nova = document.querySelector('a[href*="s=preprava&id=nova"]');
+      if (nova) { udalost.preventDefault(); window.location = nova.href; }
+    }
+  });
+
+  /* Hromadné označení řádků v seznamu. */
+  document.querySelectorAll("[data-vse]").forEach(function (vse) {
+    vse.addEventListener("change", function () {
+      document.querySelectorAll('input[name="id[]"]').forEach(function (radek) { radek.checked = vse.checked; });
+    });
+  });
+
   /* Návrh ceny: „použít" opíše částku do pole a zapíše, podle čeho vznikla. */
   document.querySelectorAll("[data-doplnit]").forEach(function (tlacitko) {
     tlacitko.addEventListener("click", function () {

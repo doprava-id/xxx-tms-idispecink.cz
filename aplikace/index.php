@@ -83,6 +83,7 @@ $STRANKY = [
   "hlidani"    => false,     /* spouštěč ranního souhrnu, místo přihlášení klíč z config.php */
   "odhlaseni"  => true,
   "prehled"    => true,
+  "hledat"     => true,
   "prepravy"   => true,
   "preprava"   => true,
   "nabidky"    => true,      /* jen s právem na ceny — stránka si to hlídá sama */

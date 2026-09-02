@@ -251,7 +251,9 @@ na ni nikde nevede.
 | **Hlídání** | ranní souhrn e-mailem všem uživatelům: nakládky bez dopravce do tří dnů, doklady chybějící déle než týden, končící doklady dopravců; spouští ho cron, tlačítko v Nastavení, nebo první otevření systému toho dne |
 | **Fakturoid** | po napojení načte stav a datum úhrady vydaných faktur a z podkladu založí fakturu pro zákazníka i za externí dispečink jedním kliknutím; bez napojení zůstává CSV s řádky faktury |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, hlídání, uživatelé a jejich role, přehled změn, zálohy |
-| **Můj účet** | vlastní heslo a druhý faktor (kód z aplikace v telefonu) |
+| **Můj účet** | vlastní heslo, druhý faktor (kód z aplikace v telefonu) a vzhled — tmavý nebo světlý režim |
+| **Hledání** | jedno pole v hlavičce (zkratka `/`): číslo zásilky, místo, firma, SPZ, reference, zboží, řidič; přesné číslo otevře rovnou kartu. `Alt+N` založí novou přepravu |
+| **Hromadné akce** | v seznamu přeprav se označí řádky a najednou dostanou přijaté doklady, číslo vydané či přijaté faktury nebo vlastníka |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
 
 ### Co je potřeba na hostingu
@@ -367,6 +369,14 @@ procento z obratu, částka za jízdu). Sazbu ani způsob systém nedomýšlí:
 dokud chybí, odměnu nespočítá a řekne to. Fakturu za odměnu založí ve
 Fakturoidu stejné tlačítko jako u zákazníků; číslo se zapíše k jízdám, aby
 se podruhé neúčtovaly, a stejné období se klientovi podruhé nevystaví.
+
+### Vzhled a mobil
+
+Výchozí je tmavý kovový vzhled; v Můj účet si každý přepne světlý režim
+s krémovými plochami. Firemní barvy zůstávají, mění se jen plochy, linky
+a text; žlutá jako barva textu se ve světlém režimu nahradí tmavým jantarem,
+aby šla přečíst. Na mobilu se seznamy přeprav, firem a nabídek i tabulka
+na Přehledu skládají do karet; tabule a plán vozů rolují do šířky.
 
 ### Hlídání — ranní souhrn
 

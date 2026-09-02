@@ -27,6 +27,8 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
   global $BEZ_NAVIGACE;
   $BEZ_NAVIGACE = !empty($volby["bez_navigace"]);
   $bez_navigace = $BEZ_NAVIGACE;
+  /* Světlý režim si volí každý uživatel sám; veřejné stránky jsou tmavé. */
+  $svetly = prihlasen() && (string)((uzivatel() ?? [])["vzhled"] ?? "") === "svetly";
   header("Content-Type: text/html; charset=utf-8");
   header("X-Robots-Tag: noindex, nofollow");
   header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -35,12 +37,12 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
   header("X-Frame-Options: DENY");
   ?>
 <!doctype html>
-<html lang="cs">
+<html lang="cs"<?= $svetly ? ' data-vzhled="svetly"' : "" ?>>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#14191B">
+<meta name="theme-color" content="<?= $svetly ? "#ECE9E1" : "#14191B" ?>">
 <meta name="referrer" content="<?= chran((string)($volby["referrer"] ?? "same-origin")) ?>">
 <title><?= chran($nadpis) ?> — provozní systém iDispečink.cz</title>
 <link rel="icon" href="../favicon.ico" sizes="32x32">
@@ -64,7 +66,7 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
 <header class="hlavicka app-hlavicka">
   <div class="obal">
     <a class="logo" href="<?= chran(odkaz("prehled")) ?>">
-      <img src="../assets/img/logo-idispecink.svg" alt="iDispečink.cz" width="214" height="34">
+      <img src="../assets/img/logo-idispecink<?= $svetly ? "-tmavy" : "" ?>.svg" alt="iDispečink.cz" width="214" height="34">
     </a>
     <span class="app-znacka">Provozní systém</span>
     <?php if (prihlasen()): ?>
@@ -78,7 +80,12 @@ function hlava(string $nadpis, string $aktivni = "", array $volby = []): void {
         <?php if (je_spravce()): ?>
           <a href="<?= chran(odkaz("nastaveni")) ?>"<?= $aktivni === "nastaveni" ? " aria-current=\"page\"" : "" ?>>Nastavení</a>
         <?php endif; ?>
-        <a class="app-uzivatel" href="<?= chran(odkaz("ucet")) ?>" title="Můj účet: heslo a druhý faktor"><?= chran(uzivatel()["jmeno"] ?? "") ?></a>
+        <form class="app-hledani" method="get" action="index.php" role="search">
+          <input type="hidden" name="s" value="hledat">
+          <label for="app-hledat" class="jen-pro-ctecky">Rychlé hledání</label>
+          <input type="search" id="app-hledat" name="q" placeholder="Hledat… /" autocomplete="off" title="Číslo zásilky, místo, firma, SPZ; zkratka /">
+        </form>
+        <a class="app-uzivatel" href="<?= chran(odkaz("ucet")) ?>" title="Můj účet: heslo, druhý faktor, vzhled"><?= chran(uzivatel()["jmeno"] ?? "") ?></a>
         <form method="post" action="<?= chran(odkaz("odhlaseni")) ?>" class="app-odhlasit">
           <?= pole_token() ?>
           <button type="submit" class="tlacitko obrys">Odhlásit</button>

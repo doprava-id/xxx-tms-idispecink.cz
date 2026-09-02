@@ -7,6 +7,44 @@ if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen.")
 $ceny = vidi_ceny();
 $ceny_dopravce = vidi_ceny_dopravce();
 
+/* Hromadné akce nad označenými řádky. Co kdo smí, rozhodují stejné funkce
+   jako na kartě přepravy; každá změna se zapíše do protokolu zvlášť. */
+if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "hromadne") {
+  $navrat = (string)($_SERVER["REQUEST_URI"] ?? odkaz("prepravy"));
+  $ids = array_values(array_unique(array_filter(array_map("intval", (array)($_POST["id"] ?? [])))));
+  $co = vstup("co"); $cislo = vstup("cislo");
+  $smi = ["doklady" => true, "faktura_prijata" => smi_fakturaci(), "faktura_vydana" => vidi_ceny(), "vlastnik" => smi_dispecink()];
+  if (!$ids) { vzkaz("chyba", "Nejdřív označte přepravy v prvním sloupci."); presmeruj($navrat); }
+  if (!isset($smi[$co])) { vzkaz("chyba", "Neznámá hromadná akce."); presmeruj($navrat); }
+  if (!$smi[$co]) { vzkaz("chyba", "Na tuhle hromadnou akci nemáte právo."); presmeruj($navrat); }
+  if (in_array($co, ["faktura_prijata", "faktura_vydana"], true) && $cislo === "") { vzkaz("chyba", "Zadejte číslo faktury."); presmeruj($navrat); }
+  $pocet = 0; $ted = date("Y-m-d H:i:s"); $ja = uzivatel();
+  foreach ($ids as $pid) {
+    $p = radek("SELECT * FROM prepravy WHERE id = ? AND sablona = 0", [$pid]);
+    if (!$p) continue;
+    $zmeny = ["upraveno" => $ted, "upravil" => (int)$ja["id"]];
+    if ($co === "doklady") {
+      if ($p["doklady"] === "prijato") continue;
+      $zmeny["doklady"] = "prijato"; $zmeny["doklady_kdy"] = $ted;
+      zapis_udalost($pid, "Doklady přijaty (hromadně)");
+    } elseif ($co === "faktura_prijata") {
+      $zmeny["faktura_prijata"] = $cislo;
+      zapis_udalost($pid, "Přijatá faktura " . $cislo . " (hromadně)");
+    } elseif ($co === "faktura_vydana") {
+      $zmeny["faktura_vydana"] = $cislo;
+      if (in_array($p["stav"], ["vylozeno", "doklady"], true)) $zmeny["stav"] = "fakturovano";
+      zapis_udalost($pid, "Vydaná faktura " . $cislo . " (hromadně)");
+    } else {
+      $zmeny["vlastnik_id"] = (int)$ja["id"];
+      zapis_udalost($pid, "Má na starosti " . $ja["jmeno"] . " (hromadně)");
+    }
+    uprav("prepravy", $pid, $zmeny);
+    $pocet++;
+  }
+  vzkaz("ok", "Hromadně upraveno: " . $pocet . " " . sklonuj($pocet, "přeprava", "přepravy", "přeprav") . ".");
+  presmeruj($navrat);
+}
+
 $hledat   = vstup("hledat");
 $stav     = vstup("stav");
 $dopravce = vstup_cislo("dopravce");
@@ -81,6 +119,11 @@ $seznam_firem = function (array $firmy): array {
   foreach ($firmy as $f) $ven[(string)$f["id"]] = (string)$f["nazev"];
   return $ven;
 };
+
+$adresa_seznamu = odkaz("prepravy", array_filter([
+  "hledat" => $hledat, "stav" => $stav, "dopravce" => $dopravce, "zakaznik" => $zakaznik,
+  "od" => $od, "do" => $do, "jen" => $jen, "strana" => $strana > 1 ? $strana : "",
+]));
 
 hlava("Přepravy", "prepravy");
 hlava_stranky("Evidence", "Přepravy",
@@ -178,16 +221,17 @@ hlava_stranky("Evidence", "Přepravy",
   <p class="prazdno">Žádná přeprava neodpovídá filtru.</p>
 <?php else: ?>
   <div class="tabulka-obal">
-    <table class="id-tabulka">
+    <table class="id-tabulka karty">
       <thead>
         <tr>
+          <th class="netisknout"><input type="checkbox" data-vse aria-label="Označit všechny na stránce" style="width:16px;height:16px;accent-color:var(--zluta)"></th>
           <th>Číslo</th>
           <th>Nakládka</th>
           <th>Vykládka</th>
           <th>Zákazník</th>
           <th>Dopravce</th>
-          <?php if ($ceny): ?><th class="vpravo">Zákazník</th><?php endif; ?>
-          <?php if ($ceny_dopravce): ?><th class="vpravo">Dopravce</th><?php endif; ?>
+          <?php if ($ceny): ?><th class="vpravo">Cena zák.</th><?php endif; ?>
+          <?php if ($ceny_dopravce): ?><th class="vpravo">Cena dopr.</th><?php endif; ?>
           <?php if ($ceny): ?><th class="vpravo">Marže</th><?php endif; ?>
           <th>Doklady</th>
         </tr>
@@ -196,24 +240,25 @@ hlava_stranky("Evidence", "Přepravy",
       <?php foreach ($prepravy as $p): ?>
         <?php $marze = (float)$p["cena_zakaznik"] - (float)$p["cena_dopravce"]; ?>
         <tr<?= $p["stav"] === "zruseno" ? ' class="zrusena"' : "" ?>>
-          <td>
+          <td class="netisknout" data-popis="Označit"><input type="checkbox" name="id[]" value="<?= (int)$p["id"] ?>" form="hromadne" aria-label="Označit <?= chran($p["cislo"]) ?>" style="width:16px;height:16px;accent-color:var(--zluta)"></td>
+          <td data-popis="Číslo">
             <a href="<?= chran(odkaz("preprava", ["id" => $p["id"]])) ?>" class="cislo"><?= chran($p["cislo"]) ?></a>
             <span class="druhotny"><?= stitek_stavu($p["stav"]) ?></span>
           </td>
-          <td>
+          <td data-popis="Nakládka">
             <?= chran($p["nakladka_misto"] ?: "—") ?>
             <?php if ((int)$p["bodu"] > 2): ?><span class="trasa-pocet">+<?= (int)$p["bodu"] - 2 ?></span><?php endif; ?>
             <span class="druhotny"><?= chran(datum($p["nakladka_datum"])) ?> <?= chran(okno($p["nakladka_od"], $p["nakladka_do"])) ?></span>
           </td>
-          <td>
+          <td data-popis="Vykládka">
             <?= chran($p["vykladka_misto"] ?: "—") ?>
             <span class="druhotny"><?= chran(datum($p["vykladka_datum"])) ?> <?= chran(okno($p["vykladka_od"], $p["vykladka_do"])) ?></span>
           </td>
-          <td>
+          <td data-popis="Zákazník">
             <?= chran($p["zakaznik_nazev"] ?: "—") ?>
             <?php if ($p["ref_zakaznika"]): ?><span class="druhotny">ref. <?= chran($p["ref_zakaznika"]) ?></span><?php endif; ?>
           </td>
-          <td>
+          <td data-popis="Dopravce">
             <?php if ($p["dopravce_nazev"]): ?>
               <?= chran($p["dopravce_nazev"]) ?>
               <?php if ($p["spz"]): ?><span class="druhotny cislo"><?= chran($p["spz"]) ?></span><?php endif; ?>
@@ -222,17 +267,40 @@ hlava_stranky("Evidence", "Přepravy",
               <span class="stitek stitek-zrus">nezajištěno</span>
             <?php endif; ?>
           </td>
-          <?php if ($ceny): ?><td class="cislo vpravo"><?= chran(castka($p["cena_zakaznik"])) ?></td><?php endif; ?>
-          <?php if ($ceny_dopravce): ?><td class="cislo vpravo"><?= chran(castka($p["cena_dopravce"])) ?></td><?php endif; ?>
+          <?php if ($ceny): ?><td class="cislo vpravo" data-popis="Cena zák."><?= chran(castka($p["cena_zakaznik"])) ?></td><?php endif; ?>
+          <?php if ($ceny_dopravce): ?><td class="cislo vpravo" data-popis="Cena dopr."><?= chran(castka($p["cena_dopravce"])) ?></td><?php endif; ?>
           <?php if ($ceny): ?>
-            <td class="cislo vpravo"><?= (!empty($p["dispecink_klient_id"]) || ($p["cena_zakaznik"] === null && $p["cena_dopravce"] === null)) ? "—" : chran(castka($marze)) ?></td>
+            <td class="cislo vpravo" data-popis="Marže"><?= (!empty($p["dispecink_klient_id"]) || ($p["cena_zakaznik"] === null && $p["cena_dopravce"] === null)) ? "—" : chran(castka($marze)) ?></td>
           <?php endif; ?>
-          <td><?= chran(DOKLADY[$p["doklady"]] ?? "Čekáme") ?></td>
+          <td data-popis="Doklady"><?= chran(DOKLADY[$p["doklady"]] ?? "Čekáme") ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
   </div>
+
+  <form id="hromadne" method="post" action="<?= chran($adresa_seznamu) ?>" class="filtr netisknout" style="margin-top:16px"
+        data-potvrdit="Provést hromadnou akci s označenými přepravami?">
+    <?= pole_token() ?>
+    <input type="hidden" name="akce" value="hromadne">
+    <div class="filtr-radek">
+      <div class="pole">
+        <label for="co">S označenými</label>
+        <select id="co" name="co"><?= volby(array_filter([
+          "doklady"         => "Doklady přijaty",
+          "faktura_vydana"  => $ceny ? "Zapsat vydanou fakturu" : null,
+          "faktura_prijata" => smi_fakturaci() ? "Zapsat přijatou fakturu dopravce" : null,
+          "vlastnik"        => smi_dispecink() ? "Mám na starosti já" : null,
+        ]), "doklady") ?></select>
+      </div>
+      <div class="pole">
+        <label for="cislo">Číslo faktury <span class="napoveda">— u faktur</span></label>
+        <input type="text" id="cislo" name="cislo">
+      </div>
+      <div class="filtr-akce"><button type="submit" class="tlacitko">Provést</button></div>
+    </div>
+    <p class="app-perex" style="margin:12px 0 0">Označte přepravy v prvním sloupci; zaškrtávátko v hlavičce označí všechny na stránce. Vydaná faktura přepne vyložené přepravy na fakturované.</p>
+  </form>
 
   <?php if ($stran > 1): ?>
     <nav class="strankovani" aria-label="Stránkování">

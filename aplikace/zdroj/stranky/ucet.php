@@ -56,6 +56,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   } elseif ($akce === "totp_nove") {
     $_SESSION["totp_navrh"] = totp_nove_tajemstvi();
     presmeruj(odkaz("ucet"));
+
+  } elseif ($akce === "vzhled") {
+    $vzhled = vstup("vzhled") === "svetly" ? "svetly" : "tmavy";
+    uprav("uzivatele", (int)$u["id"], ["vzhled" => $vzhled]);
+    vzkaz("ok", $vzhled === "svetly" ? "Světlý režim zapnutý." : "Tmavý režim zapnutý.");
+    presmeruj(odkaz("ucet"));
   }
 }
 
@@ -129,6 +135,25 @@ hlava_stranky("Uživatel", $u["jmeno"]);
         <?php endif; ?>
       </div>
     </div>
+
+    <form method="post" action="<?= chran(odkaz("ucet")) ?>" class="formular" style="margin-top:20px">
+      <?= pole_token() ?>
+      <input type="hidden" name="akce" value="vzhled">
+      <div class="skupina" style="margin-bottom:0">
+        <h2>Vzhled</h2>
+        <p class="app-perex">Firemní barvy zůstávají, mění se plochy. Volba platí jen pro vás.</p>
+        <?php $vzhled = (string)($u["vzhled"] ?? "") === "svetly" ? "svetly" : "tmavy"; ?>
+        <div class="pole-zaskrtnuti">
+          <input type="radio" id="vzhled_tmavy" name="vzhled" value="tmavy"<?= $vzhled === "tmavy" ? " checked" : "" ?>>
+          <label for="vzhled_tmavy">Tmavý <span class="napoveda">— kovové plochy, výchozí</span></label>
+        </div>
+        <div class="pole-zaskrtnuti">
+          <input type="radio" id="vzhled_svetly" name="vzhled" value="svetly"<?= $vzhled === "svetly" ? " checked" : "" ?>>
+          <label for="vzhled_svetly">Světlý <span class="napoveda">— krémové plochy, na denní světlo</span></label>
+        </div>
+        <button type="submit" class="tlacitko obrys">Uložit vzhled</button>
+      </div>
+    </form>
   </div>
 </div>
 <?php

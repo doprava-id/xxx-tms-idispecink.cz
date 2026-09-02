@@ -120,24 +120,24 @@ hlava_stranky("Obchod", "Nabídky",
   <p class="prazdno">Žádná nabídka neodpovídá filtru. Poptávku zapište tlačítkem Nová nabídka.</p>
 <?php else: ?>
   <div class="tabulka-obal">
-    <table class="id-tabulka">
+    <table class="id-tabulka karty">
       <thead>
         <tr><th>Číslo</th><th>Zákazník</th><th>Trasa</th><th>Termín</th><th>Zboží</th><th class="vpravo">Cena</th><th>Stav</th><th>Vznik</th></tr>
       </thead>
       <tbody>
       <?php foreach ($nabidky as $n): ?>
         <tr>
-          <td><a href="<?= chran(odkaz("nabidka", ["id" => $n["id"]])) ?>" class="cislo"><?= chran($n["cislo"]) ?></a>
+          <td data-popis="Číslo"><a href="<?= chran(odkaz("nabidka", ["id" => $n["id"]])) ?>" class="cislo"><?= chran($n["cislo"]) ?></a>
             <?php if ($n["ref_zakaznika"]): ?><span class="druhotny">ref. <?= chran($n["ref_zakaznika"]) ?></span><?php endif; ?></td>
-          <td><?= chran($n["zakaznik_nazev"] ?: "—") ?><?php if ($n["kontakt_jmeno"]): ?><span class="druhotny"><?= chran($n["kontakt_jmeno"]) ?></span><?php endif; ?></td>
-          <td><?= chran($n["nakladka_misto"] ?: "?") ?> → <?= chran($n["vykladka_misto"] ?: "?") ?><?php if ($n["km"]): ?><span class="druhotny"><?= (int)$n["km"] ?> km</span><?php endif; ?></td>
-          <td><?= chran(datum($n["nakladka_datum"])) ?><span class="druhotny"><?= chran(okno($n["nakladka_od"], $n["nakladka_do"])) ?></span></td>
-          <td><?= chran($n["zbozi"] ?: "—") ?></td>
-          <td class="cislo vpravo"><?= chran(castka($n["cena"])) ?></td>
-          <td><?= stitek_nabidky($n["stav"]) ?>
+          <td data-popis="Zákazník"><?= chran($n["zakaznik_nazev"] ?: "—") ?><?php if ($n["kontakt_jmeno"]): ?><span class="druhotny"><?= chran($n["kontakt_jmeno"]) ?></span><?php endif; ?></td>
+          <td data-popis="Trasa"><?= chran($n["nakladka_misto"] ?: "?") ?> → <?= chran($n["vykladka_misto"] ?: "?") ?><?php if ($n["km"]): ?><span class="druhotny"><?= (int)$n["km"] ?> km</span><?php endif; ?></td>
+          <td data-popis="Termín"><?= chran(datum($n["nakladka_datum"])) ?><span class="druhotny"><?= chran(okno($n["nakladka_od"], $n["nakladka_do"])) ?></span></td>
+          <td data-popis="Zboží"><?= chran($n["zbozi"] ?: "—") ?></td>
+          <td class="cislo vpravo" data-popis="Cena"><?= chran(castka($n["cena"])) ?></td>
+          <td data-popis="Stav"><?= stitek_nabidky($n["stav"]) ?>
             <?php if ($n["stav"] === "neprosla"): ?><span class="druhotny"><?= chran(DUVODY_NABIDKY[$n["duvod"]] ?? "") ?></span><?php endif; ?>
             <?php if ($n["preprava_cislo"]): ?><span class="druhotny"><a href="<?= chran(odkaz("preprava", ["id" => $n["preprava_id"]])) ?>">přeprava <?= chran($n["preprava_cislo"]) ?></a></span><?php endif; ?></td>
-          <td><?= chran(datum($n["vytvoreno"])) ?><?php if ($n["odeslana"]): ?><span class="druhotny">odeslána <?= chran(datum($n["odeslana"])) ?></span><?php endif; ?></td>
+          <td data-popis="Vznik"><?= chran(datum($n["vytvoreno"])) ?><?php if ($n["odeslana"]): ?><span class="druhotny">odeslána <?= chran(datum($n["odeslana"])) ?></span><?php endif; ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>

@@ -197,21 +197,21 @@ if (je_spravce() && trim(nastaveni("podminky")) === "") : ?>
   <p class="prazdno">Na dnešek ani zítřek není naplánovaná žádná nakládka.</p>
 <?php else: ?>
   <div class="tabulka-obal">
-    <table class="id-tabulka">
+    <table class="id-tabulka karty">
       <thead>
         <tr><th>Číslo</th><th>Den</th><th>Nakládka</th><th>Vykládka</th><th>Zákazník</th><th>Dopravce</th><th>Stav</th></tr>
       </thead>
       <tbody>
       <?php foreach ($blizke as $p): ?>
         <tr>
-          <td><a href="<?= chran(odkaz("preprava", ["id" => $p["id"]])) ?>" class="cislo"><?= chran($p["cislo"]) ?></a></td>
-          <td><?= $p["nakladka_datum"] === $dnes ? "dnes" : "zítra" ?>
+          <td data-popis="Číslo"><a href="<?= chran(odkaz("preprava", ["id" => $p["id"]])) ?>" class="cislo"><?= chran($p["cislo"]) ?></a></td>
+          <td data-popis="Den"><?= $p["nakladka_datum"] === $dnes ? "dnes" : "zítra" ?>
             <span class="druhotny"><?= chran(okno($p["nakladka_od"], $p["nakladka_do"])) ?></span></td>
-          <td><?= chran($p["nakladka_misto"] ?: "—") ?></td>
-          <td><?= chran($p["vykladka_misto"] ?: "—") ?></td>
-          <td><?= chran($p["zakaznik_nazev"] ?: "—") ?></td>
-          <td><?= $p["dopravce_nazev"] ? chran($p["dopravce_nazev"]) : '<span class="stitek stitek-zrus">nezajištěno</span>' ?></td>
-          <td><?= stitek_stavu($p["stav"]) ?></td>
+          <td data-popis="Nakládka"><?= chran($p["nakladka_misto"] ?: "—") ?></td>
+          <td data-popis="Vykládka"><?= chran($p["vykladka_misto"] ?: "—") ?></td>
+          <td data-popis="Zákazník"><?= chran($p["zakaznik_nazev"] ?: "—") ?></td>
+          <td data-popis="Dopravce"><?= $p["dopravce_nazev"] ? chran($p["dopravce_nazev"]) : '<span class="stitek stitek-zrus">nezajištěno</span>' ?></td>
+          <td data-popis="Stav"><?= stitek_stavu($p["stav"]) ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>

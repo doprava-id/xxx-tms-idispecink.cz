@@ -46,11 +46,48 @@
   --text:      var(--krem);
   --text-tlum: #A5AEB0;
 
+  /* Žlutá jako barva TEXTU a tenkých linek jde vždy přes --akcent, nikdy
+     přímo. Na tmavých plochách je to firemní žlutá; ve světlém režimu
+     provozního systému tmavší jantar odvozený z ní, protože žlutý text na
+     krémové nejde přečíst. Plochy (tlačítka, pruhy) zůstávají žluté. */
+  --akcent:       var(--zluta);
+  --akcent-tmavy: var(--zluta-tmava);
+
   --pismo: "Segoe UI", Inter, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --pismo-cislo: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 
   --sirka: 1160px;
   --mezera: 24px;
+}
+
+/* Světlý režim provozního systému. Zapíná ho atribut data-vzhled na <html>
+   podle volby uživatele; web sám ho nepoužívá. Firemní barvy nahoře se
+   nemění — mění se jen odvozené plochy, linky, text a stavy. Odlesky jsou
+   světlé hrany, brouš je jemný šedý. */
+:root[data-vzhled="svetly"] {
+  --ok-text:    #1E6B3C;  --ok-plocha:    #DCEFE2;
+  --pozor-text: #7A5200;  --pozor-plocha: #FBF0CE;
+  --chyba-text: #A8232F;  --chyba-plocha: #F9DEE0;
+
+  --pozadi:      #ECE9E1;
+  --povrch:      #FFFFFF;
+  --povrch-2:    #F3F0EA;
+  --linka:       #CFCABE;
+  --linka-slaba: #E6E2D9;
+  --linka-pole:  #7E8A8E;
+
+  --odlesk:       rgba(255, 255, 255, .7);
+  --odlesk-silny: rgba(255, 255, 255, .9);
+  --brouseny:     repeating-linear-gradient(90deg,
+                    rgba(52, 63, 65, .035) 0 1px, transparent 1px 3px);
+  --kov-pozadi: linear-gradient(180deg, #F2EFE8 0%, #ECE9E1 60%, #E6E2DA 100%);
+  --kov-povrch: linear-gradient(165deg, #FFFFFF 0%, #FAF8F4 48%, #F3F0EA 100%);
+  --kov-vyssi:  linear-gradient(165deg, #F6F3EE 0%, #EEEAE2 52%, #E6E2DA 100%);
+
+  --text:      #1F2729;
+  --text-tlum: #5B6669;
+  --akcent:       #7A5800;
+  --akcent-tmavy: #5C4200;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -83,8 +120,8 @@ body {
 
 img { max-width: 100%; height: auto; display: block; }
 
-a { color: var(--zluta); text-decoration: none; }
-a:hover { color: var(--zluta-tmava); text-decoration: underline; }
+a { color: var(--akcent); text-decoration: none; }
+a:hover { color: var(--akcent-tmavy); text-decoration: underline; }
 
 h1, h2, h3, h4, h5 { line-height: 1.2; margin: 0 0 .5em; font-weight: 700; letter-spacing: -0.01em; }
 h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); }
@@ -115,7 +152,7 @@ p:last-child { margin-bottom: 0; }
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--zluta);
+  color: var(--akcent);
   border-bottom: 2px solid var(--zluta);
   padding-bottom: 4px;
   margin-bottom: 16px;
@@ -150,9 +187,9 @@ p:last-child { margin-bottom: 0; }
   padding-top: 8px; padding-bottom: 8px;
 }
 .horni-pruh span, .horni-pruh a { color: var(--text-tlum); }
-.horni-pruh a:hover { color: var(--zluta); }
+.horni-pruh a:hover { color: var(--akcent); }
 .horni-pruh b { color: var(--text); font-weight: 700; }
-.horni-pruh .pohotovost b { color: var(--zluta); }
+.horni-pruh .pohotovost b { color: var(--akcent); }
 
 @media (max-width: 700px) {
   /* Telefon i e-mail jsou dostupné v hlavičce a patičce — nahoře zůstane
@@ -193,7 +230,7 @@ p:last-child { margin-bottom: 0; }
   font-weight: 700; font-size: .95rem; white-space: nowrap;
   color: var(--text);
 }
-.telefon:hover { color: var(--zluta); text-decoration: none; }
+.telefon:hover { color: var(--akcent); text-decoration: none; }
 .telefon .telefon-kratky { display: none; }
 
 .menu { display: flex; align-items: center; gap: 4px; }
@@ -204,14 +241,14 @@ p:last-child { margin-bottom: 0; }
   padding: 8px 12px;
   border-bottom: 2px solid transparent;
 }
-.menu a:hover { color: var(--zluta); text-decoration: none; }
-.menu a[aria-current="page"] { color: var(--zluta); border-bottom-color: var(--zluta); }
+.menu a:hover { color: var(--akcent); text-decoration: none; }
+.menu a[aria-current="page"] { color: var(--akcent); border-bottom-color: var(--zluta); }
 
 /* Dvě hlavní akce v menu — Pro dopravce a Poptat přepravu. Záměrně mají
    stejnou vizuální váhu: žádná služba nestojí nad druhou. */
 .menu a.tlacitko.obrys {
   border: 1px solid var(--zluta);
-  color: var(--zluta);
+  color: var(--akcent);
   padding: 8px 14px;
   font-size: .9rem;
   margin-left: 6px;
@@ -226,13 +263,13 @@ p:last-child { margin-bottom: 0; }
   background: none; border: 1px solid var(--linka); color: var(--text);
   padding: 8px 12px; font: inherit; font-size: .9rem; cursor: pointer;
 }
-.menu-prepinac:hover { border-color: var(--zluta); color: var(--zluta); }
+.menu-prepinac:hover { border-color: var(--zluta); color: var(--akcent); }
 
 /* Předěl je na 1080 px — menu se dvěma akčními tlačítky a telefonem se
    do užší hlavičky nevejde a přeteklo by do vodorovného scrollu. */
 @media (max-width: 1080px) {
   .menu-prepinac { display: block; }
-  .telefon { border: 1px solid var(--zluta); color: var(--zluta); padding: 8px 12px; font-size: .9rem; }
+  .telefon { border: 1px solid var(--zluta); color: var(--akcent); padding: 8px 12px; font-size: .9rem; }
   .telefon:hover { border-color: var(--krem); color: var(--krem); }
   .telefon .telefon-cislo { display: none; }
   .telefon .telefon-kratky { display: inline; }
@@ -280,7 +317,7 @@ p:last-child { margin-bottom: 0; }
   font-family: inherit;
 }
 .tlacitko:hover { background: var(--zluta-tmava); border-color: var(--zluta-tmava); color: var(--antracit); text-decoration: none; }
-.tlacitko.obrys { background: none; color: var(--zluta); }
+.tlacitko.obrys { background: none; color: var(--akcent); }
 .tlacitko.obrys:hover { background: none; border-color: var(--krem); color: var(--krem); }
 
 .tlacitka { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
@@ -497,11 +534,11 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
            box-shadow: inset 0 1px 0 var(--odlesk-silny);
            padding: 48px 0 28px; margin-top: 0; }
 .paticka .mrizka { gap: 32px; }
-.paticka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta); margin-bottom: 14px; }
+.paticka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--akcent); margin-bottom: 14px; }
 .paticka ul { list-style: none; margin: 0; padding: 0; }
 .paticka li { padding: 5px 0; }
 .paticka a { color: var(--text-tlum); font-size: .94rem; }
-.paticka a:hover { color: var(--zluta); }
+.paticka a:hover { color: var(--akcent); }
 .paticka .logo img { height: 34px; margin-bottom: 14px; }
 .paticka p { color: var(--text-tlum); font-size: .92rem; }
 .id-paticka {
@@ -532,7 +569,7 @@ table.id-tabulka td.cislo { font-family: var(--pismo-cislo); text-align: right; 
   font: inherit; font-size: inherit;
   color: var(--text-tlum); text-decoration: underline; cursor: pointer;
 }
-.cookies-nastaveni:hover { color: var(--zluta); }
+.cookies-nastaveni:hover { color: var(--akcent); }
 
 /* Honeypot proti robotům: pole je mimo obrazovku, člověk ho nikdy nevyplní. */
 .nevyplnovat { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

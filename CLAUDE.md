@@ -73,7 +73,7 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
     souhrn e-mailem), totp.php (druhý faktor bez knihoven), zalohy.php
     (denní kopie databáze)
   zdroj/stranky/             Jedna stránka = jeden soubor
-    instalace, prihlaseni, odhlaseni, prehled, prepravy, preprava,
+    instalace, prihlaseni, odhlaseni, prehled, hledat, prepravy, preprava,
     nabidky, nabidka (jen s právem na ceny),
     dispecink, vozy (plán vozů klientů), firmy, firma, mista, misto, linky, objednavka,
     fakturace, nastaveni, import, export, priloha,
@@ -121,7 +121,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **šestadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), účet (změna hesla, zapnutí druhého faktoru a přihlášení s kódem — kód spočítej z tajemství přes `totp_kod()`), přehled změn, stažení zálohy, **každou roli zvlášť** (brigádník nesmí vidět žádnou cenu, účetní nesmí měnit nic než doklady a faktury), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
+- u zásahu do aplikace i jejích **sedmadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), účet (změna hesla, zapnutí druhého faktoru a přihlášení s kódem — kód spočítej z tajemství přes `totp_kod()`), přehled změn, stažení zálohy, **každou roli zvlášť** (brigádník nesmí vidět žádnou cenu, účetní nesmí měnit nic než doklady a faktury), rychlé hledání (zkratka `/`), hromadné akce v seznamu přeprav, **světlý režim** (Můj účet → Vzhled; projeď stejné stránky a v tisku i na obrazovce zkontroluj kontrast — světlý text na světlé ploše se rozbije nejsnáz), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -147,7 +147,16 @@ proměnnou dosáhnout nemůže, takže je barva natvrdo v `<head>` všech devít
 Odpovídá **hornímu pruhu a pozadí stránky** (`--pozadi`), ne hlavičce: nahoře stránky
 je pruh a při odrolování se schovanou hlavičkou je pod lištou prohlížeče rovnou pozadí.
 **Když se změní odstín horního pruhu, změň i těch devět meta značek**, jinak lišta
-prohlížeče na mobilu zůstane ve staré barvě.
+prohlížeče na mobilu zůstane ve staré barvě. (Provozní systém ji v `sablona.php`
+skládá sám: `#14191B` tmavě, `#ECE9E1` ve světlém režimu.)
+
+**Žlutá jako barva textu jde jen přes `--akcent`**, nikdy přímo přes `--zluta`.
+Na tmavých plochách je `--akcent` firemní žlutá, ve světlém režimu provozního
+systému (`:root[data-vzhled="svetly"]` tamtéž v `firemni-styl.css`) tmavý jantar
+z ní odvozený — žlutý text na krémové nejde přečíst. Plochy (tlačítka, pruhy,
+hlavičky tabulek) zůstávají žluté vždy. Světlý režim mění jen odvozené plochy,
+linky, text a stavy; firemní barvy nahoře v `:root` se nemění. Web sám světlý
+režim nepoužívá.
 
 Pravidlo zní „plocha, linka, text": vržené stíny, záře ani barevné přechody přes
 firemní barvy na web nepatří. Kovové odlesky tmavých ploch jsou jediná povolená výjimka
@@ -238,6 +247,7 @@ přihlášení.
 | souběžná úprava | karta přepravy nese `upraveno_pred`; kdo ukládá starší podobu, neprojde. Každé uložení zapisuje `upravil`; `vlastnik_id` říká, kdo má zásilku na starosti |
 | druhý faktor | TOTP v `totp.php`, tajemství jen v databázi (`uzivatele.totp_tajemstvi`), použitý krok se pamatuje proti přehrání kódu. Přihlášení má dva kroky: heslo, pak kód; `cekajici_2f` v sezení platí pět minut. Správce faktor jen vypíná, zapnout si ho musí každý sám |
 | zálohy | `zaloha_denni()` při prvním GET dne kopíruje databázi do `data/zalohy/` (SQLite `VACUUM INTO`, MySQL výpis SQL) a maže starší než měsíc; stažení jen správce přes `zaloha`. Adresář `data/` web nevydá |
+| tabulky na mobilu | tabulka s třídou `karty` se pod 620 px rozpadne na karty a popisky bere z `data-popis` buňky — **každé `<td>` takové tabulky ho musí mít**, jinak řádek na mobilu ztratí smysl. Tabulky bez třídy dál rolují do šířky |
 | `.tabulka-obal` | musí zůstat `position: relative`. Skryté popisky uvnitř široké tabulky jsou absolutně umístěné a bez toho roztáhnou stránku do vodorovného scrollu |
 | číslování | tvar řady drží Nastavení, ne kód. `dalsi_cislo()` navíc přeskočí číslo, které už existuje |
 | podmínky objednávky | **PLACEHOLDER.** Text dodá zadavatel v Nastavení. Objednávka bez něj vytiskne viditelné upozornění — nedoplňuj ho za něj |

@@ -33,7 +33,15 @@
   border-left: 1px solid var(--linka); margin-left: 8px;
 }
 .app-menu a.app-uzivatel { color: var(--text-tlum); font-size: .86rem; padding: 0 10px; border-left: 1px solid var(--linka); margin-left: 8px; }
-.app-menu a.app-uzivatel:hover { color: var(--zluta); }
+.app-menu a.app-uzivatel:hover { color: var(--akcent); }
+
+/* Rychlé hledání v hlavičce: jedno pole, zkratka „/". */
+.app-hledani { margin-left: 8px; }
+.app-hledani input {
+  width: 150px; background: var(--pozadi); border: 1px solid var(--linka-pole); color: var(--text);
+  font: inherit; font-size: .86rem; padding: 6px 9px;
+}
+.app-hledani input:focus { outline: none; border-color: var(--zluta); }
 .app-odhlasit { margin: 0 0 0 8px; }
 .app-odhlasit .tlacitko { padding: 6px 12px; font-size: .84rem; }
 
@@ -50,6 +58,8 @@
   .app-menu.otevreno { display: flex; }
   .app-menu a { padding: 12px 0; border-bottom: 1px solid var(--linka-slaba); }
   .app-uzivatel, .app-menu a.app-uzivatel { border-left: 0; margin: 10px 0 0; padding: 12px 0; }
+  .app-hledani { margin: 10px 0 0; }
+  .app-hledani input { width: 100%; padding: 10px 12px; }
   .app-odhlasit { margin: 10px 0 0; }
   .app-odhlasit .tlacitko { width: 100%; padding: 11px; }
 }
@@ -160,7 +170,7 @@
 .strankovani { display: flex; gap: 8px; align-items: center; justify-content: flex-end;
                margin-top: 16px; font-size: .9rem; color: var(--text-tlum); flex-wrap: wrap; }
 .strankovani a { border: 1px solid var(--linka); padding: 6px 12px; color: var(--text); }
-.strankovani a:hover { border-color: var(--zluta); color: var(--zluta); text-decoration: none; }
+.strankovani a:hover { border-color: var(--zluta); color: var(--akcent); text-decoration: none; }
 
 /* --- Formuláře ---------------------------------------------------------- */
 
@@ -191,7 +201,7 @@ fieldset.cast { border: 0; padding: 0; margin: 0; min-width: 0; }
 fieldset.cast[disabled] { opacity: .7; }
 .skupina { margin-bottom: 26px; }
 .skupina > h2 {
-  font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--zluta);
+  font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; color: var(--akcent);
   border-bottom: 1px solid var(--linka); padding-bottom: 6px; margin-bottom: 16px;
 }
 .pole-zaskrtnuti { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
@@ -235,7 +245,7 @@ fieldset.cast[disabled] { opacity: .7; }
   padding: 9px 11px; font-size: .84rem; color: var(--text);
 }
 .jizda:hover { border-color: var(--zluta); text-decoration: none; }
-.jizda b { display: block; font-family: var(--pismo-cislo); font-size: .8rem; color: var(--zluta); }
+.jizda b { display: block; font-family: var(--pismo-cislo); font-size: .8rem; color: var(--akcent); }
 .jizda .trasa { display: block; font-weight: 600; margin: 3px 0; line-height: 1.35; }
 .jizda .radek { display: block; color: var(--text-tlum); font-size: .8rem; }
 .jizda.bez-dopravce { border-left-color: var(--chyba-text); }
@@ -258,7 +268,7 @@ fieldset.cast[disabled] { opacity: .7; }
 
 /* Návrh ceny pod polem: text a tlačítko „použít". */
 .navrh-ceny { margin: -8px 0 14px; }
-.navrh-ceny .odkaz-tlacitko { color: var(--zluta); }
+.navrh-ceny .odkaz-tlacitko { color: var(--akcent); }
 .navrh-ceny .odkaz-tlacitko:hover { color: var(--krem); }
 
 /* --- Trasa (body jízdy) ------------------------------------------------- */
@@ -281,7 +291,8 @@ details > summary::-webkit-details-marker { display: none; }
 .plan-vozu col.sl-tyden { width: 112px; }
 .aplikace table.id-tabulka.plan-vozu td { padding: 6px; }
 .plan-vozu td.vuz b { display: block; font-size: .95rem; }
-.plan-vozu th.dnes { color: var(--zluta); }
+/* Dnešek v hlavičce plánu: hlavička je žlutá, žlutý text by v ní zmizel — dnešek se obrátí. */
+.plan-vozu th.dnes { background: var(--antracit); color: var(--krem); }
 .plan-vozu td.dnes { background: var(--povrch-2); }
 .plan-vozu .jizda { font-size: .8rem; padding: 7px 9px; margin-bottom: 6px; }
 .plan-vozu td > :last-child { margin-bottom: 0; }
@@ -292,8 +303,33 @@ details > summary::-webkit-details-marker { display: none; }
   display: block; border: 1px dashed var(--linka); padding: 6px 8px;
   font-size: .78rem; color: var(--text-tlum); text-align: center;
 }
-.plan-pridat:hover { color: var(--zluta); border-color: var(--zluta); text-decoration: none; }
+.plan-pridat:hover { color: var(--akcent); border-color: var(--zluta); text-decoration: none; }
 .plan-vozu tr.bez-vozu td.vuz b { color: var(--chyba-text); }
+
+/* --- Tabulky jako karty na mobilu ---------------------------------------- */
+
+/* Široká tabulka na úzkém displeji: každý řádek je karta, popisky sloupců
+   se berou z data-popis buňky. Tabulky bez třídy karty dál rolují do šířky. */
+@media (max-width: 620px) {
+  .aplikace table.id-tabulka.karty { min-width: 0; }
+  .aplikace table.id-tabulka.karty thead { display: none; }
+  .aplikace table.id-tabulka.karty tbody, .aplikace table.id-tabulka.karty tr { display: block; }
+  .aplikace table.id-tabulka.karty tr { padding: 8px 0; border-top: 2px solid var(--linka); }
+  /* Popisek stojí absolutně vlevo, obsah teče v pravém sloupci jako běžný
+     text — proto blok a odsazení, ne flex: uvnitř buňky je text a řádky
+     .druhotny, které se mají zalamovat za sebou. */
+  .aplikace table.id-tabulka.karty td {
+    display: block; position: relative; padding: 4px 12px 4px calc(34% + 12px); border: 0; text-align: left;
+  }
+  .aplikace table.id-tabulka.karty td.vpravo, .aplikace table.id-tabulka.karty td.cislo { text-align: left; }
+  .aplikace table.id-tabulka.karty td::before {
+    content: attr(data-popis); position: absolute; left: 12px; top: 5px; width: 32%; color: var(--text-tlum);
+    font-family: var(--pismo); font-size: .76rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.3;
+  }
+  .aplikace table.id-tabulka.karty td:empty { display: none; }
+  .aplikace table.id-tabulka.karty .druhotny { display: inline; margin-left: 6px; }
+  .aplikace table.id-tabulka.karty tr.zrusena td { opacity: .55; }
+}
 
 /* --- Protokol ----------------------------------------------------------- */
 
@@ -317,7 +353,7 @@ details > summary::-webkit-details-marker { display: none; }
 .objednavka-hlava .cislo { text-align: right; }
 .objednavka-hlava .cislo b { display: block; font-size: 1.35rem; font-family: var(--pismo-cislo); }
 .objednavka h2 { font-size: .82rem; letter-spacing: .1em; text-transform: uppercase;
-                 color: var(--zluta); margin: 22px 0 10px; }
+                 color: var(--akcent); margin: 22px 0 10px; }
 .objednavka .strany { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .objednavka .strany p { font-size: .92rem; }
 .objednavka .podminky { font-size: .84rem; color: var(--text-tlum); white-space: pre-line; }
