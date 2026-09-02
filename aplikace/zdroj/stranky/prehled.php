@@ -13,25 +13,25 @@ $tyden_do = date("Y-m-d", strtotime("+7 days"));
 $mesic_od = date("Y-m-01");
 $mesic_do = date("Y-m-t");
 
-$pocet_dnes  = (int)hodnota("SELECT COUNT(*) FROM prepravy WHERE nakladka_datum = ? AND stav <> 'zruseno'", [$dnes]);
-$pocet_tyden = (int)hodnota("SELECT COUNT(*) FROM prepravy WHERE nakladka_datum BETWEEN ? AND ? AND stav <> 'zruseno'", [$dnes, $tyden_do]);
+$pocet_dnes  = (int)hodnota("SELECT COUNT(*) FROM prepravy WHERE sablona = 0 AND nakladka_datum = ? AND stav <> 'zruseno'", [$dnes]);
+$pocet_tyden = (int)hodnota("SELECT COUNT(*) FROM prepravy WHERE sablona = 0 AND nakladka_datum BETWEEN ? AND ? AND stav <> 'zruseno'", [$dnes, $tyden_do]);
 
 $bez_dopravce = radky(
   "SELECT p.* FROM prepravy p
-    WHERE (p.dopravce_id IS NULL OR p.dopravce_id = 0) AND p.stav <> 'zruseno'
+    WHERE p.sablona = 0 AND (p.dopravce_id IS NULL OR p.dopravce_id = 0) AND p.stav <> 'zruseno'
       AND (p.nakladka_datum IS NULL OR p.nakladka_datum <= ?)
     ORDER BY COALESCE(p.nakladka_datum, '9999-12-31'), p.id LIMIT 20", [$tyden_do]);
 
 $chybi_doklady = radky(
   "SELECT p.*, d.nazev AS dopravce_nazev FROM prepravy p
      LEFT JOIN firmy d ON d.id = p.dopravce_id
-    WHERE p.doklady <> 'prijato' AND p.stav IN ('vylozeno','doklady','fakturovano')
+    WHERE p.sablona = 0 AND p.doklady <> 'prijato' AND p.stav IN ('vylozeno','doklady','fakturovano')
     ORDER BY COALESCE(p.vykladka_datum, p.nakladka_datum), p.id LIMIT 20");
 
 $nevyfakturovano = $ceny ? radky(
   "SELECT p.*, z.nazev AS zakaznik_nazev FROM prepravy p
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
-    WHERE (p.faktura_vydana IS NULL OR p.faktura_vydana = '')
+    WHERE p.sablona = 0 AND (p.faktura_vydana IS NULL OR p.faktura_vydana = '')
       AND p.stav IN ('vylozeno','doklady')
     ORDER BY COALESCE(p.vykladka_datum, p.nakladka_datum), p.id LIMIT 20") : [];
 
@@ -39,7 +39,7 @@ $blizke = radky(
   "SELECT p.*, d.nazev AS dopravce_nazev, z.nazev AS zakaznik_nazev FROM prepravy p
      LEFT JOIN firmy d ON d.id = p.dopravce_id
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
-    WHERE p.nakladka_datum IN (?, ?) AND p.stav <> 'zruseno'
+    WHERE p.sablona = 0 AND p.nakladka_datum IN (?, ?) AND p.stav <> 'zruseno'
     ORDER BY p.nakladka_datum, COALESCE(p.nakladka_od, '99:99'), p.id", [$dnes, $zitra]);
 
 $mesic = radek(
@@ -47,7 +47,7 @@ $mesic = radek(
           COALESCE(SUM(cena_zakaznik), 0) AS trzba,
           COALESCE(SUM(cena_dopravce), 0) AS naklad
      FROM prepravy
-    WHERE stav <> 'zruseno' AND nakladka_datum BETWEEN ? AND ?", [$mesic_od, $mesic_do]);
+    WHERE sablona = 0 AND stav <> 'zruseno' AND nakladka_datum BETWEEN ? AND ?", [$mesic_od, $mesic_do]);
 
 hlava("Přehled", "prehled");
 hlava_stranky("Provozní systém", "Přehled",

@@ -148,7 +148,7 @@ $h = function (string $klic, string $vychozi = "") use ($firma, $ares) {
 $vozidla = $firma ? radky("SELECT * FROM vozidla WHERE firma_id = ? AND aktivni = 1 ORDER BY spz", [(int)$firma["id"]]) : [];
 $ridici  = $firma ? radky("SELECT * FROM ridici  WHERE firma_id = ? AND aktivni = 1 ORDER BY LOWER(jmeno)", [(int)$firma["id"]]) : [];
 $posledni = $firma ? radky(
-  "SELECT * FROM prepravy WHERE dopravce_id = ? OR zakaznik_id = ?
+  "SELECT * FROM prepravy WHERE sablona = 0 AND (dopravce_id = ? OR zakaznik_id = ?)
     ORDER BY COALESCE(nakladka_datum, '') DESC, id DESC LIMIT 12",
   [(int)$firma["id"], (int)$firma["id"]]) : [];
 

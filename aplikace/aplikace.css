@@ -166,8 +166,14 @@
 .formular + .formular { margin-top: 20px; }
 .pole-radek.tri  { grid-template-columns: repeat(3, 1fr); }
 .pole-radek.ctyri{ grid-template-columns: repeat(4, 1fr); }
+/* Pole přes dva sloupce. Na jednosloupcové mřížce se musí vrátit na jeden,
+   jinak si mřížka přidá sloupce navíc a stránka přeteče do šířky. */
+.pole-radek .pole.sirsi { grid-column: span 2; }
 @media (max-width: 900px) { .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 620px) { .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: 1fr; } }
+@media (max-width: 620px) {
+  .pole-radek.tri, .pole-radek.ctyri { grid-template-columns: 1fr; }
+  .pole-radek .pole.sirsi { grid-column: auto; }
+}
 
 /* Pole a tlačítko na jednom řádku — IČO a načtení z rejstříku. */
 .pole-s-tlacitkem { display: flex; gap: 8px; }
@@ -185,6 +191,9 @@
 .pole-zaskrtnuti label { font-size: .93rem; font-weight: 400; margin: 0; }
 
 .app-sloupce { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
+/* Sloupec mřížky má výchozí min-width: auto a rolovací obal tabulky uvnitř
+   ho i tak natáhne na šířku tabulky. S nulou se obal smí zúžit a rolovat. */
+.app-sloupce > * { min-width: 0; }
 @media (max-width: 1000px) { .app-sloupce { grid-template-columns: 1fr; } }
 
 /* --- Dispečerská tabule ------------------------------------------------- */
@@ -234,6 +243,17 @@
   color: var(--text-tlum); text-decoration: underline; cursor: pointer;
 }
 .odkaz-tlacitko:hover { color: var(--chyba-text); }
+
+/* --- Trasa (body jízdy) ------------------------------------------------- */
+
+.aplikace table.id-tabulka.trasa { min-width: 640px; }
+.aplikace table.id-tabulka.trasa td { vertical-align: middle; }
+.bod-splneny td { color: var(--text-tlum); }
+.bod-splneny td b { color: var(--text-tlum); text-decoration: line-through; text-decoration-color: var(--linka); }
+button.stitek { font-family: inherit; line-height: 1.4; }
+.trasa-pocet { color: var(--text-tlum); font-size: .8rem; white-space: nowrap; }
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
 
 /* --- Protokol ----------------------------------------------------------- */
 

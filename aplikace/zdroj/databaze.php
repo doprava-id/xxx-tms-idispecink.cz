@@ -91,6 +91,10 @@ $SCHEMA = [
     "ridic_jmeno" => "text",
     "ridic_telefon" => "text",
 
+    /* ODVOZENÝ SOUHRN TRASY — první nakládka a poslední vykládka.
+       Zdrojem pravdy jsou body v tabulce `body`; tahle pole přepočítává
+       prepocitej_trasu() při každé změně bodů. Seznamy, tabule a podklady
+       je čtou, protože je to rychlé, ale nikdo je nesmí zapisovat přímo. */
     "nakladka_misto"  => "text",
     "nakladka_adresa" => "text",
     "nakladka_datum"  => "datum",
@@ -102,6 +106,12 @@ $SCHEMA = [
     "vykladka_datum"  => "datum",
     "vykladka_od"     => "cas",
     "vykladka_do"     => "cas",
+
+    /* Stálé linky: šablona se v seznamech neukazuje, jen se z ní generuje. */
+    "sablona"          => "ano_ne",
+    "linka_nazev"      => "text",
+    "linka_dny"        => "text",     /* „1,3,5" = pondělí, středa, pátek */
+    "zdroj_sablony_id" => "cele",     /* z které šablony přeprava vznikla */
 
     "zbozi"        => "text",
     "hmotnost"     => "cele",      /* kg */
@@ -126,6 +136,45 @@ $SCHEMA = [
     "vytvoreno" => "cas_zapisu",
     "upraveno"  => "cas_zapisu",
     "vytvoril"  => "cele",
+  ],
+
+  /* Body trasy — zdroj pravdy o tom, kudy jízda vede. Zboží, hmotnost
+     a palety jsou u bodu nepovinně: u celovozu zůstanou prázdné a platí
+     souhrn u přepravy, u rozvozu se vyplní po bodech. */
+  "body" => [
+    "id"          => "id",
+    "preprava_id" => "cele",
+    "poradi"      => "cele",
+    "druh"        => "text",         /* nakladka | vykladka */
+    "misto_id"    => "cele",         /* odkaz do adresáře; text níže je opis */
+    "misto"       => "text",         /* obec */
+    "adresa"      => "text",
+    "datum"       => "datum",
+    "od"          => "cas",
+    "do"          => "cas",
+    "kontakt"     => "text",
+    "poznamka"    => "text",
+    "zbozi"       => "text",
+    "hmotnost"    => "cele",
+    "palet"       => "cele",
+    "splneno"     => "ano_ne",
+    "splneno_kdy" => "cas_zapisu",
+  ],
+
+  /* Adresář míst — společný číselník, firma nepovinně. */
+  "mista" => [
+    "id"              => "id",
+    "nazev"           => "text",
+    "firma_id"        => "cele",
+    "ulice"           => "text",
+    "mesto"           => "text",
+    "psc"             => "text",
+    "kontakt_jmeno"   => "text",
+    "kontakt_telefon" => "text",
+    "oteviraci_doba"  => "text",
+    "poznamka"        => "dlouhy_text",
+    "aktivni"         => "ano_ne",
+    "vytvoreno"       => "cas_zapisu",
   ],
 
   "prilohy" => [
@@ -169,6 +218,9 @@ $INDEXY = [
   "idx_prepravy_zakaznik"  => ["prepravy", "zakaznik_id"],
   "idx_udalosti_preprava"  => ["udalosti", "preprava_id"],
   "idx_prilohy_preprava"   => ["prilohy", "preprava_id"],
+  "idx_body_preprava"      => ["body", "preprava_id"],
+  "idx_mista_nazev"        => ["mista", "nazev"],
+  "idx_prepravy_sablona"   => ["prepravy", "sablona"],
   "idx_vozidla_firma"      => ["vozidla", "firma_id"],
   "idx_ridici_firma"       => ["ridici", "firma_id"],
   "idx_nastaveni_klic"     => ["nastaveni", "klic"],

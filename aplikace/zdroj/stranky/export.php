@@ -87,17 +87,19 @@ if ($co === "fakturace") {
   $soubor = "prepravy-" . date("Y-m-d") . ".csv";
 }
 
-$podminka = $kde ? " WHERE " . implode(" AND ", $kde) : "";
+$kde[] = "p.sablona = 0";
+$podminka = " WHERE " . implode(" AND ", $kde);
 
 $data = radky(
-  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev
+  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev,
+          (SELECT COUNT(*) FROM body b WHERE b.preprava_id = p.id) AS bodu
      FROM prepravy p
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
      LEFT JOIN firmy d ON d.id = p.dopravce_id" . $podminka . "
     ORDER BY COALESCE(p.nakladka_datum, '9999-12-31'), p.id", $parametry);
 
 $hlavicka = [
-  "Číslo", "Stav", "Zákazník", "Reference zákazníka",
+  "Číslo", "Stav", "Zákazník", "Reference zákazníka", "Bodů trasy",
   "Nakládka místo", "Nakládka adresa", "Nakládka datum", "Nakládka od", "Nakládka do",
   "Vykládka místo", "Vykládka adresa", "Vykládka datum", "Vykládka od", "Vykládka do",
   "Zboží", "Hmotnost kg", "Palet", "LDM", "Vozidlo", "Požadavky",
@@ -114,7 +116,7 @@ if ($ceny) { $hlavicka[] = "Vydaná faktura"; $hlavicka[] = "Marže"; }
 $vystup = [];
 foreach ($data as $p) {
   $radek = [
-    $p["cislo"], nazev_stavu($p["stav"]), $p["zakaznik_nazev"], $p["ref_zakaznika"],
+    $p["cislo"], nazev_stavu($p["stav"]), $p["zakaznik_nazev"], $p["ref_zakaznika"], (int)$p["bodu"],
     $p["nakladka_misto"], $p["nakladka_adresa"], csv_datum($p["nakladka_datum"]), $p["nakladka_od"], $p["nakladka_do"],
     $p["vykladka_misto"], $p["vykladka_adresa"], csv_datum($p["vykladka_datum"]), $p["vykladka_od"], $p["vykladka_do"],
     $p["zbozi"], $p["hmotnost"], $p["palet"], $p["ldm"], nazev_typu_vozidla($p["typ_vozidla"]), $p["pozadavky"],

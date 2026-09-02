@@ -1,9 +1,13 @@
 <?php
 /* Detail přepravy — jediné místo, kde se zásilka zakládá a mění.
 
-   Vozidlo a řidič se vybírají z číselníku dopravce, ale zároveň se
-   opisují do textových polí. Objednávka pak drží to, co bylo v okamžiku
-   vystavení dohodnuté, i když se karta vozidla později změní. */
+   Nová přeprava se zakládá s jednou nakládkou a jednou vykládkou, protože
+   tak vypadá většina celovozových jízd. Z nich vzniknou dva body trasy;
+   na detailu se pak dají přidávat další, přehazovat a odškrtávat.
+
+   Vozidlo, řidič i místo se vybírají z číselníku, ale zároveň se opisují
+   do textových polí. Objednávka pak drží to, co bylo v okamžiku vystavení
+   dohodnuté, i když se karta později změní. */
 
 if (!defined("APLIKACE")) { http_response_code(403); exit("Přístup odepřen."); }
 
@@ -20,6 +24,25 @@ if (!$nova) {
     presmeruj(odkaz("prepravy"));
   }
 }
+$zpet = function () use ($preprava) { return odkaz("preprava", ["id" => $preprava["id"]]); };
+
+/* Údaje bodu z formuláře — společné pro přidání i úpravu. */
+function bod_z_formulare(): array {
+  return [
+    "druh"     => isset(DRUHY_BODU[vstup("druh")]) ? vstup("druh") : "nakladka",
+    "misto_id" => vstup_cislo("misto_id") ?: null,
+    "misto"    => vstup("misto"),
+    "adresa"   => vstup("adresa"),
+    "datum"    => vstup_datum("datum"),
+    "od"       => vstup("od"),
+    "do"       => vstup("do"),
+    "kontakt"  => vstup("kontakt"),
+    "poznamka" => vstup("bod_poznamka"),
+    "zbozi"    => vstup("bod_zbozi"),
+    "hmotnost" => vstup_cislo("bod_hmotnost"),
+    "palet"    => vstup_cislo("bod_palet"),
+  ];
+}
 
 /* --- Zápis -------------------------------------------------------------- */
 
@@ -35,7 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $r_jmeno = vstup("ridic_jmeno");
     $r_tel   = vstup("ridic_telefon");
 
-    /* Opis z číselníku, když se pole nechalo prázdné. */
     if ($vozidlo_id && $spz === "") {
       $v = radek("SELECT spz FROM vozidla WHERE id = ?", [$vozidlo_id]);
       if ($v) $spz = (string)$v["spz"];
@@ -59,18 +81,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       "spz"           => $spz,
       "ridic_jmeno"   => $r_jmeno,
       "ridic_telefon" => $r_tel,
-
-      "nakladka_misto"  => vstup("nakladka_misto"),
-      "nakladka_adresa" => vstup("nakladka_adresa"),
-      "nakladka_datum"  => vstup_datum("nakladka_datum"),
-      "nakladka_od"     => vstup("nakladka_od"),
-      "nakladka_do"     => vstup("nakladka_do"),
-
-      "vykladka_misto"  => vstup("vykladka_misto"),
-      "vykladka_adresa" => vstup("vykladka_adresa"),
-      "vykladka_datum"  => vstup_datum("vykladka_datum"),
-      "vykladka_od"     => vstup("vykladka_od"),
-      "vykladka_do"     => vstup("vykladka_do"),
 
       "zbozi"       => vstup("zbozi"),
       "hmotnost"    => vstup_cislo("hmotnost"),
@@ -98,35 +108,132 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $data["faktura_vydana"] = vstup("faktura_vydana");
     }
 
-    if ($data["nakladka_misto"] === "" && $data["vykladka_misto"] === "") {
-      vzkaz("chyba", "Vyplňte aspoň místo nakládky nebo vykládky.");
-    } elseif ($nova) {
-      $data["cislo"]     = dalsi_cislo();
-      $data["vytvoreno"] = date("Y-m-d H:i:s");
-      $data["vytvoril"]  = (int)uzivatel()["id"];
-      $novy = vloz("prepravy", $data);
-      zapis_udalost($novy, "Přeprava " . $data["cislo"] . " založena");
-      vzkaz("ok", "Přeprava " . $data["cislo"] . " založena.");
-      presmeruj(odkaz("preprava", ["id" => $novy]));
+    if ($nova) {
+      $trasa = [
+        "nakladka_misto"  => vstup("nakladka_misto"),
+        "nakladka_adresa" => vstup("nakladka_adresa"),
+        "nakladka_datum"  => vstup_datum("nakladka_datum"),
+        "nakladka_od"     => vstup("nakladka_od"),
+        "nakladka_do"     => vstup("nakladka_do"),
+        "vykladka_misto"  => vstup("vykladka_misto"),
+        "vykladka_adresa" => vstup("vykladka_adresa"),
+        "vykladka_datum"  => vstup_datum("vykladka_datum"),
+        "vykladka_od"     => vstup("vykladka_od"),
+        "vykladka_do"     => vstup("vykladka_do"),
+        "stav"            => $data["stav"],
+      ];
+      if ($trasa["nakladka_misto"] === "" && $trasa["vykladka_misto"] === "") {
+        vzkaz("chyba", "Vyplňte aspoň místo nakládky nebo vykládky.");
+      } else {
+        $data["cislo"]     = dalsi_cislo();
+        $data["vytvoreno"] = date("Y-m-d H:i:s");
+        $data["vytvoril"]  = (int)uzivatel()["id"];
+        $data["sablona"]   = 0;
+        $novy = vloz("prepravy", $data);
+        zaloz_body_z_poli($novy, $trasa);
+        prepocitej_trasu($novy);
+        zapis_udalost($novy, "Přeprava " . $data["cislo"] . " založena");
+        vzkaz("ok", "Přeprava " . $data["cislo"] . " založena. Další body trasy přidáte níže.");
+        presmeruj(odkaz("preprava", ["id" => $novy]));
+      }
     } else {
+      /* Stálá linka — jen u existující přepravy. */
+      $data["sablona"]     = vstup_ano_ne("sablona");
+      $data["linka_nazev"] = vstup("linka_nazev");
+      $dny = [];
+      for ($d = 1; $d <= 7; $d++) if (vstup("den_" . $d) !== "") $dny[] = $d;
+      $data["linka_dny"] = implode(",", $dny);
+
       if ($preprava["stav"] !== $data["stav"]) {
         zapis_udalost((int)$preprava["id"],
           "Stav změněn: " . nazev_stavu($preprava["stav"]) . " → " . nazev_stavu($data["stav"]));
+        srovnej_body_se_stavem((int)$preprava["id"], $data["stav"]);
       }
       if ((int)$preprava["dopravce_id"] !== (int)$dopravce_id) {
         $nazev = $dopravce_id ? (string)hodnota("SELECT nazev FROM firmy WHERE id = ?", [$dopravce_id]) : "nikdo";
         zapis_udalost((int)$preprava["id"], "Dopravce: " . $nazev);
       }
       uprav("prepravy", (int)$preprava["id"], $data);
+      prepocitej_trasu((int)$preprava["id"]);
       vzkaz("ok", "Změny uloženy.");
-      presmeruj(odkaz("preprava", ["id" => $preprava["id"]]));
+      presmeruj($zpet());
     }
+
+  /* --- Body trasy --- */
+
+  } elseif ($akce === "bod_pridat" && $preprava) {
+    $b = bod_z_formulare();
+    if ($b["misto"] === "" && !$b["misto_id"]) {
+      vzkaz("chyba", "Bod trasy potřebuje aspoň obec nebo místo z adresáře.");
+    } else {
+      pridej_bod((int)$preprava["id"], $b);
+      zapis_udalost((int)$preprava["id"], "Přidán bod trasy: " . nazev_druhu($b["druh"]) . " " . ($b["misto"] ?: "z adresáře"));
+      vzkaz("ok", "Bod trasy přidán.");
+    }
+    presmeruj($zpet());
+
+  } elseif ($akce === "bod_ulozit" && $preprava) {
+    $bod_id = vstup_cislo("bod_id");
+    $bod = $bod_id ? radek("SELECT * FROM body WHERE id = ? AND preprava_id = ?", [$bod_id, (int)$preprava["id"]]) : null;
+    if ($bod) {
+      uprav_bod((int)$bod["id"], bod_z_formulare());
+      vzkaz("ok", "Bod trasy upraven.");
+    }
+    presmeruj($zpet());
+
+  } elseif (in_array($akce, ["bod_smazat", "bod_vys", "bod_niz", "bod_splnit", "bod_odsplnit"], true) && $preprava) {
+    $bod_id = vstup_cislo("bod_id");
+    $bod = $bod_id ? radek("SELECT * FROM body WHERE id = ? AND preprava_id = ?", [$bod_id, (int)$preprava["id"]]) : null;
+    if ($bod) {
+      if ($akce === "bod_smazat") {
+        if ((int)hodnota("SELECT COUNT(*) FROM body WHERE preprava_id = ?", [(int)$preprava["id"]]) <= 1) {
+          vzkaz("chyba", "Poslední bod trasy smazat nejde — jízda musí někam vést.");
+        } else {
+          smaz_bod((int)$bod["id"]);
+          zapis_udalost((int)$preprava["id"], "Smazán bod trasy: " . nazev_druhu($bod["druh"]) . " " . $bod["misto"]);
+          vzkaz("ok", "Bod trasy smazán.");
+        }
+      } elseif ($akce === "bod_vys") {
+        posun_bod((int)$bod["id"], -1);
+      } elseif ($akce === "bod_niz") {
+        posun_bod((int)$bod["id"], 1);
+      } elseif ($akce === "bod_splnit") {
+        splnit_bod((int)$bod["id"], true);
+        zapis_udalost((int)$preprava["id"], "Splněno: " . nazev_druhu($bod["druh"]) . " " . $bod["misto"]);
+      } else {
+        splnit_bod((int)$bod["id"], false);
+      }
+    }
+    presmeruj($zpet());
+
+  /* --- Přílohy --- */
+
+  } elseif ($akce === "priloha_pridat" && $preprava) {
+    $id_prilohy = priloha_uloz((array)($_FILES["soubor"] ?? []), (int)$preprava["id"], $chyba_prilohy);
+    if ($id_prilohy) {
+      zapis_udalost((int)$preprava["id"], "Nahrána příloha " . (string)($_FILES["soubor"]["name"] ?? ""));
+      vzkaz("ok", "Příloha nahrána.");
+    } else {
+      vzkaz("chyba", (string)$chyba_prilohy);
+    }
+    presmeruj($zpet());
+
+  } elseif ($akce === "priloha_smazat" && $preprava) {
+    $pr = radek("SELECT * FROM prilohy WHERE id = ? AND preprava_id = ?", [vstup_cislo("priloha_id"), (int)$preprava["id"]]);
+    if ($pr) {
+      priloha_smaz($pr);
+      zapis_udalost((int)$preprava["id"], "Smazána příloha " . $pr["nazev"]);
+      vzkaz("ok", "Příloha smazána.");
+    }
+    presmeruj($zpet());
+
+  /* --- Celá přeprava --- */
 
   } elseif ($akce === "zrusit" && $preprava) {
     uprav("prepravy", (int)$preprava["id"], ["stav" => "zruseno", "upraveno" => date("Y-m-d H:i:s")]);
     zapis_udalost((int)$preprava["id"], "Přeprava zrušena");
     vzkaz("pozor", "Přeprava zrušena.");
-    presmeruj(odkaz("preprava", ["id" => $preprava["id"]]));
+    presmeruj($zpet());
 
   } elseif ($akce === "kopie" && $preprava) {
     $kopie = $preprava;
@@ -134,6 +241,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $kopie["cislo"]     = dalsi_cislo();
     $kopie["stav"]      = "nova";
     $kopie["doklady"]   = "ceka";
+    $kopie["sablona"]   = 0;
+    $kopie["linka_nazev"] = "";
+    $kopie["linka_dny"]   = "";
+    $kopie["zdroj_sablony_id"] = null;
     $kopie["faktura_vydana"]   = "";
     $kopie["faktura_prijata"]  = "";
     $kopie["objednavka_datum"] = null;
@@ -141,15 +252,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $kopie["upraveno"]  = date("Y-m-d H:i:s");
     $kopie["vytvoril"]  = (int)uzivatel()["id"];
     $novy = vloz("prepravy", $kopie);
+    zkopiruj_body((int)$preprava["id"], $novy);
     zapis_udalost($novy, "Založeno jako kopie přepravy " . $preprava["cislo"]);
-    vzkaz("ok", "Vytvořena kopie " . $kopie["cislo"] . ". Zkontrolujte termíny.");
+    vzkaz("ok", "Vytvořena kopie " . $kopie["cislo"] . ". Zkontrolujte termíny u bodů trasy.");
     presmeruj(odkaz("preprava", ["id" => $novy]));
 
   } elseif ($akce === "smazat" && $preprava) {
     if (!je_spravce()) {
       vzkaz("chyba", "Mazat přepravy může jen správce.");
-      presmeruj(odkaz("preprava", ["id" => $preprava["id"]]));
+      presmeruj($zpet());
     }
+    prilohy_smaz_u_prepravy((int)$preprava["id"]);
+    dotaz("DELETE FROM body WHERE preprava_id = ?", [(int)$preprava["id"]]);
     dotaz("DELETE FROM udalosti WHERE preprava_id = ?", [(int)$preprava["id"]]);
     dotaz("DELETE FROM prepravy WHERE id = ?", [(int)$preprava["id"]]);
     vzkaz("ok", "Přeprava " . $preprava["cislo"] . " smazána.");
@@ -168,21 +282,44 @@ $zakaznici = radky("SELECT id, nazev FROM firmy WHERE typ IN ('zakaznik','oboji'
   [(int)($preprava["zakaznik_id"] ?? 0)]);
 $dopravci  = radky("SELECT id, nazev FROM firmy WHERE typ IN ('dopravce','oboji') AND (aktivni = 1 OR id = ?) ORDER BY LOWER(nazev)",
   [(int)($preprava["dopravce_id"] ?? 0)]);
+$mista     = radky("SELECT id, nazev, mesto FROM mista WHERE aktivni = 1 ORDER BY LOWER(nazev)");
 
 $dopravce_id = (int)($preprava["dopravce_id"] ?? 0);
 $vozidla = $dopravce_id ? radky("SELECT id, spz, typ FROM vozidla WHERE firma_id = ? AND aktivni = 1 ORDER BY spz", [$dopravce_id]) : [];
 $ridici  = $dopravce_id ? radky("SELECT id, jmeno FROM ridici WHERE firma_id = ? AND aktivni = 1 ORDER BY LOWER(jmeno)", [$dopravce_id]) : [];
 
+$body     = $preprava ? body_prepravy((int)$preprava["id"]) : [];
+$prilohy  = $preprava ? radky("SELECT p.*, u.jmeno AS kdo FROM prilohy p LEFT JOIN uzivatele u ON u.id = p.uzivatel_id WHERE p.preprava_id = ? ORDER BY p.id", [(int)$preprava["id"]]) : [];
 $udalosti = $preprava ? radky(
   "SELECT u.*, z.jmeno AS kdo FROM udalosti u
      LEFT JOIN uzivatele z ON z.id = u.uzivatel_id
     WHERE u.preprava_id = ? ORDER BY u.id DESC LIMIT 30", [(int)$preprava["id"]]) : [];
+
+/* Bod, který se právě upravuje (otevřený inline formulář). */
+$upravovany = null;
+if ($preprava && vstup_cislo("bod")) {
+  foreach ($body as $b) if ((int)$b["id"] === vstup_cislo("bod")) $upravovany = $b;
+}
+
+/* Historie stejné trasy — poslední tři jízdy odjinud než z téhle. */
+$historie = [];
+if ($preprava && $h("nakladka_misto") !== "" && $h("vykladka_misto") !== "") {
+  $historie = radky(
+    "SELECT p.id, p.cislo, p.nakladka_datum, p.cena_zakaznik, p.cena_dopravce, d.nazev AS dopravce_nazev
+       FROM prepravy p LEFT JOIN firmy d ON d.id = p.dopravce_id
+      WHERE p.id <> ? AND p.sablona = 0 AND p.stav <> 'zruseno'
+        AND LOWER(p.nakladka_misto) = LOWER(?) AND LOWER(p.vykladka_misto) = LOWER(?)
+      ORDER BY COALESCE(p.nakladka_datum, '') DESC, p.id DESC LIMIT 3",
+    [(int)$preprava["id"], $h("nakladka_misto"), $h("vykladka_misto")]);
+}
 
 $do_voleb = function (array $zaznamy, string $sloupec): array {
   $ven = [];
   foreach ($zaznamy as $z) $ven[(string)$z["id"]] = (string)$z[$sloupec];
   return $ven;
 };
+$volby_mist = [];
+foreach ($mista as $m) $volby_mist[(string)$m["id"]] = (string)$m["nazev"] . ($m["mesto"] ? " — " . $m["mesto"] : "");
 
 $akce_hlavy = "";
 if (!$nova) {
@@ -190,22 +327,182 @@ if (!$nova) {
     $akce_hlavy .= '<a class="tlacitko" href="' . chran(odkaz("objednavka", ["id" => $preprava["id"]]))
                 . '" target="_blank" rel="noopener">Objednávka přepravy</a>';
   }
-  $akce_hlavy .= '<form method="post" action="' . chran(odkaz("preprava", ["id" => $preprava["id"]])) . '" style="display:inline">'
+  $akce_hlavy .= '<form method="post" action="' . chran($zpet()) . '" style="display:inline">'
     . pole_token() . '<input type="hidden" name="akce" value="kopie">'
     . '<button type="submit" class="tlacitko obrys">Vytvořit kopii</button></form>';
 }
 
+$nadpis = $nova ? "Nová přeprava" : ($body ? popis_trasy($body) : "Přeprava " . $h("cislo"));
 hlava($nova ? "Nová přeprava" : "Přeprava " . $h("cislo"), "prepravy");
 ?>
 <a class="app-zpet" href="<?= chran(odkaz("prepravy")) ?>">← Zpět na seznam přeprav</a>
 <?php
-hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
-  $nova ? "Nová přeprava" : (($h("nakladka_misto", "?")) . " → " . ($h("vykladka_misto", "?"))),
-  $akce_hlavy);
+hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo") . ((int)$h("sablona") === 1 ? " · šablona linky" : ""), $nadpis, $akce_hlavy);
+
+/* Formulář bodu — sdílený pro přidání i úpravu. */
+function formular_bodu(array $b, array $volby_mist, bool $uprava): void {
+  $v = function (string $k) use ($b) { return chran((string)($b[$k] ?? "")); };
+  ?>
+  <div class="pole-radek ctyri">
+    <div class="pole">
+      <label for="druh">Druh</label>
+      <select id="druh" name="druh"><?= volby(DRUHY_BODU, $b["druh"] ?? "nakladka") ?></select>
+    </div>
+    <div class="pole">
+      <label for="misto_id">Místo z adresáře</label>
+      <select id="misto_id" name="misto_id"><?= volby($volby_mist, (string)($b["misto_id"] ?? ""), "— ručně —") ?></select>
+    </div>
+    <div class="pole">
+      <label for="misto">Obec</label>
+      <input type="text" id="misto" name="misto" value="<?= $v("misto") ?>" list="seznam-obci">
+    </div>
+    <div class="pole">
+      <label for="datum">Datum</label>
+      <input type="date" id="datum" name="datum" value="<?= $v("datum") ?>">
+    </div>
+  </div>
+  <div class="pole-radek ctyri">
+    <div class="pole">
+      <label for="od">Okno od</label>
+      <input type="time" id="od" name="od" value="<?= $v("od") ?>">
+    </div>
+    <div class="pole">
+      <label for="do">Okno do</label>
+      <input type="time" id="do" name="do" value="<?= $v("do") ?>">
+    </div>
+    <div class="pole sirsi">
+      <label for="adresa">Adresa <span class="napoveda">— doplní se z adresáře, když zůstane prázdná</span></label>
+      <input type="text" id="adresa" name="adresa" value="<?= $v("adresa") ?>">
+    </div>
+  </div>
+  <div class="pole-radek ctyri">
+    <div class="pole sirsi">
+      <label for="kontakt">Kontakt na místě</label>
+      <input type="text" id="kontakt" name="kontakt" value="<?= $v("kontakt") ?>">
+    </div>
+    <div class="pole sirsi">
+      <label for="bod_poznamka">Poznámka k bodu</label>
+      <input type="text" id="bod_poznamka" name="bod_poznamka" value="<?= $v("poznamka") ?>">
+    </div>
+  </div>
+  <details<?= ($b["zbozi"] ?? "") !== "" || ($b["hmotnost"] ?? null) !== null ? " open" : "" ?>>
+    <summary class="app-perex" style="cursor:pointer">Zboží u tohoto bodu <span class="napoveda">— nepovinné, u celovozu stačí souhrn u přepravy</span></summary>
+    <div class="pole-radek tri" style="margin-top:10px">
+      <div class="pole">
+        <label for="bod_zbozi">Zboží</label>
+        <input type="text" id="bod_zbozi" name="bod_zbozi" value="<?= $v("zbozi") ?>">
+      </div>
+      <div class="pole">
+        <label for="bod_hmotnost">Hmotnost <span class="napoveda">kg</span></label>
+        <input type="number" id="bod_hmotnost" name="bod_hmotnost" value="<?= $v("hmotnost") ?>" min="0">
+      </div>
+      <div class="pole">
+        <label for="bod_palet">Palet</label>
+        <input type="number" id="bod_palet" name="bod_palet" value="<?= $v("palet") ?>" min="0">
+      </div>
+    </div>
+  </details>
+  <div class="tlacitka" style="margin-top:14px">
+    <button type="submit" class="tlacitko"><?= $uprava ? "Uložit bod" : "Přidat bod" ?></button>
+    <?php if ($uprava): ?><a class="tlacitko obrys" href="<?= chran(odkaz("preprava", ["id" => $b["preprava_id"]])) ?>">Zrušit úpravu</a><?php endif; ?>
+  </div>
+  <?php
+}
 ?>
+
+<datalist id="seznam-obci">
+  <?php foreach ($mista as $m): ?><option value="<?= chran($m["mesto"]) ?>"><?= chran($m["nazev"]) ?></option><?php endforeach; ?>
+</datalist>
 
 <div class="app-sloupce">
   <div>
+
+    <?php if (!$nova): ?>
+      <!-- ================= Trasa ================= -->
+      <div class="formular" style="margin-bottom:20px">
+        <div class="skupina" style="margin-bottom:0">
+          <h2>Trasa <span class="napoveda" style="text-transform:none;letter-spacing:0"><?= count($body) ?> <?= count($body) === 1 ? "bod" : (count($body) < 5 ? "body" : "bodů") ?></span></h2>
+
+          <?php if (!$body): ?>
+            <p class="prazdno">Jízda zatím nemá žádný bod. Přidejte aspoň nakládku a vykládku.</p>
+          <?php else: ?>
+            <div class="tabulka-obal">
+              <table class="id-tabulka trasa">
+                <thead><tr><th>#</th><th>Bod</th><th>Místo</th><th>Termín</th><th>Zboží</th><th>Splněno</th><th class="netisknout"></th></tr></thead>
+                <tbody>
+                <?php foreach ($body as $i => $b): $bid = (int)$b["id"]; ?>
+                  <tr class="<?= (int)$b["splneno"] === 1 ? "bod-splneny" : "" ?>">
+                    <td class="cislo"><?= (int)$b["poradi"] ?></td>
+                    <td><?= chran(nazev_druhu($b["druh"])) ?></td>
+                    <td>
+                      <b><?= chran($b["misto"] ?: "—") ?></b>
+                      <?php if ($b["adresa"]): ?><span class="druhotny"><?= chran($b["adresa"]) ?></span><?php endif; ?>
+                      <?php if ($b["kontakt"]): ?><span class="druhotny"><?= chran($b["kontakt"]) ?></span><?php endif; ?>
+                      <?php if ($b["poznamka"]): ?><span class="druhotny"><?= chran($b["poznamka"]) ?></span><?php endif; ?>
+                    </td>
+                    <td><?= chran(datum($b["datum"])) ?><span class="druhotny"><?= chran(okno($b["od"], $b["do"])) ?></span></td>
+                    <td>
+                      <?= chran($b["zbozi"] ?: "") ?>
+                      <?php $d = []; if ($b["hmotnost"]) $d[] = cislo($b["hmotnost"]) . " kg"; if ($b["palet"]) $d[] = (int)$b["palet"] . " pal."; ?>
+                      <?php if ($d): ?><span class="druhotny"><?= chran(implode(" · ", $d)) ?></span><?php endif; ?>
+                      <?php if (!$b["zbozi"] && !$d): ?><span class="druhotny">—</span><?php endif; ?>
+                    </td>
+                    <td>
+                      <form method="post" action="<?= chran($zpet()) ?>" style="margin:0">
+                        <?= pole_token() ?>
+                        <input type="hidden" name="bod_id" value="<?= $bid ?>">
+                        <?php if ((int)$b["splneno"] === 1): ?>
+                          <input type="hidden" name="akce" value="bod_odsplnit">
+                          <button type="submit" class="stitek stitek-hotovo" style="cursor:pointer" title="Kliknutím vrátíte na nesplněno">✓ <?= chran($b["splneno_kdy"] ? date("j. n. H:i", strtotime($b["splneno_kdy"])) : "hotovo") ?></button>
+                        <?php else: ?>
+                          <input type="hidden" name="akce" value="bod_splnit">
+                          <button type="submit" class="tlacitko obrys" style="padding:4px 10px;font-size:.8rem">Splněno</button>
+                        <?php endif; ?>
+                      </form>
+                    </td>
+                    <td class="netisknout" style="white-space:nowrap">
+                      <a href="<?= chran(odkaz("preprava", ["id" => $preprava["id"], "bod" => $bid])) ?>#bod-<?= $bid ?>" class="odkaz-tlacitko" style="margin:0">upravit</a>
+                      <?php foreach ([["bod_vys", "↑", $i > 0], ["bod_niz", "↓", $i < count($body) - 1]] as [$a, $z, $lze]): if (!$lze) continue; ?>
+                        <form method="post" action="<?= chran($zpet()) ?>" style="display:inline">
+                          <?= pole_token() ?><input type="hidden" name="akce" value="<?= $a ?>"><input type="hidden" name="bod_id" value="<?= $bid ?>">
+                          <button type="submit" class="odkaz-tlacitko" title="Posunout"><?= $z ?></button>
+                        </form>
+                      <?php endforeach; ?>
+                      <form method="post" action="<?= chran($zpet()) ?>" style="display:inline" data-potvrdit="Smazat bod <?= chran($b["misto"]) ?>?">
+                        <?= pole_token() ?><input type="hidden" name="akce" value="bod_smazat"><input type="hidden" name="bod_id" value="<?= $bid ?>">
+                        <button type="submit" class="odkaz-tlacitko">smazat</button>
+                      </form>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          <?php endif; ?>
+
+          <?php if ($upravovany): ?>
+            <form method="post" action="<?= chran($zpet()) ?>" id="bod-<?= (int)$upravovany["id"] ?>" style="margin-top:18px;padding-top:14px;border-top:1px solid var(--linka)">
+              <?= pole_token() ?>
+              <input type="hidden" name="akce" value="bod_ulozit">
+              <input type="hidden" name="bod_id" value="<?= (int)$upravovany["id"] ?>">
+              <p class="app-perex"><b>Úprava bodu <?= (int)$upravovany["poradi"] ?></b></p>
+              <?php formular_bodu($upravovany, $volby_mist, true); ?>
+            </form>
+          <?php else: ?>
+            <details style="margin-top:14px">
+              <summary class="tlacitko obrys" style="display:inline-block;cursor:pointer;padding:9px 16px;font-size:.9rem">Přidat bod trasy</summary>
+              <form method="post" action="<?= chran($zpet()) ?>" style="margin-top:14px">
+                <?= pole_token() ?>
+                <input type="hidden" name="akce" value="bod_pridat">
+                <?php formular_bodu(["druh" => "vykladka", "preprava_id" => $preprava["id"]], $volby_mist, false); ?>
+              </form>
+            </details>
+          <?php endif; ?>
+        </div>
+      </div>
+    <?php endif; ?>
+
+    <!-- ================= Hlavní formulář ================= -->
     <form method="post" action="<?= chran(odkaz("preprava", ["id" => $nova ? "nova" : $preprava["id"]])) ?>" class="formular" data-jednou>
       <?= pole_token() ?>
       <input type="hidden" name="akce" value="ulozit">
@@ -214,7 +511,7 @@ hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
         <h2>Zakázka</h2>
         <div class="pole-radek tri">
           <div class="pole">
-            <label for="stav">Stav</label>
+            <label for="stav">Stav <span class="napoveda">— naloženo a vyloženo se řídí splněnými body</span></label>
             <select id="stav" name="stav"><?= volby(STAVY, $h("stav", "nova")) ?></select>
           </div>
           <div class="pole">
@@ -229,64 +526,48 @@ hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
         </div>
       </div>
 
-      <div class="skupina">
-        <h2>Nakládka</h2>
-        <div class="pole-radek">
-          <div class="pole">
-            <label for="nakladka_misto">Místo <span class="napoveda">— obec</span></label>
-            <input type="text" id="nakladka_misto" name="nakladka_misto" value="<?= chran($h("nakladka_misto")) ?>">
+      <?php if ($nova): ?>
+        <div class="skupina">
+          <h2>Nakládka</h2>
+          <div class="pole-radek">
+            <div class="pole">
+              <label for="nakladka_misto">Obec</label>
+              <input type="text" id="nakladka_misto" name="nakladka_misto" list="seznam-obci">
+            </div>
+            <div class="pole">
+              <label for="nakladka_adresa">Adresa a kontakt</label>
+              <input type="text" id="nakladka_adresa" name="nakladka_adresa">
+            </div>
           </div>
-          <div class="pole">
-            <label for="nakladka_adresa">Adresa a kontakt</label>
-            <input type="text" id="nakladka_adresa" name="nakladka_adresa" value="<?= chran($h("nakladka_adresa")) ?>">
-          </div>
-        </div>
-        <div class="pole-radek tri">
-          <div class="pole">
-            <label for="nakladka_datum">Datum</label>
-            <input type="date" id="nakladka_datum" name="nakladka_datum" value="<?= chran($h("nakladka_datum")) ?>">
-          </div>
-          <div class="pole">
-            <label for="nakladka_od">Okno od</label>
-            <input type="time" id="nakladka_od" name="nakladka_od" value="<?= chran($h("nakladka_od")) ?>">
-          </div>
-          <div class="pole">
-            <label for="nakladka_do">Okno do</label>
-            <input type="time" id="nakladka_do" name="nakladka_do" value="<?= chran($h("nakladka_do")) ?>">
+          <div class="pole-radek tri">
+            <div class="pole"><label for="nakladka_datum">Datum</label><input type="date" id="nakladka_datum" name="nakladka_datum"></div>
+            <div class="pole"><label for="nakladka_od">Okno od</label><input type="time" id="nakladka_od" name="nakladka_od"></div>
+            <div class="pole"><label for="nakladka_do">Okno do</label><input type="time" id="nakladka_do" name="nakladka_do"></div>
           </div>
         </div>
-      </div>
+        <div class="skupina">
+          <h2>Vykládka</h2>
+          <div class="pole-radek">
+            <div class="pole">
+              <label for="vykladka_misto">Obec</label>
+              <input type="text" id="vykladka_misto" name="vykladka_misto" list="seznam-obci">
+            </div>
+            <div class="pole">
+              <label for="vykladka_adresa">Adresa a kontakt</label>
+              <input type="text" id="vykladka_adresa" name="vykladka_adresa">
+            </div>
+          </div>
+          <div class="pole-radek tri">
+            <div class="pole"><label for="vykladka_datum">Datum</label><input type="date" id="vykladka_datum" name="vykladka_datum"></div>
+            <div class="pole"><label for="vykladka_od">Okno od</label><input type="time" id="vykladka_od" name="vykladka_od"></div>
+            <div class="pole"><label for="vykladka_do">Okno do</label><input type="time" id="vykladka_do" name="vykladka_do"></div>
+          </div>
+          <p class="app-perex">Další zastávky přidáte po založení — trasa může mít bodů, kolik je potřeba.</p>
+        </div>
+      <?php endif; ?>
 
       <div class="skupina">
-        <h2>Vykládka</h2>
-        <div class="pole-radek">
-          <div class="pole">
-            <label for="vykladka_misto">Místo <span class="napoveda">— obec</span></label>
-            <input type="text" id="vykladka_misto" name="vykladka_misto" value="<?= chran($h("vykladka_misto")) ?>">
-          </div>
-          <div class="pole">
-            <label for="vykladka_adresa">Adresa a kontakt</label>
-            <input type="text" id="vykladka_adresa" name="vykladka_adresa" value="<?= chran($h("vykladka_adresa")) ?>">
-          </div>
-        </div>
-        <div class="pole-radek tri">
-          <div class="pole">
-            <label for="vykladka_datum">Datum</label>
-            <input type="date" id="vykladka_datum" name="vykladka_datum" value="<?= chran($h("vykladka_datum")) ?>">
-          </div>
-          <div class="pole">
-            <label for="vykladka_od">Okno od</label>
-            <input type="time" id="vykladka_od" name="vykladka_od" value="<?= chran($h("vykladka_od")) ?>">
-          </div>
-          <div class="pole">
-            <label for="vykladka_do">Okno do</label>
-            <input type="time" id="vykladka_do" name="vykladka_do" value="<?= chran($h("vykladka_do")) ?>">
-          </div>
-        </div>
-      </div>
-
-      <div class="skupina">
-        <h2>Náklad</h2>
+        <h2>Náklad <span class="napoveda" style="text-transform:none;letter-spacing:0">— souhrn za celou jízdu</span></h2>
         <div class="pole">
           <label for="zbozi">Zboží</label>
           <input type="text" id="zbozi" name="zbozi" value="<?= chran($h("zbozi")) ?>">
@@ -399,6 +680,33 @@ hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
         </div>
       </div>
 
+      <?php if (!$nova): ?>
+        <div class="skupina">
+          <h2>Stálá linka</h2>
+          <div class="pole-zaskrtnuti">
+            <input type="checkbox" id="sablona" name="sablona" value="1"<?= (int)$h("sablona") === 1 ? " checked" : "" ?>>
+            <label for="sablona">Tohle je <b>šablona stálé linky</b> <span class="napoveda">— neukazuje se v seznamech ani na tabuli, jen se z ní generují přepravy</span></label>
+          </div>
+          <div class="pole-radek">
+            <div class="pole">
+              <label for="linka_nazev">Název linky</label>
+              <input type="text" id="linka_nazev" name="linka_nazev" value="<?= chran($h("linka_nazev")) ?>" placeholder="např. Pardubice – Ostrava, denně">
+            </div>
+            <div class="pole">
+              <span style="display:block;font-size:.88rem;font-weight:700;margin-bottom:6px">Dny v týdnu</span>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <?php $dny_linky = array_map("intval", array_filter(explode(",", $h("linka_dny")))); ?>
+                <?php foreach (["Po","Út","St","Čt","Pá","So","Ne"] as $i => $den): ?>
+                  <label style="display:flex;gap:5px;align-items:center;font-weight:400;font-size:.9rem">
+                    <input type="checkbox" name="den_<?= $i + 1 ?>" value="1"<?= in_array($i + 1, $dny_linky, true) ? " checked" : "" ?> style="accent-color:var(--zluta)"> <?= $den ?>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <div class="skupina">
         <h2>Interní poznámka</h2>
         <div class="pole">
@@ -429,10 +737,59 @@ hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
           </ul>
         </div>
 
+        <?php if ($historie): ?>
+          <div class="skupina">
+            <h2>Naposledy na této trase</h2>
+            <ul class="protokol">
+              <?php foreach ($historie as $hist): ?>
+                <li>
+                  <a href="<?= chran(odkaz("preprava", ["id" => $hist["id"]])) ?>" class="cislo"><?= chran($hist["cislo"]) ?></a>
+                  — <?= chran($hist["dopravce_nazev"] ?: "bez dopravce") ?>
+                  <time><?= chran(datum($hist["nakladka_datum"])) ?>
+                    · dopravce <?= chran(castka($hist["cena_dopravce"])) ?><?php
+                    if ($ceny) echo " · zákazník " . chran(castka($hist["cena_zakaznik"]))
+                      . " · marže " . chran(castka((float)$hist["cena_zakaznik"] - (float)$hist["cena_dopravce"]));
+                  ?></time>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+        <?php endif; ?>
+
+        <div class="skupina">
+          <h2>Přílohy</h2>
+          <?php if ($prilohy): ?>
+            <ul class="protokol">
+              <?php foreach ($prilohy as $pr): ?>
+                <li>
+                  <a href="<?= chran(odkaz("priloha", ["id" => $pr["id"]])) ?>" target="_blank" rel="noopener"><?= chran($pr["nazev"]) ?></a>
+                  <form method="post" action="<?= chran($zpet()) ?>" style="display:inline" data-potvrdit="Smazat přílohu <?= chran($pr["nazev"]) ?>?">
+                    <?= pole_token() ?><input type="hidden" name="akce" value="priloha_smazat"><input type="hidden" name="priloha_id" value="<?= (int)$pr["id"] ?>">
+                    <button type="submit" class="odkaz-tlacitko">smazat</button>
+                  </form>
+                  <time><?= chran(velikost_souboru((int)$pr["velikost"])) ?> · <?= chran(datum_cas($pr["kdy"])) ?><?= $pr["kdo"] ? " · " . chran($pr["kdo"]) : "" ?></time>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php else: ?>
+            <p class="app-perex">Zatím žádná příloha. Sem patří dodací listy, přepravní listy a fotky z vykládky.</p>
+          <?php endif; ?>
+          <form method="post" action="<?= chran($zpet()) ?>" enctype="multipart/form-data" style="margin-top:10px">
+            <?= pole_token() ?>
+            <input type="hidden" name="akce" value="priloha_pridat">
+            <div class="pole">
+              <label for="soubor" class="jen-pro-ctecky">Soubor</label>
+              <input type="file" id="soubor" name="soubor" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" required>
+            </div>
+            <button type="submit" class="tlacitko obrys" style="padding:8px 14px;font-size:.88rem">Nahrát přílohu</button>
+            <p class="formular-poznamka">PDF nebo fotka do 8 MB.</p>
+          </form>
+        </div>
+
         <div class="skupina" style="margin-bottom:0">
           <h2>Ukončení</h2>
           <?php if ($h("stav") !== "zruseno"): ?>
-            <form method="post" action="<?= chran(odkaz("preprava", ["id" => $preprava["id"]])) ?>"
+            <form method="post" action="<?= chran($zpet()) ?>"
                   data-potvrdit="Opravdu přepravu zrušit? Zůstane v evidenci, ale nebude se počítat do obratu.">
               <?= pole_token() ?>
               <input type="hidden" name="akce" value="zrusit">
@@ -442,8 +799,8 @@ hlava_stranky($nova ? "Evidence" : "Přeprava " . $h("cislo"),
             <p class="app-perex">Přeprava je zrušená. Vrátit ji zpět jde změnou stavu ve formuláři.</p>
           <?php endif; ?>
           <?php if (je_spravce()): ?>
-            <form method="post" action="<?= chran(odkaz("preprava", ["id" => $preprava["id"]])) ?>" style="margin-top:10px"
-                  data-potvrdit="Smazat přepravu nadobro? Tohle se vrátit nedá — zrušení je obvykle to, co chcete.">
+            <form method="post" action="<?= chran($zpet()) ?>" style="margin-top:10px"
+                  data-potvrdit="Smazat přepravu nadobro i s body a přílohami? Tohle se vrátit nedá — zrušení je obvykle to, co chcete.">
               <?= pole_token() ?>
               <input type="hidden" name="akce" value="smazat">
               <button type="submit" class="odkaz-tlacitko" style="margin:0">Smazat nadobro</button>

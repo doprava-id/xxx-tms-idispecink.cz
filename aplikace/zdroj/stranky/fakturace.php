@@ -20,7 +20,7 @@ $do = vstup_datum("do") ?: date("Y-m-t");
    Bez data vykládky rozhoduje datum nakládky. */
 const OBDOBI_SLOUPEC = "COALESCE(NULLIF(p.vykladka_datum, ''), p.nakladka_datum)";
 
-$kde = OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno'";
+$kde = OBDOBI_SLOUPEC . " BETWEEN ? AND ? AND p.stav <> 'zruseno' AND p.sablona = 0";
 $parametry = [$od, $do];
 
 $souhrn = radek(

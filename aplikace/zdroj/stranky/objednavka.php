@@ -94,16 +94,27 @@ hlava("Objednávka " . $p["cislo"], "", ["bez_navigace" => true]);
   <div class="tabulka-obal">
     <table class="id-tabulka">
       <tbody>
-        <tr><td>Nakládka</td><td>
-          <b><?= chran($p["nakladka_misto"] ?: "—") ?></b>
-          <?= $p["nakladka_adresa"] ? "<br>" . chran($p["nakladka_adresa"]) : "" ?>
-          <br><?= chran(datum($p["nakladka_datum"])) ?> <?= chran(okno($p["nakladka_od"], $p["nakladka_do"])) ?>
-        </td></tr>
-        <tr><td>Vykládka</td><td>
-          <b><?= chran($p["vykladka_misto"] ?: "—") ?></b>
-          <?= $p["vykladka_adresa"] ? "<br>" . chran($p["vykladka_adresa"]) : "" ?>
-          <br><?= chran(datum($p["vykladka_datum"])) ?> <?= chran(okno($p["vykladka_od"], $p["vykladka_do"])) ?>
-        </td></tr>
+        <?php
+        /* Trasa bod po bodu. U jízdy s víc než dvěma body je pořadí
+           závazné — dopravce má vědět, kudy jede. */
+        $body = body_prepravy((int)$p["id"]);
+        $vic_bodu = count($body) > 2;
+        foreach ($body as $b): ?>
+          <tr><td><?= $vic_bodu ? (int)$b["poradi"] . ". " : "" ?><?= chran(nazev_druhu($b["druh"])) ?></td><td>
+            <b><?= chran($b["misto"] ?: "—") ?></b>
+            <?= $b["adresa"] ? "<br>" . chran($b["adresa"]) : "" ?>
+            <?= $b["kontakt"] ? "<br>" . chran($b["kontakt"]) : "" ?>
+            <br><?= chran(datum($b["datum"])) ?> <?= chran(okno($b["od"], $b["do"])) ?>
+            <?php
+              $d = [];
+              if ($b["zbozi"])    $d[] = (string)$b["zbozi"];
+              if ($b["hmotnost"]) $d[] = cislo($b["hmotnost"]) . " kg";
+              if ($b["palet"])    $d[] = (int)$b["palet"] . " palet";
+              if ($d) echo "<br>" . chran(implode(" · ", $d));
+              if ($b["poznamka"]) echo "<br><i>" . chran($b["poznamka"]) . "</i>";
+            ?>
+          </td></tr>
+        <?php endforeach; ?>
         <tr><td>Zboží</td><td><?= chran($p["zbozi"] ?: "—") ?><?php
           $doplnky = [];
           if ($p["hmotnost"]) $doplnky[] = cislo($p["hmotnost"]) . " kg";

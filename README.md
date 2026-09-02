@@ -238,9 +238,11 @@ na ni nikde nevede.
 | Modul | Co dělá |
 |---|---|
 | **Přehled** | co se dnes a zítra nakládá, co nemá dopravce, kde chybí doklady, marže za měsíc |
-| **Přepravy** | evidence zásilek — nakládka, vykládka, náklad, dopravce, ceny, doklady, fakturace; filtry, stránkování, protokol změn |
+| **Přepravy** | evidence zásilek — trasa jako seznam bodů (kolik nakládek a vykládek je potřeba), náklad, dopravce, ceny, doklady, fakturace, přílohy; filtry, stránkování, protokol změn. U bodu se odškrtává splnění, stav jízdy se z toho dopočítá |
+| **Místa** | společný adresář skladů a ramp — adresa, brána, kontakt, otevírací doba; u bodu trasy se vybere a zbytek se doplní |
+| **Stálé linky** | přeprava označená jako šablona s dny v týdnu; na kliknutí se z ní založí celý týden, státní svátky se přeskočí |
 | **Dispečink** | týdenní tabule po dnech podle data nakládky; zásilky bez dopravce mají červenou hranu |
-| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference) |
+| **Firmy** | zákazníci i dopravci v jednom adresáři, vozidla, řidiči a prověření dopravce (registry, oprávnění, pojištění, doklady, reference); načtení názvu, adresy a DIČ z ARES podle IČO |
 | **Objednávka přepravy** | tisková objednávka pro dopravce, číslo přepravy je zároveň číslem objednávky |
 | **Fakturace** | obrat, marže a podklady k fakturaci po dopravcích i zákaznících za období; přehled toho, co fakturaci brání |
 | **Nastavení** | údaje firmy, číselná řada, podmínky objednávky, uživatelé a jejich práva |
@@ -252,7 +254,9 @@ na ni nikde nevede.
 - **Právo zápisu do `aplikace/data/`** — práva 0770. Tam si aplikace založí
   databázi.
 - Nahrát je nutné i skryté soubory `.htaccess` v `aplikace/`, `aplikace/data/`
-  a `aplikace/zdroj/`. **Bez nich by šla databáze stáhnout přímo z webu.**
+  a `aplikace/zdroj/`. **Bez nich by šla databáze i přílohy stáhnout přímo z webu.**
+- Načtení firmy z ARES potřebuje, aby hosting pustil odchozí HTTPS. Když
+  nepustí, tlačítko to řekne a údaje se vyplní ručně — nic dalšího nestojí.
   Většina FTP klientů soubory začínající tečkou ve výchozím nastavení
   nezobrazí — zapněte si zobrazení skrytých souborů.
 
@@ -286,8 +290,9 @@ zakomentované v kořenovém `.htaccess`.
 
 ### Zálohování
 
-Celá databáze je jediný soubor `aplikace/data/idispecink.sqlite`. Stáhněte si
-ho po FTP; kopie souboru je plnohodnotná záloha. Pro archiv mimo systém slouží
+Celá databáze je jediný soubor `aplikace/data/idispecink.sqlite`; přílohy
+k přepravám leží vedle v `aplikace/data/prilohy/`. Stáhněte si obojí po FTP;
+kopie je plnohodnotná záloha. Pro archiv mimo systém slouží
 navíc export přeprav a firem do CSV v Nastavení.
 
 ### Bezpečnost a osobní údaje

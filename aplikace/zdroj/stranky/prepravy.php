@@ -38,7 +38,9 @@ if ($jen === "bez_dopravce") {
   $kde[] = "(p.faktura_vydana IS NULL OR p.faktura_vydana = '') AND p.stav <> 'zruseno'";
 }
 
-$podminka = $kde ? " WHERE " . implode(" AND ", $kde) : "";
+/* Šablony stálých linek se v evidenci neukazují — jen se z nich generuje. */
+$kde[] = "p.sablona = 0";
+$podminka = " WHERE " . implode(" AND ", $kde);
 
 $celkem = (int)hodnota("SELECT COUNT(*) FROM prepravy p" . $podminka, $parametry);
 $stran  = max(1, (int)ceil($celkem / $na_stranu));
@@ -51,7 +53,8 @@ $souhrn = radek(
      FROM prepravy p" . $podminka, $parametry);
 
 $prepravy = radky(
-  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev
+  "SELECT p.*, z.nazev AS zakaznik_nazev, d.nazev AS dopravce_nazev,
+          (SELECT COUNT(*) FROM body b WHERE b.preprava_id = p.id) AS bodu
      FROM prepravy p
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
      LEFT JOIN firmy d ON d.id = p.dopravce_id" . $podminka . "
@@ -71,6 +74,7 @@ $seznam_firem = function (array $firmy): array {
 hlava("Přepravy", "prepravy");
 hlava_stranky("Evidence", "Přepravy",
   '<a class="tlacitko" href="' . chran(odkaz("preprava", ["id" => "nova"])) . '">Nová přeprava</a>'
+  . '<a class="tlacitko obrys" href="' . chran(odkaz("linky")) . '">Stálé linky</a>'
   . '<a class="tlacitko obrys" href="' . chran(odkaz("export", array_filter([
       "co" => "prepravy", "hledat" => $hledat, "stav" => $stav,
       "dopravce" => $dopravce, "zakaznik" => $zakaznik, "od" => $od, "do" => $do, "jen" => $jen,
@@ -181,6 +185,7 @@ hlava_stranky("Evidence", "Přepravy",
           </td>
           <td>
             <?= chran($p["nakladka_misto"] ?: "—") ?>
+            <?php if ((int)$p["bodu"] > 2): ?><span class="trasa-pocet">+<?= (int)$p["bodu"] - 2 ?></span><?php endif; ?>
             <span class="druhotny"><?= chran(datum($p["nakladka_datum"])) ?> <?= chran(okno($p["nakladka_od"], $p["nakladka_do"])) ?></span>
           </td>
           <td>

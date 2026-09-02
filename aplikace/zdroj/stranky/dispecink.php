@@ -16,11 +16,12 @@ $predchozi = (clone $pondeli)->modify("-7 days")->format("Y-m-d");
 $dalsi     = (clone $pondeli)->modify("+7 days")->format("Y-m-d");
 
 $prepravy = radky(
-  "SELECT p.*, d.nazev AS dopravce_nazev, z.nazev AS zakaznik_nazev
+  "SELECT p.*, d.nazev AS dopravce_nazev, z.nazev AS zakaznik_nazev,
+          (SELECT COUNT(*) FROM body b WHERE b.preprava_id = p.id) AS bodu
      FROM prepravy p
      LEFT JOIN firmy d ON d.id = p.dopravce_id
      LEFT JOIN firmy z ON z.id = p.zakaznik_id
-    WHERE p.nakladka_datum >= ? AND p.nakladka_datum <= ?
+    WHERE p.sablona = 0 AND p.nakladka_datum >= ? AND p.nakladka_datum <= ?
     ORDER BY p.nakladka_datum, COALESCE(p.nakladka_od, '99:99'), p.id",
   [$pondeli->format("Y-m-d"), $nedele->format("Y-m-d")]);
 
@@ -28,9 +29,10 @@ $po_dnech = [];
 foreach ($prepravy as $p) $po_dnech[$p["nakladka_datum"]][] = $p;
 
 $nezarazene = radky(
-  "SELECT p.*, d.nazev AS dopravce_nazev
+  "SELECT p.*, d.nazev AS dopravce_nazev,
+          (SELECT COUNT(*) FROM body b WHERE b.preprava_id = p.id) AS bodu
      FROM prepravy p LEFT JOIN firmy d ON d.id = p.dopravce_id
-    WHERE (p.nakladka_datum IS NULL OR p.nakladka_datum = '') AND p.stav <> 'zruseno'
+    WHERE p.sablona = 0 AND (p.nakladka_datum IS NULL OR p.nakladka_datum = '') AND p.stav <> 'zruseno'
     ORDER BY p.id DESC LIMIT 30");
 
 /* Jedna karta jízdy. */
@@ -43,7 +45,8 @@ function karta_jizdy(array $p): void {
   ?>
   <a class="<?= $trida ?>" href="<?= chran(odkaz("preprava", ["id" => $p["id"]])) ?>">
     <b><?= chran($p["cislo"]) ?><?= okno($p["nakladka_od"], $p["nakladka_do"]) !== "" ? " · " . chran(okno($p["nakladka_od"], $p["nakladka_do"])) : "" ?></b>
-    <span class="trasa"><?= chran($p["nakladka_misto"] ?: "?") ?> → <?= chran($p["vykladka_misto"] ?: "?") ?></span>
+    <span class="trasa"><?= chran($p["nakladka_misto"] ?: "?") ?> → <?= chran($p["vykladka_misto"] ?: "?") ?><?php
+      if ((int)($p["bodu"] ?? 2) > 2) echo ' <span class="trasa-pocet">' . (int)$p["bodu"] . ' bodů</span>'; ?></span>
     <span class="radek"><?= chran($p["dopravce_nazev"] ?: "bez dopravce") ?><?= $p["spz"] ? " · " . chran($p["spz"]) : "" ?></span>
     <?php if (!empty($p["zbozi"])): ?><span class="radek"><?= chran($p["zbozi"]) ?></span><?php endif; ?>
   </a>

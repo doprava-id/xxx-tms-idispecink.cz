@@ -210,9 +210,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "importovat" && $
     $stav = STAVY[$stav_text] ?? ($stavy_zpet[$stav_text] ?? "nova");
 
     try {
+      $trasa = [
+        "stav"            => $stav,
+        "nakladka_misto"  => $nakladka,
+        "nakladka_adresa" => $ber("nakladka_adresa"),
+        "nakladka_datum"  => import_datum($ber("nakladka_datum")),
+        "nakladka_od"     => import_cas($ber("nakladka_od")),
+        "nakladka_do"     => import_cas($ber("nakladka_do")),
+        "vykladka_misto"  => $vykladka,
+        "vykladka_adresa" => $ber("vykladka_adresa"),
+        "vykladka_datum"  => import_datum($ber("vykladka_datum")),
+        "vykladka_od"     => import_cas($ber("vykladka_od")),
+        "vykladka_do"     => import_cas($ber("vykladka_do")),
+      ];
       $id = vloz("prepravy", [
         "cislo"           => $cislo !== "" ? $cislo : dalsi_cislo(),
         "stav"            => $stav,
+        "sablona"         => 0,
         "zakaznik_id"     => import_firma($ber("zakaznik"), "zakaznik", $zakladat),
         "ref_zakaznika"   => $ber("ref_zakaznika"),
         "dopravce_id"     => import_firma($ber("dopravce"), "dopravce", $zakladat),
@@ -243,6 +257,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && vstup("akce") === "importovat" && $
         "upraveno"        => date("Y-m-d H:i:s"),
         "vytvoril"        => (int)uzivatel()["id"],
       ]);
+      /* Trasa: z polí vzniknou dva body, souhrn se přepočítá. */
+      zaloz_body_z_poli($id, $trasa);
+      prepocitej_trasu($id);
       $pridano++;
       if ($pridano <= 3) zapis_udalost($id, "Založeno importem z CSV");
     } catch (PDOException $e) {

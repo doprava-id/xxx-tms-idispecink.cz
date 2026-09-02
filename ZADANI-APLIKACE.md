@@ -2,7 +2,8 @@
 
 **Datum:** 1. 9. 2026
 **Větev:** `claude/idispecink-tms-software-uosnh7`
-**Stav:** postavené jádro (14 obrazovek) + načtení z ARES. Zbytek níže čeká.
+**Stav:** jádro (18 obrazovek), ARES, přílohy a bod 1 pořadí prací — trasa
+jako seznam bodů, místa, linky, historie trasy. Zbytek níže čeká.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -42,7 +43,12 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Fakturace — obrat, marže, podklady po firmách | hotové |
 | Nastavení, import z CSV, export do CSV | hotové |
 | Načtení firmy z ARES podle IČO | hotové (živé volání neověřeno, viz 6) |
-| Přílohy k přepravě | základ napsaný, **nezapojený** |
+| Přílohy k přepravě | hotové — nahrání, stažení po přihlášení, mazání |
+| Trasa jako seznam bodů (3.1) | hotové — body, splnění, převod starých dat |
+| Adresář míst (3.2) | hotové |
+| Stálé linky a generování týdne (3.2) | hotové |
+| Návrh ceny podle historie trasy (3.2) | hotové |
+| Kilometry a čas trasy (3.2) | čeká na mapovou službu, viz 6 |
 
 ---
 
