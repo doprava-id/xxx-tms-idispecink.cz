@@ -53,6 +53,21 @@ return [
      toho dne. */
   "hlidani_klic" => "",
 
+  /* --- Airtable ---------------------------------------------------------
+     Načtení přeprav z provozní evidence firmy. Token vydá Airtable
+     v Developer hub → Personal access tokens; stačí mu právo číst záznamy
+     a schéma (data.records:read, schema.bases:read) a přístup k jediné
+     bázi. Identifikátor báze je v adrese otevřené báze a začíná "app".
+
+     Tohle jsou přístupy k provozním datům. Patří JEN sem, do config.php,
+     který je v .gitignore. Repozitář je veřejný. Tabulku a mapování polí
+     si vyberete v aplikaci; ukládají se do databáze, ne sem.
+
+     Zapisuje se jen jedním směrem — z Airtable do systému —, takže token
+     s právem zápisu není potřeba a je lepší mu ho nedávat. */
+  "airtable_token" => "",
+  "airtable_baze"  => "",
+
   /* --- Fakturoid --------------------------------------------------------
      Čtení úhrad vydaných faktur a založení faktury z podkladu. Přístup
      vydá Fakturoid v Nastavení → Uživatelský účet → API (OAuth 2.0,

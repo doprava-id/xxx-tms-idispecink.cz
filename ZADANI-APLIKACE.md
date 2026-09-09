@@ -6,7 +6,8 @@
 jako seznam bodů, místa, linky, historie trasy), bod 2 (odeslání objednávky,
 veřejné odkazy, WhatsApp), bod 3 (faktury, pohledávky, závazky, Fakturoid),
 bod 4 (externí dispečink), bod 5 (nabídky, ceníky, doklady dopravců)
-a bod 6 (vyhodnocení, hlídání, ovládání, role, provoz). Čeká bod 7.
+a bod 6 (vyhodnocení, hlídání, ovládání, role, provoz). Z bodu 7 je hotové
+napojení na Airtable; Blue Yonder čeká na odpovědi, viz 9.
 
 Vzniklo z pohovoru se zadavatelem. Je to **zdroj pravdy o tom, co se má
 postavit** — ne popis toho, co existuje. Co existuje, popisuje `README.md`.
@@ -64,6 +65,8 @@ uživatele ji nést nesmí. Web o aplikaci nemluví a nemá začít.
 | Smlouvy a pojistky dopravců (3.3) | hotové — platnosti s upozorněním měsíc předem; objednávka varuje a pustí |
 | Vyhodnocení (3.5) | hotové — pohled Vyhodnocení ve Fakturaci: zákazníci, dopravci, řidiči, vozy |
 | Hlídání (3.9) | hotové — ranní souhrn e-mailem přes cron s klíčem, ručně, nebo při prvním otevření dne (viz 6) |
+| Napojení na Airtable (3.13) | hotové — načtení přeprav přes API, mapování v aplikaci, ověřeno proti napodobenině; živě až s tokenem v config.php |
+| Napojení na Blue Yonder (3.13) | čeká — rozhraní ani přístupy nejsou zadané, viz 9 |
 | Ovládání (3.10) | hotové — světlý režim, rychlé hledání se zkratkami, hromadné akce, seznamy jako karty na mobilu |
 | Role a přístupy (3.11) | hotové — čtyři role, brigádník bez jakékoli ceny, účetní bez zásahu do dispečinku; vlastník přepravy a zámek proti souběžné úpravě |
 | Provoz (3.12) | hotové — denní zálohy a stažení zálohy, druhý faktor (TOTP), přehled změn |
@@ -269,10 +272,9 @@ Zadavatel rozhodl **napojit systém přímo přes API**, ne jen přes soubor.
 Týká se to Airtable a Blue Yonderu i Fakturoidu, ze kterého se tahá,
 které faktury jsou uhrazené.
 
-> **Tohle mění dosavadní pravidlo.** `CLAUDE.md` dnes říká, že propojení
-> patří do samostatné pipeline mimo tento repozitář. Až se napojení bude
-> stavět, **musí se to pravidlo v `CLAUDE.md` přepsat ve stejném commitu**,
-> jinak bude dokumentace lhát.
+> **Pravidlo v `CLAUDE.md` je přepsané** (2. 9. 2026, ve stejném commitu jako
+> napojení): provozní systém na Airtable navazuje přímo, pro Blue Yonder
+> a Trello platí dál, že konektor v repozitáři není.
 >
 > Co platí dál bez výjimky: **přihlašovací údaje, identifikátory bází
 > a kódy nástěnek se do repozitáře nedostanou.** Patří do `config.php`,
@@ -323,8 +325,10 @@ Nic z toho si nelze domyslet.
    `config.php`.
 8. **Doba uchování osobních údajů** — jak dlouho držet jména a telefony
    řidičů u uzavřených přeprav.
-9. **Airtable a Blue Yonder** — které báze, tabulky a účty, a jaká data
-   mají téct kterým směrem.
+9. **Airtable a Blue Yonder** — u Airtable zbývá říct, jestli mají data téct
+   i zpátky (systém zatím jen čte) a která báze je ta živá; tabulku a mapování
+   polí si vyberete v aplikaci sami. U Blue Yonderu chybí všechno: má vůbec
+   rozhraní, nebo se data berou jen ze smartbench gridu jako v pipeline?
 10. **Živé volání ARES** — prostředí, ve kterém aplikace vznikala, nepustí
     ven. Po nasazení zkusit jedno IČO a ověřit.
 11. **Kdo fakturuje odesílateli u externího dispečinku** — systém počítá

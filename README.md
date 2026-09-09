@@ -255,6 +255,7 @@ na ni nikde nevede.
 | **Hledání** | jedno pole v hlavičce (zkratka `/`): číslo zásilky, místo, firma, SPZ, reference, zboží, řidič; přesné číslo otevře rovnou kartu. `Alt+N` založí novou přepravu |
 | **Hromadné akce** | v seznamu přeprav se označí řádky a najednou dostanou přijaté doklady, číslo vydané či přijaté faktury nebo vlastníka |
 | **Import / export** | obecné načtení přeprav z CSV s ručním přiřazením sloupců; export do CSV pro Excel |
+| **Airtable** | načtení přeprav z provozní evidence firmy přes API: výběr tabulky, mapování polí a stavů, náhled nanečisto a teprve pak zápis |
 
 ### Co je potřeba na hostingu
 
@@ -369,6 +370,25 @@ procento z obratu, částka za jízdu). Sazbu ani způsob systém nedomýšlí:
 dokud chybí, odměnu nespočítá a řekne to. Fakturu za odměnu založí ve
 Fakturoidu stejné tlačítko jako u zákazníků; číslo se zapíše k jízdám, aby
 se podruhé neúčtovaly, a stejné období se klientovi podruhé nevystaví.
+
+### Napojení na Airtable
+
+Volitelné a vypnuté, dokud do `config.php` nedoplníte přístup: `airtable_token`
+a `airtable_baze`. Token vydá Airtable v Developer hub → Personal access tokens;
+stačí mu právo číst záznamy a schéma (`data.records:read`, `schema.bases:read`)
+a přístup k jediné bázi. **Právo zápisu mu nedávejte** — data tečou jen dovnitř.
+Přístup patří jen do `config.php`, který je v `.gitignore`.
+
+Tabulku a mapování polí si vyberete v aplikaci (Nastavení → Airtable); ukládají se
+do databáze, ne do souborů. Systém si při výběru tabulky mapování odhadne podle
+názvů polí a vy ho potvrdíte. Stavy z Airtable si přeložíte na naše; co nepřeložíte,
+se založí jako nová přeprava.
+
+Přepravy se párují číslem. U existující se podle zvoleného režimu buď doplní jen
+prázdná pole, nebo přepíší všechna, nebo se nechá být; **trasa se u existující
+přepravy nepřepisuje nikdy**, protože body jízdy jsou tady zdrojem pravdy a mohly
+mezitím přibýt. Před zápisem si výsledek prohlédnete nanečisto. Nic se nevolá samo
+od sebe — načtení je tlačítko.
 
 ### Vzhled a mobil
 

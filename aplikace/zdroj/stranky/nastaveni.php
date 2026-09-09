@@ -127,7 +127,8 @@ $ukazka = slozene_cislo(nastaveni("cislovani_predpona", "{RR}-"),
 
 hlava("Nastavení", "nastaveni");
 hlava_stranky("Provozní systém", "Nastavení",
-  '<a class="tlacitko obrys" href="' . chran(odkaz("import")) . '">Import z CSV</a>');
+  '<a class="tlacitko obrys" href="' . chran(odkaz("import")) . '">Import z CSV</a>'
+  . '<a class="tlacitko obrys" href="' . chran(odkaz("airtable")) . '">Airtable</a>');
 ?>
 
 <div class="app-sloupce">
@@ -292,6 +293,7 @@ hlava_stranky("Provozní systém", "Nastavení",
         <h2>Data</h2>
         <ul class="seznam">
           <li><a href="<?= chran(odkaz("import")) ?>">Import přeprav z CSV</a> — načtení zásilek z exportu jiného systému.</li>
+          <li><a href="<?= chran(odkaz("airtable")) ?>">Napojení na Airtable</a> — načtení přeprav z provozní evidence firmy<?= airtable_nastaven() ? "" : " (přístup zatím není v config.php)" ?>.</li>
           <li><a href="<?= chran(odkaz("export", ["co" => "zaloha"])) ?>">Export všech přeprav</a> — celá evidence do CSV.</li>
           <li><a href="<?= chran(odkaz("export", ["co" => "firmy"])) ?>">Export firem</a> — adresář zákazníků a dopravců.</li>
           <li><a href="<?= chran(odkaz("zmeny")) ?>">Přehled změn</a> — kdo co kdy změnil, napříč systémem.</li>

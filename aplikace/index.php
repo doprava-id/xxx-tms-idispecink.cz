@@ -68,6 +68,7 @@ require __DIR__ . "/zdroj/nabidky.php";
 require __DIR__ . "/zdroj/hlidani.php";
 require __DIR__ . "/zdroj/totp.php";
 require __DIR__ . "/zdroj/zalohy.php";
+require __DIR__ . "/zdroj/airtable.php";
 
 /* Přepravy z doby před body trasy dostanou dva body z polí. Po prvním
    průchodu se už nic nenajde a volání je zadarmo. */
@@ -99,6 +100,7 @@ $STRANKY = [
   "zmeny"      => true,      /* protokol změn, jen správce */
   "zaloha"     => true,      /* stažení zálohy, jen správce */
   "import"     => true,
+  "airtable"   => true,      /* napojení na Airtable, jen správce */
   "mista"      => true,
   "misto"      => true,
   "linky"      => true,

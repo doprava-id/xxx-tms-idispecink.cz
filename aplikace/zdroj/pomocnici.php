@@ -271,3 +271,48 @@ function dalsi_cislo(): string {
   uloz_nastaveni("cislovani_dalsi", (string)($poradi + 1));
   return $cislo;
 }
+
+/* --- Převod cizích údajů na naše ---------------------------------------
+   Sdílí je import z CSV i napojení na Airtable: obojí čte údaje, které
+   psal někdo jiný, a musí je srovnat do stejného tvaru. */
+
+/* Datum z běžných českých i strojových tvarů. */
+function import_datum(string $h): ?string {
+  $h = trim($h);
+  if ($h === "") return null;
+  foreach (["d.m.Y", "j.n.Y", "d. m. Y", "j. n. Y", "Y-m-d", "d/m/Y", "d.m.y"] as $tvar) {
+    $d = DateTime::createFromFormat($tvar, $h);
+    if ($d && $d->format($tvar) === $h) return $d->format("Y-m-d");
+  }
+  $d = date_create($h);
+  return $d ? $d->format("Y-m-d") : null;
+}
+
+function import_cas(string $h): string {
+  $h = trim($h);
+  if ($h === "") return "";
+  if (preg_match('/(\d{1,2})[:.](\d{2})/', $h, $shoda)) {
+    return str_pad($shoda[1], 2, "0", STR_PAD_LEFT) . ":" . $shoda[2];
+  }
+  return "";
+}
+
+function import_cislo(string $h): ?float {
+  $h = str_replace([" ", "\u{00A0}", "Kč", "kg"], "", trim($h));
+  $h = str_replace(",", ".", $h);
+  if ($h === "" || !is_numeric($h)) return null;
+  return (float)$h;
+}
+
+/* Firma podle názvu — najde, nebo (smí-li) založí. */
+function import_firma(string $nazev, string $typ, bool $zakladat): ?int {
+  $nazev = trim($nazev);
+  if ($nazev === "") return null;
+  $id = hodnota("SELECT id FROM firmy WHERE LOWER(nazev) = ?", [mb_strtolower($nazev)]);
+  if ($id) return (int)$id;
+  if (!$zakladat) return null;
+  return vloz("firmy", [
+    "typ" => $typ, "nazev" => $nazev, "stat" => "Česká republika",
+    "aktivni" => 1, "vytvoreno" => date("Y-m-d H:i:s"),
+  ]);
+}

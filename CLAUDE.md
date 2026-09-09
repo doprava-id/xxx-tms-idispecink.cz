@@ -71,13 +71,13 @@ aplikace/                    PROVOZNÍ SYSTÉM — vnitřní aplikace za přihl�
     dopravci.php (platnosti dokladů dopravce), nabidky.php (nabídky:
     číslování, převod na přepravu, zpráva zákazníkovi), hlidani.php (ranní
     souhrn e-mailem), totp.php (druhý faktor bez knihoven), zalohy.php
-    (denní kopie databáze)
+    (denní kopie databáze), airtable.php (načtení přeprav z Airtable)
   zdroj/stranky/             Jedna stránka = jeden soubor
     instalace, prihlaseni, odhlaseni, prehled, hledat, prepravy, preprava,
     nabidky, nabidka (jen s právem na ceny),
     dispecink, vozy (plán vozů klientů), firmy, firma, mista, misto, linky, objednavka,
     fakturace, nastaveni, import, export, priloha,
-    ucet (vlastní heslo a druhý faktor), zmeny a zaloha (jen správce),
+    ucet (vlastní heslo a druhý faktor), zmeny, zaloha a airtable (jen správce),
     verejne (bez přihlášení: zákazník, dopravce, řidič),
     hlidani (bez přihlášení, jen s klíčem z config.php: spouštěč souhrnu)
 ```
@@ -121,7 +121,7 @@ je nastavená, `playwright install` nespouštěj). Po každé netriviální změ
 - všech devět stránek: stav 200, žádné chyby v konzoli,
 - šířky 1280, 768 a 390 px: nikde vodorovný scroll,
 - oba formuláře: POST na `odeslani.php` projde na `odeslano.html` a povinná pole nejdou obejít (testuj přes `php -S`, ne `python3 -m http.server`),
-- u zásahu do aplikace i jejích **sedmadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), účet (změna hesla, zapnutí druhého faktoru a přihlášení s kódem — kód spočítej z tajemství přes `totp_kod()`), přehled změn, stažení zálohy, **každou roli zvlášť** (brigádník nesmí vidět žádnou cenu, účetní nesmí měnit nic než doklady a faktury), rychlé hledání (zkratka `/`), hromadné akce v seznamu přeprav, **světlý režim** (Můj účet → Vzhled; projeď stejné stránky a v tisku i na obrazovce zkontroluj kontrast — světlý text na světlé ploše se rozbije nejsnáz), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
+- u zásahu do aplikace i jejích **osmadvacet stránek** (Fakturace má osm pohledů: dopravci, zákazníci, externí dispečink, chybějící údaje, faktury, pohledávky, závazky, vyhodnocení; Fakturoid zkoušej proti napodobenině přes `fakturoid_adresa` v dočasném `config.php`): instalace, přihlášení, obojí CRUD, body trasy (přidat, posunout, splnit, smazat), místa, linky včetně generování týdne, přílohy, tabule, plán vozů včetně nové jízdy z prázdné buňky, nabídky (návrh ceny, tisk, odeslání, přijetí → přeprava, důvod neúspěchu), ceník a platnosti dokladů na kartě firmy, ranní souhrn (tlačítko v Nastavení a adresa s klíčem, obojí přes `-d sendmail_path=`), účet (změna hesla, zapnutí druhého faktoru a přihlášení s kódem — kód spočítej z tajemství přes `totp_kod()`), přehled změn, stažení zálohy, **každou roli zvlášť** (brigádník nesmí vidět žádnou cenu, účetní nesmí měnit nic než doklady a faktury), rychlé hledání (zkratka `/`), hromadné akce v seznamu přeprav, napojení na Airtable (výběr tabulky, mapování polí a stavů, náhled nanečisto a načtení — zkoušej proti napodobenině přes `airtable_adresa` v dočasném `config.php`), **světlý režim** (Můj účet → Vzhled; projeď stejné stránky a v tisku i na obrazovce zkontroluj kontrast — světlý text na světlé ploše se rozbije nejsnáz), objednávka včetně odeslání e-mailem (spusť `php -S` s `-d sendmail_path=` na skript, který zprávu uloží), veřejné odkazy všech tří rolí z cizího prohlížeče, fakturace, import a export,
 - vypnutý JavaScript: menu na mobilu musí zůstat dostupné,
 - tiskový režim (`emulateMedia({media:'print'})`): žádný světlý text na bílé.
 
@@ -239,7 +239,8 @@ přihlášení.
 | hlídání | ranní souhrn posílá `hlidani_odesli()`; spouští ho cron přes `?s=hlidani&klic=…` (klíč jen v `config.php`, bez něj je adresa mrtvá), tlačítko v Nastavení, nebo záloha při prvním GET dne (`hlidani_denni_kontrola()` v `index.php`). **Do souhrnu nepatří žádná cena** — chodí všem uživatelům |
 | doklady dopravce | propadlé pojištění, oprávnění nebo smlouva **varují, ale nepustí** — objednávka jde vystavit, rozhodnutí je na dispečerovi. Varování jde jen na obrazovku, do tisku ne |
 | přílohy | soubory leží v `data/prilohy/` pod náhodným jménem, ven jdou jen přes `priloha.php` po přihlášení. Typ se bere z tabulky `PRILOHY_TYPY`, ne z toho, co soubor tvrdí; SVG a HTML tam schválně nejsou |
-| odchozí provoz | ven volají jen `ares.php` a `fakturoid.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
+| odchozí provoz | ven volají jen `ares.php`, `fakturoid.php` a `airtable.php` — s limitem a bez výjimky ven. Hosting nemusí odchozí spojení povolit a aplikace na tom nesmí stát. Pošta jde přes `posta.php` a PHP `mail()` jako u webu |
+| Airtable | přístup (token, báze) je **jen v `config.php`**, tabulka a mapování polí v databázi; **v repozitáři není ani token, ani báze, ani jediný název pole** — jen obecná nápověda pro odhad. Čte se jen jedním směrem, dovnitř, takže token stačí s právem číst. Nic se nevolá samo: načtení je tlačítko a před ním je náhled nanečisto. Přepravy se párují **číslem** (`cislo` ↔ namapované pole), trasa se u existující přepravy nepřepisuje nikdy. Klíč `airtable_adresa` je jen pro zkoušení proti napodobenině |
 | Fakturoid | přístup (slug, client_id, client_secret) je **jen v `config.php`**, který je v `.gitignore`. Nic se nevolá samo: čtení úhrad i založení faktury jsou tlačítka. Faktury se na přepravy vážou **číslem** (`faktura_vydana`, `faktura_prijata`), ne cizím klíčem — jedna faktura kryje víc přeprav. Klíč `fakturoid_adresa` v konfiguraci je jen pro zkoušení proti napodobenině |
 | veřejné odkazy | `verejne.php` je jediná stránka bez přihlášení. Kód v adrese vybírá přepravu i roli; **cena dopravce a marže se tam nesmí objevit nikdy, cena zákazníka jen zákazníkovi.** Stránka posílá `Referrer-Policy: no-referrer` a odkazy ven mají `rel="noreferrer"`, jinak by kód utekl do cizích logů. Každý POST má token jako všude jinde |
 | ceny | cenu zákazníka a marži smí vidět jen `vidi_ceny()`, cenu dopravce jen `vidi_ceny_dopravce()` (brigádník ani jednu). Kdo právo nemá, **nesmí ta pole ani přepsat** — jinak by je uložení formuláře smazalo (viz `preprava.php`). Stránky s cenou dopravce (fakturace, objednávka, vozy, linky, export) to hlídají samy |
@@ -258,8 +259,14 @@ všechno. Repozitář je veřejný a evidence přeprav nese osobní údaje záka
 dopravců i řidičů.
 
 **Import z CSV je obecný**, ne konektor. Čte cizí soubor, hádá sloupce podle názvů
-a mapování se nikam neukládá. Konfigurace Airtable, Blue Yonderu ani Trella sem
-nepatří — platí kapitola „Provoz firmy" níže.
+a mapování se nikam neukládá.
+
+**Napojení na Airtable je konektor** (`zdroj/airtable.php`, stránka `airtable`) —
+načítá přepravy z provozní evidence firmy. Do repozitáře z něj ale nepatří **nic
+konkrétního**: token a báze jsou v `config.php`, tabulka a mapování polí v databázi.
+Kód zná jen obecná slova pro odhad sloupců, stejně jako import z CSV. Blue Yonder
+a Trello konektor nemají a jejich konfigurace sem nepatří — platí kapitola
+„Provoz firmy" níže.
 
 ## Nasazení
 
@@ -285,14 +292,18 @@ Blue Yonder TMS (účty ESA a WELLPACK/Chep), denními Trello nástěnkami a exp
 Excelu. **Nic z té automatizace v tomto repozitáři není** a nepatří sem. Běží
 v samostatné lokální pipeline a v Claude skillech.
 
-Provozní systém v `aplikace/` na ni **nenavazuje** a navazovat nemá: je to
-samostatná evidence, do které se data zadávají ručně nebo se načtou obecným
-importem z CSV. Kdyby se někdy měly obě věci propojit, propojení patří do
-pipeline mimo tento repozitář, ne sem.
+**Na Airtable už provozní systém navazuje** — zadavatel to tak rozhodl (viz
+`ZADANI-APLIKACE.md`, 3.13). Dřív tady stálo, že propojení patří výhradně do
+pipeline mimo tento repozitář; to už neplatí pro Airtable, ze kterého si systém
+načítá přepravy sám přes API. **Pro Blue Yonder a Trello to platí dál** — konektor
+na ně tu není a jejich přihlašovací údaje ani kódy nástěnek sem nepatří.
 
-Do repozitáře nekopíruj identifikátory Airtable bází a tabulek, přihlašovací údaje
-k Blue Yonderu, kódy Trello nástěnek ani cesty na pracovní stanici. Zmínit systém
-jménem je v pořádku, kopírovat jeho konfiguraci ne.
+Napojení nic nemění na tom, co do repozitáře nesmí. **Do repozitáře nekopíruj
+identifikátory Airtable bází a tabulek, názvy jejich polí, přihlašovací údaje
+k Blue Yonderu, kódy Trello nástěnek ani cesty na pracovní stanici.** Zmínit systém
+jménem je v pořádku, kopírovat jeho konfiguraci ne — proto si konektor tabulku
+i mapování polí drží v databázi a token s bází v `config.php`, a proto obojí zůstává
+mimo git. Pipeline běží dál vedle a systém na ni nesahá.
 
 **Repozitář je veřejný.** Commit je publikace: obsah zůstane v historii i poté, co ho
 další commit smaže, takže uniklý klíč se musí zneplatnit, ne jen odstranit. U webu
